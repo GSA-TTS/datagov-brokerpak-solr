@@ -9,3 +9,6 @@ spec:
     repository: {{ .Values.solrImageRepo | quote }} 
     tag: {{ .Values.solrImageTag | quote }}
   solrJavaMem: {{ .Values.solrJavaMem | quote }}
+  solrAddressibility:
+    external:
+#      hideNodes: true

@@ -99,3 +99,14 @@ resource "helm_release" "solrcloud" {
   # }
 }
 
+data "kubernetes_ingress" "example-solrcloud" {
+  metadata {
+    name = "example-solrcloud-common"
+  }
+}
+
+output "uri" {
+  value = format("%s://%s",
+    "http",
+    data.kubernetes_ingress.example-solrcloud.spec[0].rule[0].host)
+}
