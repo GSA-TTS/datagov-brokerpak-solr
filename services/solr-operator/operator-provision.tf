@@ -1,23 +1,6 @@
-# =========
-# Interface
-# =========
-variable "cluster_id" {
-  description = "The cluster ID to target from the passed kubeconfig"
-  default     = "docker-desktop"
-}
-
-# Does the customer have to know? Can this be derived from the existing ingress
-# controller in the provided k8s?
-variable "ingress_base_domain" {
-  description = "The base domain to expose Solr on, eg *.(ingress-base-domain)"
-  default     = "ing.local.domain"
-}
-
-variable "operator_name" {
-  type = string
-  description = "The namespace to use (null generates, specify only for demo purposes)"
-  default = ""
-}
+variable "cluster_id" { type = string }
+variable "ingress_base_domain" { type = string }
+variable "operator_name" { type = string }
 
 output "operator" {
   value = local.operator_name
@@ -72,7 +55,6 @@ resource "helm_release" "zookeeper" {
   name            = "zookeeper"
   chart           = "zookeeper-operator"
   repository      = "https://charts.pravega.io/"
-#  namespace       = kubernetes_namespace.operator.id
   namespace       = local.operator_name
   cleanup_on_fail = "true"
   atomic          = "true"
@@ -86,7 +68,6 @@ resource "helm_release" "solr" {
   name            = "solr"
   chart           = "solr-operator"
   repository      = "https://bloomberg.github.io/solr-operator/charts"
-#  namespace       = kubernetes_namespace.operator.id
   namespace       = local.operator_name
   cleanup_on_fail = "true"
   atomic          = "true"

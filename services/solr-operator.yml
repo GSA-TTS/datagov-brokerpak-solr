@@ -1,0 +1,82 @@
+version: 1
+name: solr-operator
+id: f145c5aa-4cee-4570-8a95-9a65f0d8d9da
+description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr, in the Kubernetes cluster of your choice
+display_name: Apache SolrCloud
+image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
+documentation_url: https://lucene.apache.org/solr/resources.html
+support_url: https://github.com/GSA/solr-brokerpak
+tags: [apache, search, index, k8s]
+plans:
+- name: base
+  id: 1779d7d5-874a-4352-b9c4-877be1f0745b
+  description: Establish a beachhead in the provided k8s where you want SolrCloud services available
+  display_name: SolrCloud beachhead in k8s
+  bullets:
+  - "REQUIRED prerequisite: Create an operator before creating instances of the SolrCloud service"
+  properties: {}
+provision:
+  plan_inputs: []
+  user_inputs:
+  - required: true
+    field_name: cluster_id
+    type: string
+    details: The cluster ID to target from the passed kubeconfig
+  - required: true
+    field_name: ingress_base_domain
+    # Does the customer have to know? Can we derive this from an existing ingress
+    # controller in the provided k8s?
+    type: string
+    details: "The base domain to expose Solr on, eg *.(ingress-base-domain)"
+  - required: false
+    field_name: operator_name
+    type: string
+    details: The namespace to use (only specify for demo purposes)"
+  computed_inputs: 
+  - name: operator_name
+    default: ""
+    overwrite: false
+    type: string
+  outputs:
+  - required: true
+    field_name: operator
+    type: string
+    details: The name of the operator, to be used when creating SolrCloud instances
+  template_ref: "services/solr-operator/operator-provision.tf"
+bind:
+  plan_inputs: []
+  user_inputs: []
+  computed_inputs:
+  - name: operator
+    default: ${instance.details["operator"]}
+    overwrite: true
+    type: string
+  outputs:
+  - required: true
+    field_name: operator
+    type: string
+    details: The name of the operator, to be used when creating SolrCloud instances
+  template_ref: "services/solr-operator/operator-bind.tf"
+examples:
+- name: Create an operator in Docker Desktop
+  description: "This example creates an operator in a local k8s provided by
+  Docker Desktop. It's presumes the k8s already has an ingress controller
+  available that will handle ing.local.domain."
+  plan_id: 1779d7d5-874a-4352-b9c4-877be1f0745b
+  provision_params:
+    cluster_id: docker-desktop
+    ingress_base_domain: ing.local.domain
+  bind_params: {}
+- name: Create an operator in Docker Desktop in the default namespace
+  description: "This example creates an operator in a local k8s provided by
+  Docker Desktop. It's presumes the k8s already has an ingress controller
+  available that will handle ing.local.domain. The `default` namespace will be
+  used in order to make it easy to demonstrate a provisioned SolrCloud in the
+  ing.local.domain later."
+  plan_id: 1779d7d5-874a-4352-b9c4-877be1f0745b
+  provision_params:
+    cluster_id: docker-desktop
+    ingress_base_domain: ing.local.domain
+  bind_params: {}
+plan_updateable: false
+requiredenvvars: []
