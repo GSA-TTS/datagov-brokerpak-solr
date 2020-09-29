@@ -58,10 +58,6 @@ resource "helm_release" "zookeeper" {
   namespace       = local.operator_name
   cleanup_on_fail = "true"
   atomic          = "true"
-
-  provisioner "local-exec" {
-    command = "helm --kube-context ${var.cluster_id} test -n ${self.namespace} ${self.name}"
-  }
 }
 
 resource "helm_release" "solr" {
@@ -75,9 +71,5 @@ resource "helm_release" "solr" {
   set {
     name  = "ingressBaseDomain"
     value = var.ingress_base_domain
-  }
-
-  provisioner "local-exec" {
-    command = "helm --kube-context ${var.cluster_id} test -n ${self.namespace} ${self.name}"
   }
 }
