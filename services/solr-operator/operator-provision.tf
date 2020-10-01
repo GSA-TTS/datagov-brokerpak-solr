@@ -64,3 +64,35 @@ resource "helm_release" "solr" {
     value = var.ingress_base_domain
   }
 }
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Create RBAC roles for manipulating the namespace
+# - solrcloud-all : Admin level permissions on solr and solrmetrics resources in the namespace.
+# - solrcloud-read-only: Read only permissions on solr and solrmetrics resources in the namespace.
+# ---------------------------------------------------------------------------------------------------------------------
+
+resource "kubernetes_role" "rbac_role_access_all" {
+  metadata {
+    name        = "solrcloud-access-all"
+    namespace   = data.kubernetes_namespace.operator.id
+  }
+
+  rule {
+    api_groups = ["solr.bloomberg.com"]
+    resources  = ["solr,solrmetrics"]
+    verbs      = ["*"]
+  }
+}
+
+resource "kubernetes_role" "rbac_role_access_read_only" {
+  metadata {
+    name        = "solrcloud-access-read-only"
+    namespace   = data.kubernetes_namespace.operator.id
+  }
+
+  rule {
+    api_groups = ["solr.bloomberg.com"]
+    resources  = ["solr,solrmetrics"]
+    verbs      = ["get", "list", "watch"]
+  }
+}

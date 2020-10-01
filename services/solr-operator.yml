@@ -60,38 +60,62 @@ provision:
   template_ref: "services/solr-operator/operator-provision.tf"
 bind:
   plan_inputs: []
-  user_inputs: []
+  user_inputs: 
+  - required: false
+    field_name: read_only
+    type: boolean
+    details: Whether the binding should only be for inspection of Solr resources
   computed_inputs:
-  - name: operator
-    default: ${instance.details["operator"]}
+  - name: namespace
+    default: ${instance.details["namespace"]}
     overwrite: true
     type: string
+  - name: server
+    default: ${instance.details["server"]}
+    overwrite: true
+    type: string
+  - name: cluster_ca_certificate
+    default: ${instance.details["cluster_ca_certificate"]}
+    overwrite: true
+    type: string
+  - name: token
+    default: ${instance.details["token"]}
+    overwrite: true
+    type: string
+  - name: read_only
+    default: false
+    overwrite: false
+    type: boolean
   outputs:
   - required: true
-    field_name: operator
+    field_name: server
     type: string
-    details: The name of the operator, to be used when creating SolrCloud instances
+    details: The service URL to provide when provisioning solr-cloud instances
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: Base64-encoded CA certificate to provide when provisioning solr-cloud instances
+  - required: true
+    field_name: token
+    type: string
+    details: Base64-encoded service account token to provide when provisioning solr-cloud instances 
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace to provide when provisioning solr-cloud instances
   template_ref: "services/solr-operator/operator-bind.tf"
 examples:
-- name: Create an operator in Docker Desktop
-  description: "This example creates an operator in a local k8s provided by
-  Docker Desktop. It's presumes the k8s already has an ingress controller
-  available that will handle ing.local.domain."
+- name: Install a Solr operator in Docker Desktop in the provided k8s namespace
+  description: "This example installs an operator in the provided k8s namespace. 
+  The operator can be bound to provide output, which are then used as inputs
+  when provisioning solr-cloud service instances. It is presumed the k8s already
+  has an ingress controller available that will handle the provided domain."
   plan_id: 1779d7d5-874a-4352-b9c4-877be1f0745b
   provision_params:
-    cluster_id: docker-desktop
     ingress_base_domain: ing.local.domain
-  bind_params: {}
-- name: Create an operator in Docker Desktop in the default namespace
-  description: "This example creates an operator in a local k8s provided by
-  Docker Desktop. It's presumes the k8s already has an ingress controller
-  available that will handle ing.local.domain. The `default` namespace will be
-  used in order to make it easy to demonstrate a provisioned SolrCloud in the
-  ing.local.domain later."
-  plan_id: 1779d7d5-874a-4352-b9c4-877be1f0745b
-  provision_params:
-    cluster_id: docker-desktop
-    ingress_base_domain: ing.local.domain
+    cluster_ca_certificate: some-base64-encoded-cluster-ca-certificate
+    token: some-base64-encoded-service-account-token
+    server: some-k8s-service-url
   bind_params: {}
 plan_updateable: false
 requiredenvvars: []
