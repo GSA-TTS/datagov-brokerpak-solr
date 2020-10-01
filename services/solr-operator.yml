@@ -19,29 +19,44 @@ provision:
   plan_inputs: []
   user_inputs:
   - required: true
-    field_name: cluster_id
+    field_name: server
     type: string
-    details: The cluster ID to target from the passed kubeconfig
+    details: The service URL for the target k8s cluster
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: The CA certificate for the target k8s cluster, Base64-encoded
+  - required: true
+    field_name: token
+    type: string
+    details: The service account token to use with the target k8s cluster, Base64-encoded
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace in which instances of SolrCloud should be operated
   - required: true
     field_name: ingress_base_domain
     # Does the customer have to know? Can we derive this from an existing ingress
-    # controller in the provided k8s?
+    # controller in the provided k8s? Unknown...
     type: string
     details: "The base domain to expose Solr on, eg *.(ingress-base-domain)"
-  - required: false
-    field_name: operator_name
-    type: string
-    details: The namespace to use (only specify for demo purposes)"
-  computed_inputs: 
-  - name: operator_name
-    default: ""
-    overwrite: false
-    type: string
   outputs:
   - required: true
-    field_name: operator
+    field_name: server
     type: string
-    details: The name of the operator, to be used when creating SolrCloud instances
+    details: The service URL to provide when binding this operator
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: Base64-encoded CA certificate to provide when binding this operator
+  - required: true
+    field_name: token
+    type: string
+    details: Base64-encoded service account token to provide when binding this operator 
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace to provide when binding this operator
   template_ref: "services/solr-operator/operator-provision.tf"
 bind:
   plan_inputs: []
