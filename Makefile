@@ -12,6 +12,8 @@ clean: .env.secrets ## Bring down the broker service if it's up, clean out the d
 build: .env.secrets docker-compose.yaml Dockerfile $(shell find services) ## Build the brokerpak(s) and create a docker image for testing it/them
 	docker-compose build
 	@echo "Exporting brokerpak(s)..."
+	# Copy the built brokerpak(s) out into the bind mount so it/they are
+	# accessible for other testing, releasing, etc.
 	@docker-compose run --rm --no-deps --entrypoint "/bin/sh -c 'cp -u * /code' " -w /usr/share/gcp-service-broker/builtin-brokerpaks broker
 
 up: .env.secrets ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
