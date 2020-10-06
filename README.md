@@ -1,11 +1,9 @@
-# template-brokerpak
+# datagov-brokerpak
 
 ## Why this project
 
-_This is a template repository that can be cloned by anyone who wants to develop a brokerpak for their own services. Fork or copy this repository, and edit references to XXXX to refer to your own team or service provider._
-
-The XXXX brokerpak is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker) plugin that makes services
-provided by XXXX brokerable via the [Open Service Broker API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and Kubernetes), using Terraform.
+The datagov brokerpak is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker) plugin that makes services
+needed by the data.gov team brokerable via the [Open Service Broker API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and Kubernetes), using Terraform. In particular, this brokerpak is used by [`datagov-ssb`](https://github.com/GSA/datagov-ssb) to extend the capabilities of cloud.gov for the purposes of the data.gov team.
 
 For more information about the brokerpak concept, here's a [5-minute lightning
 talk](https://www.youtube.com/watch?v=BXIvzEfHil0) from the 2019 Cloud Foundry Summit. You may also want to check out the brokerpak
@@ -32,6 +30,7 @@ $ make
 clean      Bring down the broker service if it's up, clean out the database, and remove created images
 build      Build the brokerpak(s) and create a docker image for testing it/them
 up         Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
+wait       Wait 40 seconds, enough time for the DB and broker to stabilize
 test       Execute the brokerpak examples against the running broker
 down       Bring the cloud-service-broker service down
 all        Clean and rebuild, then bring up the server, run the examples, and bring the system down
@@ -43,7 +42,7 @@ Notable targets are described below
 Run 
 
 ```
-make up
+make up wait
 ```
 
 The broker will start and listen on `0.0.0.0:8080`. You can curl
