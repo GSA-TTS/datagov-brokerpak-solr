@@ -1,5 +1,5 @@
 packversion: 1
-name: solr-services-pak
+name: datagov-services-pak
 version: 1.0.0
 metadata:
   author: Bret Mogilefsky
