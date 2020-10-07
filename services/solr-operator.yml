@@ -104,18 +104,6 @@ bind:
     type: string
     details: The namespace to provide when provisioning solr-cloud instances
   template_ref: "services/solr-operator/operator-bind.tf"
-examples:
-- name: Install a Solr operator in Docker Desktop in the provided k8s namespace
-  description: "This example installs an operator in the provided k8s namespace. 
-  The operator can be bound to provide output, which are then used as inputs
-  when provisioning solr-cloud service instances. It is presumed the k8s already
-  has an ingress controller available that will handle the provided domain."
-  plan_id: 1779d7d5-874a-4352-b9c4-877be1f0745b
-  provision_params:
-    ingress_base_domain: ing.local.domain
-    cluster_ca_certificate: some-base64-encoded-cluster-ca-certificate
-    token: some-base64-encoded-service-account-token
-    server: some-k8s-service-url
-  bind_params: {}
+examples: []
 plan_updateable: false
 requiredenvvars: []
