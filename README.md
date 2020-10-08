@@ -59,6 +59,9 @@ specification](https://github.com/openservicebrokerapi/servicebroker/blob/master
 The broker will reject requests that don't include the header with `412
 Precondition Failed`, and browsers will show that status as `Not Authorized`.)
 
+You can also inspect auto-generated documentation for the brokerpak's offerings
+by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
+
 ## Testing the brokerpak (after the broker has started)
 
 ### Testing automatically
@@ -105,7 +108,7 @@ docker-compose exec -T broker /bin/cloud-service-broker client provision --insta
 ...and so on.
 
 Using the CLI in this way will give you very precise JSON results for each
-query. For a more human-frienfly workflow, use `eden` to manually manipulate the
+query. For a more human-friendly workflow, use `eden` to manually manipulate the
 broker.
 
 For example, listing the catalog and provisioning a service instance with `eden`
