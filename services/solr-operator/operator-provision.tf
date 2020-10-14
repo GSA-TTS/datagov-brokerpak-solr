@@ -15,7 +15,6 @@ output "cluster_ca_certificate" { value = var.cluster_ca_certificate }
 # Implementation
 # ==============
 provider "kubernetes" {
-#  config_context_cluster = var.cluster_id
   host                   = var.server
   cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
   token                  = base64decode(var.token)
