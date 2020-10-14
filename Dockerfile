@@ -11,8 +11,6 @@ RUN (cd /bin \
 
 # Include the source
 COPY . /service-broker-plugins/
-# ENV PORT 8080
-# EXPOSE 8080/tcp
 
 # Set the working directory
 WORKDIR /service-broker-plugins
