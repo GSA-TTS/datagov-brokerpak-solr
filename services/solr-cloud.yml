@@ -1,0 +1,126 @@
+version: 1
+name: solr-cloud
+id: b9013a91-9ce8-4c18-8035-a135a8cd6ff9
+description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr
+display_name: SolrCloud
+image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
+documentation_url: https://lucene.apache.org/solr/resources.html
+support_url: https://github.com/GSA/datagov-brokerpak
+tags: [apache, search, index, k8s]
+plans:
+- name: base
+  id: e35e9675-413f-4f42-83de-ad5003357e77
+  description: Provision a fault-tolerant instance of Solr for use by applications
+  display_name: Provision and use SolrCloud in your app
+  bullets:
+  - "REQUIRED prerequisite: Create an instance of solr-operator before creating instances of the solr-cloud service!"
+  properties: {}
+provision:
+  plan_inputs: []
+  user_inputs:
+  - required: true
+    field_name: server
+    type: string
+    details: "The service URL (from your solr-operator binding)"
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: "The CA certificate (from your solr-operator binding)"
+  - required: true
+    field_name: token
+    type: string
+    details: "The service account token (from your solr-operator binding)"
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace (from your solr-operator binding)
+  - required: true
+    field_name: ingress_base_domain
+    # Does the customer have to know? Can we derive this from an existing ingress
+    # controller in the provided k8s? Unknown...
+    type: string
+    details: "The base domain to expose Solr on, eg *.(ingress-base-domain)"
+  - required: false
+    field_name: replicas
+    type: number
+    details: "How many replicas to stand up in the SolrCloud instance (defaults to 3)"
+  - required: false
+    field_name: solrImageTag
+    type: string
+    details: "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags for options"
+  - required: false
+    field_name: solrJavaMem
+    type: string
+    details: "How much memory to give each replica (default is '-Xms300m -Xmx300m')"
+  - required: false
+    field_name: cloud_name
+    type: string
+    details: "Name of the SolrCloud instance (only for testing purposes)"
+  computed_inputs:
+  - name: replicas
+    default: 3
+    overwrite: false
+    type: number
+  - name: solrImageTag
+    default: "8.6"
+    overwrite: false
+    type: string
+  - name: solrJavaMem
+    default: "-Xms300m -Xmx300m"
+    overwrite: false
+    type: string
+  outputs:
+  - required: true
+    field_name: server
+    type: string
+    details: The service URL to provide when binding this operator
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: Base64-encoded CA certificate to provide when binding this operator
+  - required: true
+    field_name: token
+    type: string
+    details: Base64-encoded service account token to provide when binding this operator 
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace to provide when binding this operator
+  - required: true
+    field_name: cloud_name
+    type: string
+    details: The name of the SolrCloud instance that was created
+  template_ref: "services/solr-cloud/cloud-provision.tf"
+bind:
+  plan_inputs: []
+  user_inputs: []
+  computed_inputs:
+  - name: namespace
+    default: ${instance.details["namespace"]}
+    overwrite: true
+    type: string
+  - name: server
+    default: ${instance.details["server"]}
+    overwrite: true
+    type: string
+  - name: cluster_ca_certificate
+    default: ${instance.details["cluster_ca_certificate"]}
+    overwrite: true
+    type: string
+  - name: token
+    default: ${instance.details["token"]}
+    overwrite: true
+    type: string
+  - name: cloud_name
+    default: ${instance.details["cloud_name"]}
+    overwrite: true
+    type: string
+  outputs:
+  - required: true
+    field_name: uri
+    type: string
+    details: The URL to use for working with the solr-cloud instance
+  template_ref: "services/solr-cloud/cloud-bind.tf"
+examples: []
+plan_updateable: false
+requiredenvvars: []

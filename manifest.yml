@@ -23,6 +23,7 @@ terraform_binaries:
   source: https://releases.hashicorp.com/terraform-provider-helm/1.3.0/terraform-provider-helm_1.3.0_linux_amd64.zip
 service_definitions:
 - services/solr-operator.yml
+- services/solr-cloud.yml
 parameters: []
 required_env_variables: []
 env_config_mapping: {}
