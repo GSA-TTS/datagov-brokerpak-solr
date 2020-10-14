@@ -5,7 +5,7 @@ description: Fault-tolerant and highly-available distributed indexing and search
 display_name: Apache SolrCloud
 image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
 documentation_url: https://lucene.apache.org/solr/resources.html
-support_url: https://github.com/GSA/solr-brokerpak
+support_url: https://github.com/GSA/datagov-brokerpak
 tags: [apache, search, index, k8s]
 plans:
 - name: base
