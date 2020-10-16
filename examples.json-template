@@ -1,0 +1,33 @@
+[
+    {
+       "name": "Operator in local k8s",
+       "description": "Provision a SolrCloud operator in a local k8s",
+       "service_name": "solr-operator",
+       "service_id": "f145c5aa-4cee-4570-8a95-9a65f0d8d9da",
+       "plan_id": "1779d7d5-874a-4352-b9c4-877be1f0745b",
+       "provision_params": {
+          "namespace": "default",
+          "server": "https://kubernetes.docker.internal:6443",
+          "cluster_ca_certificate": "YOUR_CERT",
+          "token": "YOUR_TOKEN",
+          "ingress_base_domain": "ing.local.domain"
+       },
+       "bind_params": {}
+    },
+    {
+       "name": "Cloud in local k8s",
+       "description": "Provision a SolrCloud instance in a local k8s",
+       "service_name": "solr-cloud",
+       "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+       "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+       "provision_params": {
+          "namespace": "default",
+          "server": "https://kubernetes.docker.internal:6443",
+          "cluster_ca_certificate": "YOUR_CERT",
+          "token": "YOUR_TOKEN",
+          "ingress_base_domain": "ing.local.domain",
+          "cloud_name": "example"
+       },
+       "bind_params": {}
+    }
+ ]

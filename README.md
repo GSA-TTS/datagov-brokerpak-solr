@@ -17,7 +17,8 @@ brokerpak concept, and to the Pivotal team running with the concept!
 
 ## Prerequisites
 
-1. `make` is used for executing docker commands in a meaningful build cycle. 
+1. `make` is used for executing docker commands in a meaningful build cycle.
+1. `jq` is used for running certain tests
 1. [Docker Desktop (for Mac or
    Windows)](https://www.docker.com/products/docker-desktop) or [Docker Engine
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
@@ -64,6 +65,16 @@ by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your b
 
 ## Testing the brokerpak (after the broker has started)
 
+To prepare to run tests, copy the `examples.json-template` to `examples.json` and edit it to
+include the correct credentials for your own Docker Desktop k8s service.
+
+- To get the value of `YOUR_CERT`, look in your kubeconfig file (eg `~/.kube./config`) for
+  the value of `certificate-authority-data`.
+- To get the value of `YOUR_TOKEN`, use the output of: 
+```
+kubectl get secret $(kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name') -n default -o json | jq .data.token
+```
+
 ### Testing automatically
 
 Run 
@@ -71,18 +82,14 @@ Run
 make test
 ```
 
-The [examples specified by the
-brokerpak](https://github.com/pivotal/cloud-service-broker/blob/master/docs/brokerpak-specification.md#service-yaml-flie)
-will be invoked for end-to-end testing of the brokerpak's service offerings.
+The examples and values in the `examples.json` file will be used for end-to-end testing of the brokerpak's service offerings.
 
-**NOTE:** The broker requires credentials for an accessible kubernetes cluster (eg in
-the cloud, or provided by Docker Desktop) when provisioning services. Currently we have no way to inject
-those credentials as `examples`, which are used as test cases, without
-compromising them. We've [requested
-this capability upstream in the
-broker](https://github.com/pivotal/cloud-service-broker/issues/108).
+**NOTE:** This automatic testing capability relies on undocumented functionality
+that is not yet working correctly in the upstream broker. We've filed an issue
+about that: https://github.com/pivotal/cloud-service-broker/issues/115
 
-In the meantime you can manipulate the broker manually. 
+In the meantime you can manipulate the broker manually, as described in the next
+section.
 
 ### Testing manually
 
@@ -98,11 +105,11 @@ For example to see the catalog:
 docker-compose exec -T broker /bin/cloud-service-broker client catalog"
 ```
 
-To provision a service, copy `k8s-creds.yml-template` and edit it to
-include the correct credentials for an accessible kubernetes service. Then run:
+You can refer to the content of the `examples.json` file to manually provision
+and bind services. For example:
 
 ```
-docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat k8s-creds.yml)"
+docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
 ```
 
 ...and so on.
@@ -118,7 +125,7 @@ $ export SB_BROKER_URL=http://user:pass@127.0.0.1:8080
 $ export SB_BROKER_USERNAME=user
 $ export SB_BROKER_PASSWORD=pass
 $ eden catalog
-$ eden provision -s solr-operator -p base -i <instance-name> -P "$(cat k8s-creds.yml)"
+$ eden provision -s solr-operator -p base -i <instance-name> -P "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
 $ eden bind -i <instance-name>
 $ eden credentials -i <instance-name> -b <binding-name>
 ```
