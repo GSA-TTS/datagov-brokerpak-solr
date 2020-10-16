@@ -21,8 +21,6 @@ services:
       SECURITY_USER_PASSWORD: pass
       GSB_API_HOSTNAME: broker
       PORT: 80
-    env_file:
-    - .env.secrets
 
   database:
     image: mysql:latest
