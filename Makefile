@@ -34,14 +34,28 @@ test: examples.json  ## Execute the brokerpak examples against the running broke
 	# with eden instead for now... See the target "test-eden"!
 
 test-eden: examples.json
-	$(EDEN_EXEC) provision -i testoperator -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
-	$(EDEN_EXEC) bind -b testbinding -i testoperator
-	$(EDEN_EXEC) unbind -b testbinding -i testoperator
-	$(EDEN_EXEC) deprovision -i testoperator
+	# Provision and bind a solr-operator service
+	$(EDEN_EXEC) provision -i operatorinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
+	$(EDEN_EXEC) bind -b operatorbinding -i operatorinstance
+	$(EDEN_EXEC) credentials -b operatorbinding -i operatorinstance
+
+	# Provision and bind a solr-cloud instance (using credentials from the
+	# operator instance, then unbind and deprovision
+	$(EDEN_EXEC) provision -i cloudinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
+	$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
+	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
+	$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
+	$(EDEN_EXEC) deprovision -i cloudinstance
+
+	# Unbind and deprovision the solr-operator instance
+	$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
+	$(EDEN_EXEC) deprovision -i operatorinstance
 
 test-cleanup: ## Clean up data from failed tests
-	-$(EDEN_EXEC) unbind -b testbinding -i testoperator
-	-$(EDEN_EXEC) deprovision -i testoperator
+	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
+	-$(EDEN_EXEC) deprovision -i cloudinstance
+	-$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
+	-$(EDEN_EXEC) deprovision -i operatorinstance
 
 down: ## Bring the cloud-service-broker service down
 	docker-compose down
