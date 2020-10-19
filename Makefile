@@ -35,7 +35,7 @@ test: examples.json  ## Execute the brokerpak examples against the running broke
 
 test-eden: examples.json
 	$(EDEN_EXEC) provision -i testoperator -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
-	$(EDEN_EXEC) bind -b testbinding -i testoperator -s solr-operator -p base -P '$(OPERATOR_BIND_PARAMS)'
+	$(EDEN_EXEC) bind -b testbinding -i testoperator
 	$(EDEN_EXEC) unbind -b testbinding -i testoperator
 	$(EDEN_EXEC) deprovision -i testoperator
 
