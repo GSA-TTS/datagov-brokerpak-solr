@@ -1,0 +1,14 @@
+apiVersion: solr.bloomberg.com/v1beta1
+kind: SolrCloud
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicas }}
+  solrImage:
+    repository: {{ .Values.solrImageRepo | quote }} 
+    tag: {{ .Values.solrImageTag | quote }}
+  solrJavaMem: {{ .Values.solrJavaMem | quote }}
+  solrAddressibility:
+    external:
+#      hideNodes: true

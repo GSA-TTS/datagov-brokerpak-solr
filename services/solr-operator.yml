@@ -1,0 +1,109 @@
+version: 1
+name: solr-operator
+id: f145c5aa-4cee-4570-8a95-9a65f0d8d9da
+description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr, in the Kubernetes cluster of your choice
+display_name: Apache SolrCloud
+image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
+documentation_url: https://lucene.apache.org/solr/resources.html
+support_url: https://github.com/GSA/solr-brokerpak
+tags: [apache, search, index, k8s]
+plans:
+- name: base
+  id: 1779d7d5-874a-4352-b9c4-877be1f0745b
+  description: Establish a beachhead in the provided k8s where you want SolrCloud services available
+  display_name: SolrCloud beachhead in k8s
+  bullets:
+  - "REQUIRED prerequisite: Create an operator before creating instances of the SolrCloud service"
+  properties: {}
+provision:
+  plan_inputs: []
+  user_inputs:
+  - required: true
+    field_name: server
+    type: string
+    details: The service URL for the target k8s cluster
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: The CA certificate for the target k8s cluster, Base64-encoded
+  - required: true
+    field_name: token
+    type: string
+    details: The service account token to use with the target k8s cluster, Base64-encoded
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace in which instances of SolrCloud should be operated
+  - required: true
+    field_name: ingress_base_domain
+    # Does the customer have to know? Can we derive this from an existing ingress
+    # controller in the provided k8s? Unknown...
+    type: string
+    details: "The base domain to expose Solr on, eg *.(ingress-base-domain)"
+  outputs:
+  - required: true
+    field_name: server
+    type: string
+    details: The service URL to provide when binding this operator
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: Base64-encoded CA certificate to provide when binding this operator
+  - required: true
+    field_name: token
+    type: string
+    details: Base64-encoded service account token to provide when binding this operator 
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace to provide when binding this operator
+  template_ref: "services/solr-operator/operator-provision.tf"
+bind:
+  plan_inputs: []
+  user_inputs: 
+  - required: false
+    field_name: read_only
+    type: boolean
+    details: Whether the binding should only be for inspection of Solr resources
+  computed_inputs:
+  - name: namespace
+    default: ${instance.details["namespace"]}
+    overwrite: true
+    type: string
+  - name: server
+    default: ${instance.details["server"]}
+    overwrite: true
+    type: string
+  - name: cluster_ca_certificate
+    default: ${instance.details["cluster_ca_certificate"]}
+    overwrite: true
+    type: string
+  - name: token
+    default: ${instance.details["token"]}
+    overwrite: true
+    type: string
+  - name: read_only
+    default: false
+    overwrite: false
+    type: boolean
+  outputs:
+  - required: true
+    field_name: server
+    type: string
+    details: The service URL to provide when provisioning solr-cloud instances
+  - required: true
+    field_name: cluster_ca_certificate
+    type: string
+    details: Base64-encoded CA certificate to provide when provisioning solr-cloud instances
+  - required: true
+    field_name: token
+    type: string
+    details: Base64-encoded service account token to provide when provisioning solr-cloud instances 
+  - required: true
+    field_name: namespace
+    type: string
+    details: The namespace to provide when provisioning solr-cloud instances
+  template_ref: "services/solr-operator/operator-bind.tf"
+examples: []
+plan_updateable: false
+requiredenvvars: []
