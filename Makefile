@@ -5,6 +5,8 @@ CSB_EXEC=docker-compose exec -T broker /bin/cloud-service-broker
 EDEN_EXEC=eden --client user --client-secret pass --url http://127.0.0.1:8080
 OPERATOR_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')
 OPERATOR_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .bind_params')
+CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
+CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
 clean: ## Bring down the broker service if it's up, clean out the database, and remove created images
 	docker-compose down -v --remove-orphans --rmi local
@@ -25,35 +27,31 @@ wait: ## Wait 40 seconds, enough time for the DB and broker to stabilize
 	@sleep 40
 	@docker-compose ps
 
-test: examples.json  ## Execute the brokerpak examples against the running broker
+test: examples.json demo cleanup ## Execute the brokerpak examples against the running broker
 	@echo "Running examples..."
-	$(CSB_EXEC) client run-examples --filename examples.json
+	# $(CSB_EXEC) client run-examples --filename examples.json
 	# This is supposed to work, but it doesn't... See upstream issue at:
 	# https://github.com/pivotal/cloud-service-broker/issues/115
 	# Also, some of our examples need to run nested. So, we'll run them manually
-	# with eden instead for now... See the target "test-eden"!
+	# with eden instead for now... 
 
-test-eden: examples.json
+demo: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	# Provision and bind a solr-operator service
 	$(EDEN_EXEC) provision -i operatorinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
 	$(EDEN_EXEC) bind -b operatorbinding -i operatorinstance
 	$(EDEN_EXEC) credentials -b operatorbinding -i operatorinstance
 
 	# Provision and bind a solr-cloud instance (using credentials from the
-	# operator instance, then unbind and deprovision
-	$(EDEN_EXEC) provision -i cloudinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
+	# operator instance)
+	$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
 	$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
 	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
-	$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
-	$(EDEN_EXEC) deprovision -i cloudinstance
 
-	# Unbind and deprovision the solr-operator instance
-	$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
-	$(EDEN_EXEC) deprovision -i operatorinstance
-
-test-cleanup: ## Clean up data from failed tests
+cleanup: examples.json ## Clean up data left over from tests and demos
 	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
 	-$(EDEN_EXEC) deprovision -i cloudinstance
+
+	# Unbind and deprovision the solr-operator instance
 	-$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
 	-$(EDEN_EXEC) deprovision -i operatorinstance
 
@@ -61,14 +59,14 @@ down: ## Bring the cloud-service-broker service down
 	docker-compose down
 
 all: clean build up wait test down ## Clean and rebuild, then bring up the server, run the examples, and bring the system down
-.PHONY: all clean build up wait test down
+.PHONY: all clean build up wait test down demo-up demo-down test-cleanup
 
 examples.json:
 	$(error Copy examples.json-template to examples.json, then edit in your own values)
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-.PHONY: help
+.PHONY: help 
 help: ## This help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
