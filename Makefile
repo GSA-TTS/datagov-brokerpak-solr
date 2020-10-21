@@ -48,6 +48,7 @@ demo: examples.json ## Provision a SolrCloud instance and output the bound crede
 	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
 
 cleanup: examples.json ## Clean up data left over from tests and demos
+	# Unbind and deprovision the solr-cloud instance
 	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
 	-$(EDEN_EXEC) deprovision -i cloudinstance
 
