@@ -51,6 +51,21 @@ resource "random_id" "solrcloud_name" {
   byte_length = 8
 }
 
+resource "kubernetes_secret" "solr_auth1" {
+  metadata {
+    name = "basic-auth1"
+    namespace = var.namespace
+  }
+
+  data = {
+    username = "admin"
+    password = bcrypt("P4ssw0rd")
+  }
+
+  type = "Opaque"
+}
+
+
 # Get ahold of the k8s namespace where the solr-operator CRDs are available
 data "kubernetes_namespace" "namespace" {
   metadata {
@@ -97,7 +112,8 @@ resource "helm_release" "solrcloud" {
     value = var.solrJavaMem
   }
 
-  # TODO: We should have a loop with a timeout here to verify that Solr is
+
+# TODO: We should have a loop with a timeout here to verify that Solr is
   # actually available before returning.
 
 }

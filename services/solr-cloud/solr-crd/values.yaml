@@ -14,6 +14,13 @@ solrImageTag: 8.6
 # How much memory to give each container
 solrJavaMem: "-Xms300m -Xmx300m"
 
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth1
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - admin'
+
 # --- everything below here is Helm boilerplate ---
 
 service:
