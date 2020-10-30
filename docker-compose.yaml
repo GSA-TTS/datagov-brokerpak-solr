@@ -29,6 +29,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: servicebroker
-
+    ports:
+      - "3306:3306"
 volumes:
   database_data:

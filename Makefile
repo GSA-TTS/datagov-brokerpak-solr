@@ -11,6 +11,16 @@ CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | co
 clean: ## Bring down the broker service if it's up, clean out the database, and remove created images
 	docker-compose down -v --remove-orphans --rmi local
 
+# Added to remove the orphan services
+#
+	rm ~/.eden/config  2>/dev/null ; true
+	helm uninstall solr 2>/dev/null ; true
+	helm uninstall zookeeper 2>/dev/null ; true
+	kubectl delete role solrcloud-access-read-only 2>/dev/null ; true
+	helm uninstall example 2>/dev/null ; true
+	kubectl delete role solrcloud-access-all 2>/dev/null ; true
+	kubectl delete secret basic-auth1 2>/dev/null ; true
+	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
 # Rebuild when the Docker Compose, Dockerfile, or anything in services/ changes
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
@@ -46,7 +56,7 @@ demo: examples.json ## Provision a SolrCloud instance and output the bound crede
 	$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
 	$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
 	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
-
+	
 cleanup: examples.json ## Clean up data left over from tests and demos
 	# Unbind and deprovision the solr-cloud instance
 	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
