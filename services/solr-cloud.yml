@@ -90,6 +90,14 @@ provision:
     field_name: cloud_name
     type: string
     details: The name of the SolrCloud instance that was created
+  - required: true
+    field_name: username
+    type: string
+    details: The username of the SolrCloud instance that was created
+  - required: true
+    field_name: password
+    type: string
+    details: The password of the SolrCloud instance that was created
   template_ref: "services/solr-cloud/cloud-provision.tf"
 bind:
   plan_inputs: []
@@ -113,6 +121,14 @@ bind:
     type: string
   - name: cloud_name
     default: ${instance.details["cloud_name"]}
+    overwrite: true
+    type: string
+  - name: username
+    default: ${instance.details["username"]}
+    overwrite: true
+    type: string
+  - name: password
+    default: ${instance.details["password"]}
     overwrite: true
     type: string
   outputs:
