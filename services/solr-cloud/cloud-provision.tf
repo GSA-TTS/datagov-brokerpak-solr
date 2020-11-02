@@ -20,6 +20,9 @@ output "server" { value = var.server }
 output "token" { value = var.token }
 output "cluster_ca_certificate" { value = var.cluster_ca_certificate }
 output "cloud_name" { value = local.cloud_name }
+output "username" { value = random_uuid.client_username.result }
+output "password" { value = random_password.client_password.result }
+
 
 # ==============
 # Implementation
@@ -51,6 +54,16 @@ resource "random_id" "solrcloud_name" {
   byte_length = 8
 }
 
+# TODO: Create an nginx-ingress HTTP AUTH secret resources that correspond to these
+# credentials: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
+resource "random_uuid" "client_username" {}
+resource "random_password" "client_password" {
+  length           = 16
+  special          = false
+#  override_special = "_%@"
+}
+
+
 resource "kubernetes_secret" "solr_auth1" {
   metadata {
     name = "basic-auth1"
@@ -58,8 +71,7 @@ resource "kubernetes_secret" "solr_auth1" {
   }
 
   data = {
-    username = "admin"
-    password = bcrypt("P4ssw0rd")
+    auth = "${random_uuid.client_username.result}:${bcrypt(random_password.client_password.result)}"
   }
 
   type = "Opaque"
