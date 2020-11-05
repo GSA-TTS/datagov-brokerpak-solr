@@ -37,13 +37,12 @@ wait: ## Wait 40 seconds, enough time for the DB and broker to stabilize
 	@sleep 40
 	@docker-compose ps
 
+# Normally we would run 
+	# $(CSB_EXEC) client run-examples --filename examples.json
+# ...to test the brokerpak. However, some of our examples need to run nested.
+# So, we'll run them manually with eden via "demo" and "cleanup" targets.
 test: examples.json demo cleanup ## Execute the brokerpak examples against the running broker
 	@echo "Running examples..."
-	# $(CSB_EXEC) client run-examples --filename examples.json
-	# This is supposed to work, but it doesn't... See upstream issue at:
-	# https://github.com/pivotal/cloud-service-broker/issues/115
-	# Also, some of our examples need to run nested. So, we'll run them manually
-	# with eden instead for now... 
 
 demo: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	# Provision and bind a solr-operator service
