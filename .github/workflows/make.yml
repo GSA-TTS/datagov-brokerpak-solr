@@ -25,11 +25,16 @@ jobs:
       with: 
         fetch-depth: '0'
 
-    - name: Supply an empty .env.secrets file
+        # TODO: 
+        # 1. We need to figure out how to have a k8s available while the GitHub
+        #    Action is running. 
+        # 2. We need to figure out how to automate population of the
+        #    examples.json file from the kubeconfig for that ephemeral k8s
+    - name: Populate the examples.json file
       run: cp .env.secrets-template .env.secrets
 
     - name: Build and run examples (tests)
-      run: make all
+      run: make build up wait wait test
 
     - name: Bump version and push tag
       id: bump
