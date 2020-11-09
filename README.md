@@ -65,16 +65,6 @@ by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your b
 
 ## Testing the brokerpak (after the broker has started)
 
-To prepare to run tests, copy the `examples.json-template` to `examples.json` and edit it to
-include the correct credentials for your own Docker Desktop k8s service.
-
-- To get the value of `YOUR_CERT`, look in your kubeconfig file (eg `~/.kube./config`) for
-  the value of `certificate-authority-data`.
-- To get the value of `YOUR_TOKEN`, use the output of: 
-```
-kubectl get secret $(kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name') -n default -o json | jq .data.token
-```
-
 ### Testing automatically
 
 Run 

@@ -21,6 +21,8 @@ clean: ## Bring down the broker service if it's up, clean out the database, and 
 	kubectl delete role solrcloud-access-all 2>/dev/null ; true
 	kubectl delete secret basic-auth1 2>/dev/null ; true
 	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
+	rm examples.json 2>/dev/null; true
+
 # Rebuild when the Docker Compose, Dockerfile, or anything in services/ changes
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
@@ -72,7 +74,11 @@ all: clean build up wait test down ## Clean and rebuild, then bring up the serve
 .PHONY: all clean build up wait test down demo-up demo-down test-cleanup
 
 examples.json:
-	$(error Copy examples.json-template to examples.json, then edit in your own values)
+	set -e ;\
+	SERVICEACCOUNT=$$( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' ) ;\
+   	TOKEN=$$(kubectl get secret $$SERVICEACCOUNT -n default -o json | jq .data.token ) ;\
+	kubectl config view --raw -o go-template-file --template='examples.json-template' > examples.json
+#	$(error Copy examples.json-template to examples.json, then edit in your own values)
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
