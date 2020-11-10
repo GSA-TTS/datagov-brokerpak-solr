@@ -22,6 +22,8 @@ brokerpak concept, and to the Pivotal team running with the concept!
 1. [Docker Desktop (for Mac or
    Windows)](https://www.docker.com/products/docker-desktop) or [Docker Engine
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
+1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
+   a local k8s for the broker to populate during tests and demos
 1. (optional) [`eden`](https://github.com/starkandwayne/eden) can be used for
    manually testing the brokerpak with a nicer UI 
 
@@ -64,6 +66,11 @@ You can also inspect auto-generated documentation for the brokerpak's offerings
 by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
 
 ## Testing the brokerpak (after the broker has started)
+
+Create a temporary Kubernetes cluster to test against with KinD:
+```
+kind create cluster
+```
 
 ### Testing automatically
 

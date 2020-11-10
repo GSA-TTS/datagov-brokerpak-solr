@@ -9,7 +9,7 @@
           "namespace": "default",
           "server": "https://kubernetes.docker.internal:6443",
           "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name "kind-kind" }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "YOUR_TOKEN",
+          "token": "{{"{{"}} .data.token {{"}}"}}",
           "ingress_base_domain": "ing.local.domain"
        },
        "bind_params": {}
@@ -24,7 +24,7 @@
           "namespace": "default",
           "server": "https://kubernetes.docker.internal:6443",
           "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name "kind-kind" }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "YOUR_TOKEN",
+          "token": "{{"{{"}} .data.token {{"}}"}}",
           "ingress_base_domain": "ing.local.domain",
           "cloud_name": "example"
        },
