@@ -8,20 +8,9 @@ OPERATOR_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name |
 CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
 CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
-clean: ## Bring down the broker service if it's up, clean out the database, and remove created images
+clean: cleanup ## Bring down the broker service if it's up, clean out the database, and remove created images
 	docker-compose down -v --remove-orphans --rmi local
 
-# Added to remove the orphan services
-#
-	rm ~/.eden/config  2>/dev/null ; true
-	helm uninstall solr 2>/dev/null ; true
-	helm uninstall zookeeper 2>/dev/null ; true
-	kubectl delete role solrcloud-access-read-only 2>/dev/null ; true
-	helm uninstall example 2>/dev/null ; true
-	kubectl delete role solrcloud-access-all 2>/dev/null ; true
-	kubectl delete secret basic-auth1 2>/dev/null ; true
-	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
- 
 # Rebuild when the Docker Compose, Dockerfile, or anything in services/ changes
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
@@ -66,6 +55,16 @@ cleanup: examples.json ## Clean up data left over from tests and demos
 	-$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
 	-$(EDEN_EXEC) deprovision -i operatorinstance
 	-rm examples.json 2>/dev/null; true
+
+	# Remove any orphan services
+	rm ~/.eden/config  2>/dev/null ; true
+	helm uninstall solr 2>/dev/null ; true
+	helm uninstall zookeeper 2>/dev/null ; true
+	kubectl delete role solrcloud-access-read-only 2>/dev/null ; true
+	helm uninstall example 2>/dev/null ; true
+	kubectl delete role solrcloud-access-all 2>/dev/null ; true
+	kubectl delete secret basic-auth1 2>/dev/null ; true
+	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
 
 down: ## Bring the cloud-service-broker service down
 	docker-compose down
