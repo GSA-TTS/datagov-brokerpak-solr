@@ -71,6 +71,11 @@ Create a temporary Kubernetes cluster to test against with KinD:
 ```
 kind create cluster
 ```
+Grant admin permissions to the `system:serviceaccount:default:default` Service
+Account:
+```
+kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
+```
 
 ### Testing automatically
 
