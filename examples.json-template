@@ -1,3 +1,4 @@
+{{ $context := (index . "current-context") }}
 [
     {
        "name": "Operator in local k8s",
@@ -8,7 +9,7 @@
        "provision_params": {
           "namespace": "default",
           "server": "https://kind-control-plane:6443",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name "kind-kind" }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
+          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
           "token": "{{"{{"}} .data.token {{"}}"}}",
           "ingress_base_domain": "ing.local.domain"
        },
@@ -23,7 +24,7 @@
        "provision_params": {
           "namespace": "default",
           "server": "https://kind-control-plane:6443",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name "kind-kind" }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
+          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
           "token": "{{"{{"}} .data.token {{"}}"}}",
           "ingress_base_domain": "ing.local.domain",
           "cloud_name": "example"
