@@ -71,7 +71,9 @@ Create a temporary Kubernetes cluster to test against with KinD:
 ```
 kind create cluster
 ```
-Grant admin permissions to the `system:serviceaccount:default:default` Service
+Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
+(This is necessary for the service account to be able to create the cluster-wide
+Solr CRD definitions.)
 Account:
 ```
 kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default

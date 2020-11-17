@@ -26,6 +26,9 @@ jobs:
         INPUT_CLUSTER_NAME: kind
       uses: helm/kind-action@v1.0.0
 
+    - name: Make the ServiceAccount default:default a cluster-admin
+      run: kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
+
     - name: Check out repository
       uses: actions/checkout@v2
       with: 
