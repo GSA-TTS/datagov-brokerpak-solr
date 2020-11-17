@@ -21,17 +21,15 @@ jobs:
 
     # Checkout the repository to the GitHub Actions runner
     steps:
-    - uses: actions/checkout@v2
+    - name: Create KinD cluster
+      env: 
+        INPUT_CLUSTER_NAME: kind
+      uses: helm/kind-action@v1.0.0
+
+    - name: Check out repository
+      uses: actions/checkout@v2
       with: 
         fetch-depth: '0'
-
-        # TODO: 
-        # 1. We need to figure out how to have a k8s available while the GitHub
-        #    Action is running. 
-        # 2. We need to figure out how to automate population of the
-        #    examples.json file from the kubeconfig for that ephemeral k8s
-    - name: Populate the examples.json file
-      run: cp .env.secrets-template .env.secrets
 
     - name: Build and run examples (tests)
       run: make build up wait wait test
