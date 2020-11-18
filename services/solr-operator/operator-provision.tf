@@ -15,7 +15,6 @@ output "cluster_ca_certificate" { value = var.cluster_ca_certificate }
 # Implementation
 # ==============
 provider "kubernetes" {
-#  config_context_cluster = var.cluster_id
   host                   = var.server
   cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
   token                  = base64decode(var.token)
@@ -60,9 +59,18 @@ resource "helm_release" "solr" {
   atomic          = "true"
 
   set {
+    # TODO: ingressBaseDomain is going away! Instead we should be setting the
+    # SolrAccessibility as described here:
+    # https://github.com/bloomberg/solr-operator/commit/045abaa806ce50ba2132f73c1ab38dec4e7bf784
     name  = "ingressBaseDomain"
     value = var.ingress_base_domain
   }
+
+  # Here we're attempting to sidestep the issue described here:
+  # https://github.com/bloomberg/solr-operator/issues/122
+  depends_on = [
+    helm_release.zookeeper
+  ]
 }
 
 # ---------------------------------------------------------------------------------------------------------------------

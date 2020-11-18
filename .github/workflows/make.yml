@@ -19,17 +19,27 @@ jobs:
       run:
         shell: bash
 
-    # Checkout the repository to the GitHub Actions runner
     steps:
-    - uses: actions/checkout@v2
+    - name: Create KinD cluster
+      uses: helm/kind-action@v1.0.0
+
+    - name: Make the ServiceAccount default:default a cluster-admin
+      run: kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
+
+    - name: Install the eden OSBAPI CLI tool
+      run: |
+        wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | sudo apt-key add -
+        echo "deb http://apt.starkandwayne.com stable main" | sudo tee /etc/apt/sources.list.d/starkandwayne.list
+        sudo apt-get update
+        sudo apt-get install eden
+
+    - name: Check out repository
+      uses: actions/checkout@v2
       with: 
         fetch-depth: '0'
 
-    - name: Supply an empty .env.secrets file
-      run: cp .env.secrets-template .env.secrets
-
     - name: Build and run examples (tests)
-      run: make all
+      run: make build up wait test
 
     - name: Bump version and push tag
       id: bump

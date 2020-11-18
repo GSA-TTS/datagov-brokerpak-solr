@@ -11,4 +11,9 @@ spec:
   solrJavaMem: {{ .Values.solrJavaMem | quote }}
   solrAddressibility:
     external:
-#      hideNodes: true
+  customSolrKubeOptions:
+    ingressOptions:
+      annotations:
+      {{- range $key, $value := .Values.ingress.annotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
