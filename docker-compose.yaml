@@ -5,18 +5,19 @@ networks:
       name: kind
 services:
   broker:
-    build: .
+    image: cfplatformeng/csb
     ports:
-      - "8080:80"
+      - "8080:8080"
     volumes:
-      - .:/code
-    working_dir: /code
+      - .:/brokerpaks
+    working_dir: /brokerpaks
     entrypoint: ["/bin/cloud-service-broker"]
     command: ["serve"]
     depends_on:
       - database
     restart: on-failure
     environment:
+      DB_TLS: skip-verify
       DB_HOST: database
       DB_USERNAME: root
       DB_PASSWORD: password
