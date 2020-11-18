@@ -9,8 +9,8 @@
        "provision_params": {
           "namespace": "default",
           "server": "$( kind get kubeconfig --internal | grep server | cut -d ' ' -f 6- )",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "{{"{{"}} .data.token {{"}}"}}",
+          "cluster_ca_certificate": $( kubectl config view --raw -o json | jq '.clusters[]| select(.name | contains("kind-kind")) .cluster["certificate-authority-data"]' ),
+          "token": $( kubectl get secret $(kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name') -o json | jq .data.token ),
           "ingress_base_domain": "ing.local.domain"
        },
        "bind_params": {}
@@ -24,8 +24,8 @@
        "provision_params": {
           "namespace": "default",
           "server": "$( kind get kubeconfig --internal | grep server | cut -d ' ' -f 6- )",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "{{"{{"}} .data.token {{"}}"}}",
+          "cluster_ca_certificate": $( kubectl config view --raw -o json | jq '.clusters[]| select(.name | contains("kind-kind")) .cluster["certificate-authority-data"]' ),
+          "token": $( kubectl get secret $(kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name') -o json | jq .data.token ),
           "ingress_base_domain": "ing.local.domain",
           "cloud_name": "example"
        },
