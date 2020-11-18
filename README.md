@@ -65,11 +65,12 @@ Precondition Failed`, and browsers will show that status as `Not Authorized`.)
 You can also inspect auto-generated documentation for the brokerpak's offerings
 by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
 
-## Testing the brokerpak (after the broker has started)
+## Operating a test/demo Kubernetes environment
 
+### Creating the environment
 Create a temporary Kubernetes cluster to test against with KinD:
 ```
-kind create cluster
+kind create cluster --config kind-config.yaml
 ```
 Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
 (This is necessary for the service account to be able to create the cluster-wide
@@ -79,6 +80,63 @@ Account:
 kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
 ```
 
+[Install a KinD-flavored ingress controller](https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx
+) (to make the Solr instances visible to your host):
+```
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+kubectl wait --namespace ingress-nginx \
+  --for=condition=ready pod \
+  --selector=app.kubernetes.io/component=controller \
+  --timeout=90s
+```
+### Tearing down the environment
+Run 
+```
+kind delete cluster
+```
+
+## Demonstrating operation
+
+### Spinning up a demo instance
+
+Run
+```
+make demo
+```
+
+The examples and values in the `examples.json` file will be used to:
+- Provision and bind a solr-operator instance
+- Provision and bind a solr-cloud instance
+
+Once the solr-cloud instance is running, you will see a URL for accessing it.
+Open that URL in your browser. 
+
+You are likely to see `503 Service Temporarily
+Unavailable` as it takes a while for the SolrCloud instance to be ready for
+client connections (up to 12 minutes on Bret's workstation). You can monitor the
+progress by running:
+```
+watch kubectl get all -n default
+```
+When there is at least one `pod/example-solrcloud-<n>` with status showing `Running` and
+Ready showing `1/1`, then reload the provided URL in your browser to see the SolrCloud dashboard.
+
+### Spinning down the demo instance
+
+Run
+```
+make cleanup
+```
+The examples and values in the `examples.json` file will be used to:
+- Unbind and deprovision the solr-cloud instance
+- Unbind and deprovision the solr-operator instance
+
+Any stray resources left over from a failed demo will also be removed, so you
+can use this command to reset the environment.
+
+
+## Running tests
+
 ### Testing automatically
 
 Run 
@@ -86,14 +144,12 @@ Run
 make test
 ```
 
-The examples and values in the `examples.json` file will be used for end-to-end testing of the brokerpak's service offerings.
-
-**NOTE:** This automatic testing capability relies on undocumented functionality
-that is not yet working correctly in the upstream broker. We've filed an issue
-about that: https://github.com/pivotal/cloud-service-broker/issues/115
-
-In the meantime you can manipulate the broker manually, as described in the next
-section.
+The examples and values in the `examples.json` file will be used for end-to-end
+testing of the brokerpak:
+- Provision and bind a solr-operator instance
+- Provision and bind a solr-cloud instance
+- Unbind and deprovision the solr-cloud instance
+- Unbind and deprovision the solr-operator instance
 
 ### Testing manually
 
