@@ -70,11 +70,7 @@ all: clean build up wait test down ## Clean and rebuild, then bring up the serve
 .PHONY: all clean build up wait test down demo-up demo-down test-cleanup
 
 examples.json:
-	set -e ;\
-	export SECRETNAME=$$( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' ) ;\
-	kubectl config view --raw -o go-template-file --template='examples.json-template' > examples.temp ;\
-	kubectl get secret $$SECRETNAME -n default -o go-template-file --template='examples.temp' > examples.json
-	rm examples.temp
+	./generate-examples.sh > examples.json
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
