@@ -19,11 +19,8 @@ jobs:
       run:
         shell: bash
 
-    # Checkout the repository to the GitHub Actions runner
     steps:
     - name: Create KinD cluster
-      env: 
-        INPUT_CLUSTER_NAME: kind
       uses: helm/kind-action@v1.0.0
 
     - name: Make the ServiceAccount default:default a cluster-admin
@@ -35,7 +32,7 @@ jobs:
         fetch-depth: '0'
 
     - name: Build and run examples (tests)
-      run: make build up wait wait test
+      run: make build up wait test
 
     - name: Bump version and push tag
       id: bump
