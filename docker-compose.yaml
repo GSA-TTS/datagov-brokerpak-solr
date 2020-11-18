@@ -25,7 +25,7 @@ services:
       SECURITY_USER_NAME: user
       SECURITY_USER_PASSWORD: pass
       GSB_API_HOSTNAME: broker
-      PORT: 80
+      PORT: 8080
 
   database:
     image: mysql:latest
