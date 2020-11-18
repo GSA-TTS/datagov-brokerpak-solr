@@ -24,8 +24,7 @@ brokerpak concept, and to the Pivotal team running with the concept!
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
 1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
    a local k8s for the broker to populate during tests and demos
-1. (optional) [`eden`](https://github.com/starkandwayne/eden) can be used for
-   manually testing the brokerpak with a nicer UI 
+1. [`eden`](https://github.com/starkandwayne/eden) is used as a client for testing the brokerpak
 
 Run the `make` command by itself for information on the various targets that are available. 
 
