@@ -8,7 +8,7 @@ CLUSTER_CA_CERTIFICATE=$(kubectl config view --raw -o json | jq -r '.clusters[]|
 TOKEN=$(kubectl get secret $( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' ) -n default -o json | jq -r .data.token)
 
 # We need the Docker-internal control plane URL to be resolved
-SERVER=$(kind get kubeconfig --internal | grep server | cut -d ' ' -f 6-)
+SERVER=$(kind get kubeconfig --internal --name=$(kind get clusters | head -1) | grep server | cut -d ' ' -f 6-)
 
 template() {
   file=examples.json-template
