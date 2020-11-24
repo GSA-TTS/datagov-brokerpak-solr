@@ -24,14 +24,17 @@ wait: ## Wait 40 seconds, enough time for the DB and broker to stabilize
 	@sleep 40
 	@docker-compose ps
 
+down: ## Bring the cloud-service-broker service down
+	docker-compose down
+
 # Normally we would run 
 	# $(CSB_EXEC) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
 # So, we'll run them manually with eden via "demo" and "cleanup" targets.
-test: examples.json demo cleanup ## Execute the brokerpak examples against the running broker
+test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
 	@echo "Running examples..."
 
-demo: examples.json ## Provision a SolrCloud instance and output the bound credentials
+demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	# Provision and bind a solr-operator service
 	$(EDEN_EXEC) provision -i operatorinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
 	$(EDEN_EXEC) bind -b operatorbinding -i operatorinstance
@@ -43,7 +46,7 @@ demo: examples.json ## Provision a SolrCloud instance and output the bound crede
 	$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
 	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
 	
-cleanup: examples.json ## Clean up data left over from tests and demos
+demo-down: examples.json ## Clean up data left over from tests and demos
 	# Unbind and deprovision the solr-cloud instance
 	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
 	-$(EDEN_EXEC) deprovision -i cloudinstance
@@ -63,11 +66,29 @@ cleanup: examples.json ## Clean up data left over from tests and demos
 	kubectl delete secret basic-auth1 2>/dev/null ; true
 	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
 
-down: ## Bring the cloud-service-broker service down
-	docker-compose down
+test-env-up: ## Set up a Kubernetes test environment using KinD
+	ifneq ($(shell which docker jq kind kubectl  2> /dev/null; echo $$?), 0)
+		$(error Missing one of the prerequisite commands: docker jq kind kubectl)
+	endif
+	# Creating a temporary Kubernetes cluster to test against with KinD
+	@kind create cluster --config kind-config.yaml --name datagov-broker-test
+	# Granting cluster-admin permissions to the `system:serviceaccount:default:default` Service.
+	# (This is necessary for the service account to be able to create the cluster-wide
+	# Solr CRD definitions.)
+	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
+	# Installing a KinD-flavored ingress controller (to make the Solr instances visible to the host)
+	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+	@kubectl wait --namespace ingress-nginx \
+      --for=condition=ready pod \
+      --selector=app.kubernetes.io/component=controller \
+      --timeout=90s
+
+test-env-down: ## Tear down the Kubernetes test environment in KinD
+	kind delete cluster --name datagov-broker-test
 
 all: clean build up wait test down ## Clean and rebuild, then bring up the server, run the examples, and bring the system down
-.PHONY: all clean build up wait test down demo-up demo-down test-cleanup
+.PHONY: all clean build up down wait test demo-up demo-down test-env-up test-env-down
 
 examples.json:
 	./generate-examples.sh > examples.json
