@@ -45,7 +45,7 @@ Notable targets are described below
 Run 
 
 ```
-make up wait
+make build up wait
 ```
 
 The broker will start and (after about 40 seconds) listen on `0.0.0.0:8080`. You
@@ -70,29 +70,12 @@ by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your b
 ### Creating the environment
 Create a temporary Kubernetes cluster to test against with KinD:
 ```
-kind create cluster --config kind-config.yaml
-```
-Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
-(This is necessary for the service account to be able to create the cluster-wide
-Solr CRD definitions.)
-Account:
-```
-kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-```
-
-[Install a KinD-flavored ingress controller](https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx
-) (to make the Solr instances visible to your host):
-```
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
-kubectl wait --namespace ingress-nginx \
-  --for=condition=ready pod \
-  --selector=app.kubernetes.io/component=controller \
-  --timeout=90s
+make test-env-up
 ```
 ### Tearing down the environment
 Run 
 ```
-kind delete cluster
+kind test-env-down
 ```
 
 ## Demonstrating operation
@@ -101,7 +84,7 @@ kind delete cluster
 
 Run
 ```
-make demo
+make demo-up
 ```
 
 The examples and values in the `examples.json` file will be used to:
@@ -125,7 +108,7 @@ Ready showing `1/1`, then reload the provided URL in your browser to see the Sol
 
 Run
 ```
-make cleanup
+make demo-down
 ```
 The examples and values in the `examples.json` file will be used to:
 - Unbind and deprovision the solr-cloud instance
@@ -155,14 +138,14 @@ testing of the brokerpak:
 
 Run 
 ```
-docker-compose exec -T broker /bin/cloud-service-broker client help"
+docker-compose exec -T broker /bin/cloud-service-broker client help
 ```
 to get a list of available commands. You can further request help for each
 sub-command. Use this command to poke at the browser one request at a time.
 
 For example to see the catalog:
 ```
-docker-compose exec -T broker /bin/cloud-service-broker client catalog"
+docker-compose exec -T broker /bin/cloud-service-broker client catalog
 ```
 
 You can refer to the content of the `examples.json` file to manually provision
