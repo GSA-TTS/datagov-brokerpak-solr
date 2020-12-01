@@ -1,7 +1,11 @@
 
 .DEFAULT_GOAL := help
 
-CSB_EXEC=docker-compose exec -T broker /bin/cloud-service-broker
+DOCKER_OPTS=--rm -v $(PWD):/brokerpak -w /brokerpak #--network=host
+CSB=cfplatformeng/csb
+SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
+SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
+
 EDEN_EXEC=eden --client user --client-secret pass --url http://127.0.0.1:8080
 OPERATOR_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')
 OPERATOR_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .bind_params')
@@ -14,21 +18,23 @@ clean: cleanup ## Bring down the broker service if it's up, clean out the databa
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
 build: manifest.yml $(shell find services) ## Build the brokerpak(s)
-	@docker run --rm --mount type=bind,src=$(PWD),dst=/source --workdir="/source" cfplatformeng/csb pak build .
+	@docker run $(DOCKER_OPTS) $(CSB) pak build
 
 up: ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
-	docker-compose up -d
-
-wait: ## Wait 40 seconds, enough time for the DB and broker to stabilize
-	@echo "Waiting 40 seconds for the DB and broker to stabilize..."
-	@sleep 40
-	@docker-compose ps
+	docker run $(DOCKER_OPTS) \
+	-p 8080:8080 \
+	-e SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
+	-e SECURITY_USER_PASSWORD=$(SECURITY_USER_PASSWORD) \
+	-e "DB_TYPE=sqlite3" \
+	-e "DB_PATH=/tmp/csb-db" \
+	-d --name csb-service \
+	$(CSB) serve
 
 down: ## Bring the cloud-service-broker service down
-	docker-compose down
+	docker rm -f csb-service
 
 # Normally we would run 
-	# $(CSB_EXEC) client run-examples --filename examples.json
+	# $(CSB) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
 # So, we'll run them manually with eden via "demo" and "cleanup" targets.
 test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
@@ -67,9 +73,6 @@ demo-down: examples.json ## Clean up data left over from tests and demos
 	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
 
 test-env-up: ## Set up a Kubernetes test environment using KinD
-	ifneq ($(shell which docker jq kind kubectl  2> /dev/null; echo $$?), 0)
-		$(error Missing one of the prerequisite commands: docker jq kind kubectl)
-	endif
 	# Creating a temporary Kubernetes cluster to test against with KinD
 	@kind create cluster --config kind-config.yaml --name datagov-broker-test
 	# Granting cluster-admin permissions to the `system:serviceaccount:default:default` Service.
