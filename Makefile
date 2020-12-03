@@ -8,6 +8,9 @@ OPERATOR_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name |
 CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
 CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
+PREREQUISITES = docker jq kind kubectl java
+K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequistie commands $(prereq)")))
+
 clean: cleanup ## Bring down the broker service if it's up, clean out the database, and remove created images
 	docker-compose down -v --remove-orphans --rmi local
 
