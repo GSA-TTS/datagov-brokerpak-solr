@@ -39,7 +39,7 @@ jobs:
         fetch-depth: '0'
 
     - name: Build and run examples (tests)
-      run: make build up wait test
+      run: make build up test
 
     - name: Bump version and push tag
       id: bump
