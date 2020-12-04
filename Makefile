@@ -12,8 +12,6 @@ OPERATOR_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name |
 CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
 CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
-clean: cleanup ## Bring down the broker service if it's up, clean out the database, and remove created images
-	docker-compose down -v --remove-orphans --rmi local
 clean: demo-down down ## Bring down the broker service if it's up and clean out the database
 	@docker rm -f csb-service
 	@rm datagov-services-pak-*.brokerpak
