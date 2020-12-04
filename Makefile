@@ -20,15 +20,24 @@ clean: cleanup ## Bring down the broker service if it's up, clean out the databa
 build: manifest.yml $(shell find services) ## Build the brokerpak(s)
 	@docker run $(DOCKER_OPTS) $(CSB) pak build
 
-up: ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
+# Healthcheck solution from https://stackoverflow.com/a/47722899 
+# (Alpine inclues wget, but not curl.)
+up: ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser. 
 	docker run $(DOCKER_OPTS) \
 	-p 8080:8080 \
 	-e SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
 	-e SECURITY_USER_PASSWORD=$(SECURITY_USER_PASSWORD) \
 	-e "DB_TYPE=sqlite3" \
 	-e "DB_PATH=/tmp/csb-db" \
-	-d --name csb-service \
+	--name csb-service \
+	-d --network kind \
+	--health-cmd="wget --header=\"X-Broker-API-Version: 2.16\" --no-verbose --tries=1 --spider http://$(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD)@localhost:8080/v2/catalog || exit 1" \
+	--health-interval=2s \
+	--health-retries=15 \
 	$(CSB) serve
+	@while [ "`docker inspect -f {{.State.Health.Status}} csb-service`" != "healthy" ]; do   echo "Waiting for csb-service to be ready..." ;  sleep 2; done
+	@echo "csb-service is ready!" ; echo ""
+	@docker ps -l
 
 down: ## Bring the cloud-service-broker service down
 	docker rm -f csb-service
