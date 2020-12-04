@@ -44,43 +44,42 @@ down: ## Bring the cloud-service-broker service down
 	@docker stop csb-service
 
 # Normally we would run 
-	# $(CSB) client run-examples --filename examples.json
+# $(CSB) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
-# So, we'll run them manually with eden via "demo" and "cleanup" targets.
+# So, we'll run them manually with eden via "demo-up" and "demo-down" targets.
 test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
-	@echo "Running examples..."
 
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	# Provision and bind a solr-operator service
-	$(EDEN_EXEC) provision -i operatorinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
-	$(EDEN_EXEC) bind -b operatorbinding -i operatorinstance
-	$(EDEN_EXEC) credentials -b operatorbinding -i operatorinstance
+	@$(EDEN_EXEC) provision -i operatorinstance -s solr-operator  -p base -P '$(OPERATOR_PROVISION_PARAMS)'
+	@$(EDEN_EXEC) bind -b operatorbinding -i operatorinstance
+	@$(EDEN_EXEC) credentials -b operatorbinding -i operatorinstance
 
 	# Provision and bind a solr-cloud instance (using credentials from the
 	# operator instance)
-	$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
-	$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
-	$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
+	@$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
+	@$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
+	@$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
 	
 demo-down: examples.json ## Clean up data left over from tests and demos
-	# Unbind and deprovision the solr-cloud instance
-	-$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance
-	-$(EDEN_EXEC) deprovision -i cloudinstance
+	@echo "Unbinding and deprovisioning the solr-cloud instance"
+	-@$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance 2>/dev/null
+	-@$(EDEN_EXEC) deprovision -i cloudinstance 2>/dev/null
 
-	# Unbind and deprovision the solr-operator instance
-	-$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance
-	-$(EDEN_EXEC) deprovision -i operatorinstance
-	-rm examples.json 2>/dev/null; true
+	@echo "Unbinding and deprovisioning the solr-operator instance"
+	-@$(EDEN_EXEC) unbind -b operatorbinding -i operatorinstance 2>/dev/null
+	-@$(EDEN_EXEC) deprovision -i operatorinstance 2>/dev/null
+	-@rm examples.json 2>/dev/null; true
 
-	# Remove any orphan services
-	rm ~/.eden/config  2>/dev/null ; true
-	helm uninstall solr 2>/dev/null ; true
-	helm uninstall zookeeper 2>/dev/null ; true
-	kubectl delete role solrcloud-access-read-only 2>/dev/null ; true
-	helm uninstall example 2>/dev/null ; true
-	kubectl delete role solrcloud-access-all 2>/dev/null ; true
-	kubectl delete secret basic-auth1 2>/dev/null ; true
-	kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
+	@echo "Removing any orphan services from eden"
+	-@rm ~/.eden/config  2>/dev/null ; true
+	-@helm uninstall solr 2>/dev/null ; true
+	-@helm uninstall zookeeper 2>/dev/null ; true
+	-@kubectl delete role solrcloud-access-read-only 2>/dev/null ; true
+	-@helm uninstall example 2>/dev/null ; true
+	-@kubectl delete role solrcloud-access-all 2>/dev/null ; true
+	-@kubectl delete secret basic-auth1 2>/dev/null ; true
+	-@kubectl delete role zookeeper-zookeeper-operator 2>/dev/null ; true
 
 test-env-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
@@ -104,7 +103,7 @@ all: clean build up wait test down ## Clean and rebuild, then bring up the serve
 .PHONY: all clean build up down wait test demo-up demo-down test-env-up test-env-down
 
 examples.json:
-	./generate-examples.sh > examples.json
+	@./generate-examples.sh > examples.json
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
