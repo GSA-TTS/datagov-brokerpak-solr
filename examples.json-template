@@ -8,9 +8,9 @@
        "plan_id": "1779d7d5-874a-4352-b9c4-877be1f0745b",
        "provision_params": {
           "namespace": "default",
-          "server": "https://kind-control-plane:6443",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "{{"{{"}} .data.token {{"}}"}}",
+          "server": "${SERVER}",
+          "cluster_ca_certificate": "${CLUSTER_CA_CERTIFICATE}",
+          "token": "${TOKEN}",
           "ingress_base_domain": "ing.local.domain"
        },
        "bind_params": {}
@@ -23,9 +23,9 @@
        "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
        "provision_params": {
           "namespace": "default",
-          "server": "https://kind-control-plane:6443",
-          "cluster_ca_certificate": "{{ range .clusters }}{{ if eq .name $context }}{{index .cluster "certificate-authority-data"}}{{end}}{{end}}",
-          "token": "{{"{{"}} .data.token {{"}}"}}",
+          "server": "${SERVER}",
+          "cluster_ca_certificate": "${CLUSTER_CA_CERTIFICATE}",
+          "token": "${TOKEN}",
           "ingress_base_domain": "ing.local.domain",
           "cloud_name": "example"
        },

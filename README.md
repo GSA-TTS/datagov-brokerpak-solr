@@ -24,8 +24,12 @@ brokerpak concept, and to the Pivotal team running with the concept!
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
 1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
    a local k8s for the broker to populate during tests and demos
+<<<<<<< HEAD
 1. (optional) [`eden`](https://github.com/starkandwayne/eden) can be used for
    manually testing the brokerpak with a nicer UI 
+=======
+1. [`eden`](https://github.com/starkandwayne/eden) is used as a client for testing the brokerpak
+>>>>>>> main
 
 Run the `make` command by itself for information on the various targets that are available. 
 
@@ -46,13 +50,14 @@ Notable targets are described below
 Run 
 
 ```
-make up wait
+make build up wait
 ```
 
 The broker will start and (after about 40 seconds) listen on `0.0.0.0:8080`. You
 test that it's responding by running:
 ```
 curl -i -H "X-Broker-API-Version: 2.16" http://user:pass@127.0.0.1:8080/v2/catalog
+
 ```
 In response you will see a YAML description of the services and plans available
 from the brokerpak.
@@ -65,7 +70,60 @@ Precondition Failed`, and browsers will show that status as `Not Authorized`.)
 You can also inspect auto-generated documentation for the brokerpak's offerings
 by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
 
-## Testing the brokerpak (after the broker has started)
+## Operating a test/demo Kubernetes environment
+
+### Creating the environment
+Create a temporary Kubernetes cluster to test against with KinD:
+```
+make test-env-up
+```
+### Tearing down the environment
+Run 
+```
+kind test-env-down
+```
+
+## Demonstrating operation
+
+### Spinning up a demo instance
+
+Run
+```
+make demo-up
+```
+
+The examples and values in the `examples.json` file will be used to:
+- Provision and bind a solr-operator instance
+- Provision and bind a solr-cloud instance
+
+Once the solr-cloud instance is running, you will see a URL for accessing it.
+Open that URL in your browser. 
+
+You are likely to see `503 Service Temporarily
+Unavailable` as it takes a while for the SolrCloud instance to be ready for
+client connections (up to 12 minutes on Bret's workstation). You can monitor the
+progress by running:
+```
+watch kubectl get all -n default
+```
+When there is at least one `pod/example-solrcloud-<n>` with status showing `Running` and
+Ready showing `1/1`, then reload the provided URL in your browser to see the SolrCloud dashboard.
+
+### Spinning down the demo instance
+
+Run
+```
+make demo-down
+```
+The examples and values in the `examples.json` file will be used to:
+- Unbind and deprovision the solr-cloud instance
+- Unbind and deprovision the solr-operator instance
+
+Any stray resources left over from a failed demo will also be removed, so you
+can use this command to reset the environment.
+
+
+## Running tests
 
 Create a temporary Kubernetes cluster to test against with KinD:
 ```
@@ -86,7 +144,51 @@ Run
 make test
 ```
 
-The examples and values in the `examples.json` file will be used for end-to-end testing of the brokerpak's service offerings.
+The examples and values in the `examples.json` file will be used for end-to-end
+testing of the brokerpak:
+- Provision and bind a solr-operator instance
+- Provision and bind a solr-cloud instance
+- Unbind and deprovision the solr-cloud instance
+- Unbind and deprovision the solr-operator instance
+
+### Testing manually
+
+Run 
+```
+docker-compose exec -T broker /bin/cloud-service-broker client help
+```
+to get a list of available commands. You can further request help for each
+sub-command. Use this command to poke at the browser one request at a time.
+
+For example to see the catalog:
+```
+docker-compose exec -T broker /bin/cloud-service-broker client catalog
+```
+
+You can refer to the content of the `examples.json` file to manually provision
+and bind services. For example:
+
+```
+docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
+```
+
+...and so on.
+
+Using the CLI in this way will give you very precise JSON results for each
+query. For a more human-friendly workflow, use `eden` to manually manipulate the
+broker.
+
+For example, listing the catalog and provisioning a service instance with `eden`
+looks like this:
+```
+$ export SB_BROKER_URL=http://user:pass@127.0.0.1:8080
+$ export SB_BROKER_USERNAME=user
+$ export SB_BROKER_PASSWORD=pass
+$ eden catalog
+$ eden provision -s solr-operator -p base -i <instance-name> -P "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
+$ eden bind -i <instance-name>
+$ eden credentials -i <instance-name> -b <binding-name>
+```
 
 **NOTE:** This automatic testing capability relies on undocumented functionality
 that is not yet working correctly in the upstream broker. We've filed an issue
