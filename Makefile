@@ -102,8 +102,8 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 test-env-down: ## Tear down the Kubernetes test environment in KinD
 	kind delete cluster --name datagov-broker-test
 
-all: clean build up wait test down ## Clean and rebuild, then bring up the server, run the examples, and bring the system down
-.PHONY: all clean build up down wait test demo-up demo-down test-env-up test-env-down
+all: clean build up test down ## Clean and rebuild, then bring up the server, run the examples, and bring the system down
+.PHONY: all clean build up down test demo-up demo-down test-env-up test-env-down
 
 examples.json:
 	@./generate-examples.sh > examples.json
