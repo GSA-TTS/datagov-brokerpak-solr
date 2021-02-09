@@ -51,8 +51,6 @@ down: ## Bring the cloud-service-broker service down
 test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
 
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
-	# Provision and bind a solr-cloud instance (using credentials from the
-	# operator instance)
 	@$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
 	@$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
 	@$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance

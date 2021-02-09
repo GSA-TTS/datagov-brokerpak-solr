@@ -3,7 +3,11 @@
 ## Why this project
 
 The datagov brokerpak is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker) plugin that makes services
-needed by the data.gov team brokerable via the [Open Service Broker API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and Kubernetes), using Terraform. In particular, this brokerpak is used by [`datagov-ssb`](https://github.com/GSA/datagov-ssb) to extend the capabilities of cloud.gov for the purposes of the data.gov team.
+needed by the data.gov team brokerable via the [Open Service Broker
+API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and
+Kubernetes), using Terraform. In particular, this brokerpak is used by
+[`datagov-ssb`](https://github.com/GSA/datagov-ssb) to broker instances of
+[SolrCloud](https://lucene.apache.org/solr/) through cloud.gov.
 
 For more information about the brokerpak concept, here's a [5-minute lightning
 talk](https://www.youtube.com/watch?v=BXIvzEfHil0) from the 2019 Cloud Foundry Summit. You may also want to check out the brokerpak
@@ -88,7 +92,6 @@ make demo-up
 ```
 
 The examples and values in the `examples.json` file will be used to:
-- Provision and bind a solr-operator instance
 - Provision and bind a solr-cloud instance
 
 Once the solr-cloud instance is running, you will see a URL for accessing it.
@@ -112,7 +115,6 @@ make demo-down
 ```
 The examples and values in the `examples.json` file will be used to:
 - Unbind and deprovision the solr-cloud instance
-- Unbind and deprovision the solr-operator instance
 
 Any stray resources left over from a failed demo will also be removed, so you
 can use this command to reset the environment.
@@ -129,10 +131,8 @@ make test
 
 The examples and values in the `examples.json` file will be used for end-to-end
 testing of the brokerpak:
-- Provision and bind a solr-operator instance
 - Provision and bind a solr-cloud instance
 - Unbind and deprovision the solr-cloud instance
-- Unbind and deprovision the solr-operator instance
 
 ### Testing manually
 
@@ -152,7 +152,7 @@ You can refer to the content of the `examples.json` file to manually provision
 and bind services. For example:
 
 ```
-docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
+docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')"
 ```
 
 ...and so on.
@@ -168,7 +168,7 @@ $ export SB_BROKER_URL=http://user:pass@127.0.0.1:8080
 $ export SB_BROKER_USERNAME=user
 $ export SB_BROKER_PASSWORD=pass
 $ eden catalog
-$ eden provision -s solr-operator -p base -i <instance-name> -P "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-operator")) | .provision_params')"
+$ eden provision -s solr-cloud -p base -i <instance-name> -P "$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')"
 $ eden bind -i <instance-name>
 $ eden credentials -i <instance-name> -b <binding-name>
 ```
@@ -216,7 +216,7 @@ $ export SB_BROKER_URL=http://user:pass@127.0.0.1:8080
 $ export SB_BROKER_USERNAME=user
 $ export SB_BROKER_PASSWORD=pass
 $ eden catalog
-$ eden provision -s solr-operator -p base -i <instance-name> -P "$(cat k8s-creds.yml)"
+$ eden provision -s solr-cloud -p base -i <instance-name> -P "$(cat k8s-creds.yml)"
 $ eden bind -i <instance-name>
 $ eden credentials -i <instance-name> -b <binding-name>
 ```
