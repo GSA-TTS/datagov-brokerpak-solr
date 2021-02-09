@@ -3,5 +3,5 @@
   "cluster_ca_certificate": "<Base64-encoded cluster_ca_certificate data> ",
   "token": "<Base64-encoded service account token>",
   "ingress_base_domain": "<ingress domain for this k8s>",
-  "namespace": "<namespace where you want to operator SolrCloud instances>"
+  "namespace": "<namespace where you want to deploy SolrCloud instances>"
 }
