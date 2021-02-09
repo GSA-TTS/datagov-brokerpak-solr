@@ -98,7 +98,12 @@ provision:
     field_name: password
     type: string
     details: The password of the SolrCloud instance that was created
-  template_ref: "terraform/provision/cloud-provision.tf"
+  template_refs: 
+  - main: terraform/provision/main.tf
+  - data: terraform/provision/data.tf
+  - outputs: terraform/provision/outputs.tf
+  - provider: terraform/provision/provider.tf
+  - variables: terraform/provision/variables.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -164,7 +169,12 @@ bind:
     field_name: uri
     type: string
     details: The URL to use for working with the solr-cloud instance
-  template_ref: "terraform/bind/cloud-bind.tf"
+  template_refs: 
+  - main: terraform/bind/main.tf
+  - data: terraform/bind/data.tf
+  - outputs: terraform/bind/outputs.tf
+  - provider: terraform/bind/provider.tf
+  - variables: terraform/bind/variables.tf
 examples: []
 plan_updateable: false
 requiredenvvars: []
