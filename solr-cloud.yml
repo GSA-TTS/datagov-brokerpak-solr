@@ -1,0 +1,13 @@
+  template_refs: 
+    main: terraform/provision/main.tf
+    data: terraform/provision/data.tf
+    outputs: terraform/provision/outputs.tf
+    providers: terraform/provision/providers.tf
+    variables: terraform/provision/variables.tf
+bind:
+  template_refs: 
+    main: terraform/bind/main.tf
+    data: terraform/bind/data.tf
+    outputs: terraform/bind/outputs.tf
+    providers: terraform/bind/providers.tf
+    variables: terraform/bind/variables.tf

@@ -1,51 +1,7 @@
-variable "server" { type = string }
-variable "cluster_ca_certificate" { type = string }
-variable "token" { type = string }
-variable "namespace" { type = string }
-variable "ingress_base_domain" { type = string }
-
-variable "replicas" { type = number }
-variable "solrImageTag" { type = string }
-variable "solrJavaMem" { type = string }
-
-variable "cloud_name" {
-  type = string
-  description = "The name of the cloud to create (used only for demo purposes)"
-  default = ""
-}
-
-# Not all of these will be output; most will just be passed on for use in binding
-output "namespace" { value = var.namespace }
-output "server" { value = var.server }
-output "token" { value = var.token }
-output "cluster_ca_certificate" { value = var.cluster_ca_certificate }
-output "cloud_name" { value = local.cloud_name }
-output "username" { value = random_uuid.client_username.result }
-output "password" { value = random_password.client_password.result }
-
-
-# ==============
-# Implementation
-# ==============
-provider "kubernetes" {
-  host                   = var.server
-  cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
-  token                  = base64decode(var.token)
-  load_config_file       = false
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = var.server
-    cluster_ca_certificate = base64decode(var.cluster_ca_certificate)
-    token                  = base64decode(var.token)
-    load_config_file       = false
-  }
-}
-
 locals {
   cloud_name = var.cloud_name != "" ? var.cloud_name : lower(random_id.solrcloud_name.b64_url)
 }
+
 # We're generating these randomly now because they're ignored anyway, 
 # but in future we're going to have to create a secret with these creds and
 # get solr-operator to reference it when creating our ingress rule. See
@@ -63,7 +19,6 @@ resource "random_password" "client_password" {
 #  override_special = "_%@"
 }
 
-
 resource "kubernetes_secret" "solr_auth1" {
   metadata {
     name = "basic-auth1"
@@ -77,13 +32,6 @@ resource "kubernetes_secret" "solr_auth1" {
   type = "Opaque"
 }
 
-
-# Get ahold of the k8s namespace where the solr-operator CRDs are available
-data "kubernetes_namespace" "namespace" {
-  metadata {
-    name = var.namespace
-  }
-}
 
 # Instantiate a SolrCloud instance using the CRD
 resource "helm_release" "solrcloud" {
@@ -124,8 +72,7 @@ resource "helm_release" "solrcloud" {
     value = var.solrJavaMem
   }
 
-
-# TODO: We should have a loop with a timeout here to verify that Solr is
+  # TODO: We should have a local-exec provisioner with a timeout here to verify that Solr is
   # actually available before returning.
 
 }
