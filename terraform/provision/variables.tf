@@ -7,8 +7,4 @@ variable "replicas" { type = number }
 variable "solrImageTag" { type = string }
 variable "solrJavaMem" { type = string }
 
-variable "cloud_name" {
-  type = string
-  description = "The name of the cloud to create (used only for demo purposes)"
-  default = ""
-}
+variable "cloud_name" { type = string }
