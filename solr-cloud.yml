@@ -35,23 +35,28 @@ provision:
     type: string
     details: "Name of the SolrCloud instance (only for testing purposes)"
   computed_inputs:
+  - name: cloud_name
+    type: string
+    details: "The name of the cloud to create (used only for demo purposes)"
+    overwrite: true
+    default: "example"
   - name: server
-    required: true
     type: string
     details: "The service URL (for your target k8s)"
+    overwrite: true
     default: ${config("k8s.server")}
   - name: cluster_ca_certificate
-    required: true
+    overwrite: true
     type: string
     details: "The CA certificate (for your target k8s)"
     default: ${config("k8s.cluster_ca_certificate")}
   - name: token
-    required: true
+    overwrite: true
     type: string
     details: "The service account token (for your target k8s)"
     default: ${config("k8s.token")}
   - name: namespace
-    required: true
+    overwrite: true
     type: string
     details: The namespace (where you want SolrClouds deployed in your target k8s)
     default: ${config("k8s.namespace")}
