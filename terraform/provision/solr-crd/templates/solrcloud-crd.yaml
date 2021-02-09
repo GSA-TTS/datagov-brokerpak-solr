@@ -9,8 +9,11 @@ spec:
     repository: {{ .Values.solrImageRepo | quote }} 
     tag: {{ .Values.solrImageTag | quote }}
   solrJavaMem: {{ .Values.solrJavaMem | quote }}
-  solrAddressibility:
+  solrAddressability:
     external:
+      method: Ingress
+      # TODO: Set this automatically if we can!
+      domainName: ing.local.domain
   customSolrKubeOptions:
     ingressOptions:
       annotations:
