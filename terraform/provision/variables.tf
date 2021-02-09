@@ -2,7 +2,6 @@ variable "server" { type = string }
 variable "cluster_ca_certificate" { type = string }
 variable "token" { type = string }
 variable "namespace" { type = string }
-variable "ingress_base_domain" { type = string }
 
 variable "replicas" { type = number }
 variable "solrImageTag" { type = string }

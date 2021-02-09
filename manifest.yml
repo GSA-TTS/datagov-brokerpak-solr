@@ -1,6 +1,6 @@
 packversion: 1
 name: datagov-services-pak
-version: 1.0.0
+version: 0.11.0
 metadata:
   author: Bret Mogilefsky
 platforms:
@@ -25,4 +25,8 @@ service_definitions:
 - solr-cloud.yml
 parameters: []
 required_env_variables: []
-env_config_mapping: {}
+env_config_mapping:
+  K8S_SERVER: k8s.server
+  K8S_CLUSTER_CA_CERTIFICATE: k8s.cluster_ca_certificate
+  K8S_TOKEN: k8s.token
+  K8S_NAMESPACE: k8s.namespace

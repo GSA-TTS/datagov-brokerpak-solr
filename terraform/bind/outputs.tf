@@ -6,10 +6,6 @@ output "uri" {
     var.password,
     data.kubernetes_ingress.solrcloud-ingress.spec[0].rule[0].host)
 }
-output "namespace" { value = "" }
-output "server" { value = "" }
-output "token" { value = "" }
-output "cluster_ca_certificate" { value = "" }
 output "cloud_name" { value = "" }
 output "username" { value = "" }
 output "password" { value = "" }
