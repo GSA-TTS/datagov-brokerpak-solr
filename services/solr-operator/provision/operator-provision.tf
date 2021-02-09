@@ -1,1 +1,0 @@
-../operator-provision.tf
