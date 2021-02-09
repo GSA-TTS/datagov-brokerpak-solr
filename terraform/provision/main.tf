@@ -4,7 +4,7 @@ locals {
 
 # We're generating these randomly now because they're ignored anyway, 
 # but in future we're going to have to create a secret with these creds and
-# get solr-operator to reference it when creating our ingress rule. See
+# reference it when creating our ingress annotations. See
 # https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
 resource "random_id" "solrcloud_name" {
   byte_length = 8
@@ -42,17 +42,6 @@ resource "helm_release" "solrcloud" {
   atomic = true
   wait = true
   timeout = 600
-
-  set {
-    name  = "ingressBaseDomain"
-    # Since we're no longer in charge of creating the namespace, we need to
-    # ensure that the ingressBaseDomain is available in some other way! Again:
-    # Can we query it from the nginx-ingress pod in k8s itself?
-    # value = var.cloud_name == "example" ? "ing.local.domain" : data.kubernetes_namespace.namespace.metadata[0].annotations.ingress_base_domain
-
-    # For now, we'll just use what was passed in
-    value = var.ingress_base_domain
-  }
 
   set {
     # How many replicas you want

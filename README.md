@@ -49,7 +49,7 @@ Notable targets are described below
 Run 
 
 ```
-make build up wait
+make build up 
 ```
 
 The broker will start and (after about 40 seconds) listen on `0.0.0.0:8080`. You
@@ -79,7 +79,7 @@ make test-env-up
 ### Tearing down the environment
 Run 
 ```
-kind test-env-down
+make test-env-down
 ```
 
 ## Demonstrating operation
