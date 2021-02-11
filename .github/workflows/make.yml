@@ -42,7 +42,7 @@ jobs:
       run: docker login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
 
     - name: Build and run examples (tests)
-      run: make build up test
+      run: make build test-env-up up test
 
     - name: Bump version and push tag
       id: bump
