@@ -1,7 +1,3 @@
-locals {
-  cloud_name = var.cloud_name != "" ? var.cloud_name : lower(random_id.solrcloud_name.b64_url)
-}
-
 # We're generating these randomly now because they're ignored anyway, 
 # but in future we're going to have to create a secret with these creds and
 # reference it when creating our ingress annotations. See
