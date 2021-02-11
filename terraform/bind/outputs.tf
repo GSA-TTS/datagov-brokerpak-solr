@@ -6,6 +6,6 @@ output "uri" {
     var.password,
     data.kubernetes_ingress.solrcloud-ingress.spec[0].rule[0].host)
 }
-output "cloud_name" { value = "" }
-output "username" { value = "" }
-output "password" { value = "" }
+output "domain"  { value = data.kubernetes_ingress.solrcloud-ingress.spec[0].rule[0].host }
+output "username" { value = var.username }
+output "password" { value = var.password }
