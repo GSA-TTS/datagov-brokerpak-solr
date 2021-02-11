@@ -15,9 +15,9 @@ resource "random_password" "client_password" {
 #  override_special = "_%@"
 }
 
-resource "kubernetes_secret" "solr_auth1" {
+resource "kubernetes_secret" "client_creds" {
   metadata {
-    name = "basic-auth1"
+    name = "${local.cloud_name}-creds"
     namespace = var.namespace
   }
 
@@ -55,6 +55,12 @@ resource "helm_release" "solrcloud" {
     # How much memory to give each replica
     name  = "solrJavaMem"
     value = var.solrJavaMem
+  }
+
+  set {
+    # The name of the secret to be used for authentication
+    name  = "secretName"
+    value = kubernetes_secret.client_creds.metadata[0].name
   }
 
   # TODO: We should have a local-exec provisioner with a timeout here to verify that Solr is
