@@ -39,7 +39,12 @@ provision:
     type: string
     details: "The name of the cloud to create (used only for demo purposes)"
     overwrite: true
-    default: "example"
+    default: ${request.instance_id}
+  - name: labels
+    default: ${json.marshal(request.default_labels)}
+    overwrite: true
+    type: object
+    details: "Labels with the org, space, and instance ID"
   - name: server
     type: string
     details: "The service URL (for your target k8s)"
@@ -73,10 +78,6 @@ provision:
     overwrite: false
     type: string
   outputs:
-  - field_name: cloud_name
-    required: true
-    type: string
-    details: The name of the SolrCloud instance that was created
   - field_name: username
     required: true
     type: string
@@ -112,7 +113,7 @@ bind:
     overwrite: true
     type: string
   - name: cloud_name
-    default: ${instance.details["cloud_name"]}
+    default: ${request.instance_id}
     overwrite: true
     type: string
   - name: username
@@ -124,10 +125,10 @@ bind:
     overwrite: true
     type: string
   outputs:
-  - field_name: cloud_name
+  - field_name: domain
     required: false
     type: string
-    details: The name of the SolrCloud instance that was created
+    details: The domain of the SolrCloud instance that was created
   - field_name: username
     required: false
     type: string
@@ -139,7 +140,7 @@ bind:
   - field_name: uri
     required: true
     type: string
-    details: The URL to use for working with the solr-cloud instance
+    details: The URL to use for working with the SolrCloud instance
   template_refs: 
     main: terraform/bind/main.tf
     data: terraform/bind/data.tf
