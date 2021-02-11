@@ -17,6 +17,9 @@ spec:
   customSolrKubeOptions:
     ingressOptions:
       annotations:
+        nginx.ingress.kubernetes.io/auth-type: basic
+        nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - admin'
+        nginx.ingress.kubernetes.io/auth-secret: {{ .Values.secretName | quote }}
       {{- range $key, $value := .Values.ingress.annotations }}
         {{ $key }}: {{ $value | quote }}
       {{- end }}
