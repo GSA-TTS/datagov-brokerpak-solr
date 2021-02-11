@@ -1,20 +1,5 @@
-# We're generating these randomly now because they're ignored anyway, 
-# but in future we're going to have to create a secret with these creds and
-# reference it when creating our ingress annotations. See
-# https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
-resource "random_id" "solrcloud_name" {
-  byte_length = 8
-}
-
-# TODO: Create an nginx-ingress HTTP AUTH secret resources that correspond to these
-# credentials: https://kubernetes.github.io/ingress-nginx/examples/auth/basic/
-resource "random_uuid" "client_username" {}
-resource "random_password" "client_password" {
-  length           = 16
-  special          = false
-#  override_special = "_%@"
-}
-
+# We create the secret to be used for authentication here, then add a new set of
+# credentials to data.auth upon each binding.
 resource "kubernetes_secret" "client_creds" {
   metadata {
     name = "${local.cloud_name}-creds"
@@ -22,7 +7,7 @@ resource "kubernetes_secret" "client_creds" {
   }
 
   data = {
-    auth = "${random_uuid.client_username.result}:${bcrypt(random_password.client_password.result)}"
+    auth = base64encode("")
   }
 
   type = "Opaque"

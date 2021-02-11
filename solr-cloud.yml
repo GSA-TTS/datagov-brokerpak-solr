@@ -77,15 +77,7 @@ provision:
     default: "-Xms300m -Xmx300m"
     overwrite: false
     type: string
-  outputs:
-  - field_name: username
-    required: true
-    type: string
-    details: The username of the SolrCloud instance that was created
-  - field_name: password
-    required: true
-    type: string
-    details: The password of the SolrCloud instance that was created
+  outputs: []
   template_refs: 
     main: terraform/provision/main.tf
     data: terraform/provision/data.tf
@@ -114,14 +106,6 @@ bind:
     type: string
   - name: cloud_name
     default: ${request.instance_id}
-    overwrite: true
-    type: string
-  - name: username
-    default: ${instance.details["username"]}
-    overwrite: true
-    type: string
-  - name: password
-    default: ${instance.details["password"]}
     overwrite: true
     type: string
   outputs:
