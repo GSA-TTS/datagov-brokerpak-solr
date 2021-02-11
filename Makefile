@@ -76,8 +76,8 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 	# (This is necessary for the service account to be able to create the cluster-wide
 	# Solr CRD definitions.)
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-	@helm install --repo https://charts.pravega.io zookeeper zookeeper-operator
-	@helm install --repo https://apache.github.io/lucene-solr-operator/charts solr solr-operator
+	@helm install --namespace kube-system --repo https://charts.pravega.io zookeeper zookeeper-operator
+	@helm install --namespace kube-system --repo https://apache.github.io/lucene-solr-operator/charts solr solr-operator
 	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host)
 	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details
 	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
