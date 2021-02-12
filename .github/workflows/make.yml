@@ -23,9 +23,6 @@ jobs:
     - name: Create KinD cluster
       uses: helm/kind-action@v1.0.0
 
-    - name: Make the ServiceAccount default:default a cluster-admin
-      run: kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-
     - name: Install the eden OSBAPI CLI tool
       run: |
         wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | sudo apt-key add -
@@ -41,8 +38,16 @@ jobs:
     - name: Authenticate with the GitHub Package Registry
       run: docker login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
 
-    - name: Build and run examples (tests)
-      run: make build test-env-up up test
+    - name: Build the brokerpak and set up the test environment
+      run: make build test-env-up 
+    
+    # - name: Stop for debugging
+    #   uses: mxschmitt/action-tmate@v3
+    #   with:
+    #     limit-access-to-actor: true  
+    
+    - name: Start the broker and run the tests
+      run: make up test
 
     - name: Bump version and push tag
       id: bump
