@@ -17,6 +17,9 @@ solrJavaMem: "-Xms300m -Xmx300m"
 # The name of a kubernetes secret that you'd like to use for auth
 secretName: basic-auth1
 
+# The base name to use for ingress
+domainName: ing.local.domain
+
 # Ingress annotations (beyond basic-auth)
 ingress:
   annotations:

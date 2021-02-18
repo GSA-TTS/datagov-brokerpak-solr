@@ -12,8 +12,7 @@ spec:
   solrAddressability:
     external:
       method: Ingress
-      # TODO: Set this automatically if we can!
-      domainName: ing.local.domain
+      domainName: {{ .Values.domainName | quote }}
   customSolrKubeOptions:
     ingressOptions:
       annotations:

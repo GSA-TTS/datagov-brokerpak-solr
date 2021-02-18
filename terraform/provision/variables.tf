@@ -8,6 +8,7 @@ variable "solrImageTag" { type = string }
 variable "solrJavaMem" { type = string }
 
 variable "cloud_name" { type = string }
+variable "domain_name" { type = string }
 variable labels { type = map }
 
 locals {

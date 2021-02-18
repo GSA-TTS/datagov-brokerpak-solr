@@ -48,6 +48,12 @@ resource "helm_release" "solrcloud" {
     value = kubernetes_secret.client_creds.metadata[0].name
   }
 
+  set {
+    # The name of the domain to be used for ingress
+    name  = "domainName"
+    value = var.domain_name
+  }
+
   # TODO: We should have a local-exec provisioner with a timeout here to verify that Solr is
   # actually available before returning.
 

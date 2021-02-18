@@ -1,6 +1,6 @@
 packversion: 1
 name: datagov-services-pak
-version: 0.11.0
+version: 0.12.0
 metadata:
   author: Bret Mogilefsky
 platforms:
@@ -36,3 +36,4 @@ env_config_mapping:
   K8S_CLUSTER_CA_CERTIFICATE: k8s.cluster_ca_certificate
   K8S_TOKEN: k8s.token
   K8S_NAMESPACE: k8s.namespace
+  K8S_DOMAIN_NAME: k8s.domain_name
