@@ -19,6 +19,7 @@ echo K8S_SERVER=${K8S_DOCKER_SERVER} > .env
 echo K8S_TOKEN=${K8S_TOKEN} >> .env
 echo K8S_CLUSTER_CA_CERTIFICATE=${K8S_CLUSTER_CA_CERTIFICATE} >> .env
 echo K8S_NAMESPACE=default >> .env
+echo K8S_DOMAIN_NAME=ing.local.domain >> .env
 
 # Generate terraform.tfvars needed for mucking about directly with terraform/provision
 cat > terraform/provision/terraform.tfvars << HEREDOC
@@ -26,8 +27,12 @@ server="${K8S_LOCALHOST_SERVER}"
 token="${K8S_TOKEN}"
 cluster_ca_certificate="${K8S_CLUSTER_CA_CERTIFICATE}"
 namespace="default"
+domain_name="ing.local.domain"
 replicas=3
 solrImageTag="8.6"
 solrJavaMem="-Xms300m -Xmx300m"
 cloud_name="example"
 HEREDOC
+
+# Use the same terraform.tfvars config for mucking about directly with terraform/bind.
+cp terraform/provision/terraform.tfvars terraform/bind/terraform.tfvars

@@ -65,6 +65,11 @@ provision:
     type: string
     details: The namespace (where you want SolrClouds deployed in your target k8s)
     default: ${config("k8s.namespace")}
+  - name: domain_name
+    overwrite: true
+    type: string
+    details: The domain to use for ingress (for your target k8s)
+    default: ${config("k8s.domain_name")}
   - name: replicas
     default: 3
     overwrite: false
