@@ -49,27 +49,27 @@ provision:
     type: string
     details: "The service URL (for your target k8s)"
     overwrite: true
-    default: ${config("k8s.server")}
+    default: ${config("solr.server")}
   - name: cluster_ca_certificate
     overwrite: true
     type: string
     details: "The CA certificate (for your target k8s)"
-    default: ${config("k8s.cluster_ca_certificate")}
+    default: ${config("solr.cluster_ca_certificate")}
   - name: token
     overwrite: true
     type: string
     details: "The service account token (for your target k8s)"
-    default: ${config("k8s.token")}
+    default: ${config("solr.token")}
   - name: namespace
     overwrite: true
     type: string
     details: The namespace (where you want SolrClouds deployed in your target k8s)
-    default: ${config("k8s.namespace")}
+    default: ${config("solr.namespace")}
   - name: domain_name
     overwrite: true
     type: string
     details: The domain to use for ingress (for your target k8s)
-    default: ${config("k8s.domain_name")}
+    default: ${config("solr.domain_name")}
   - name: replicas
     default: 3
     overwrite: false
@@ -94,19 +94,19 @@ bind:
   user_inputs: []
   computed_inputs:
   - name: namespace
-    default: ${config("k8s.namespace")}
+    default: ${config("solr.namespace")}
     overwrite: true
     type: string
   - name: server
-    default: ${config("k8s.server")}
+    default: ${config("solr.server")}
     overwrite: true
     type: string
   - name: cluster_ca_certificate
-    default: ${config("k8s.cluster_ca_certificate")}
+    default: ${config("solr.cluster_ca_certificate")}
     overwrite: true
     type: string
   - name: token
-    default: ${config("k8s.token")}
+    default: ${config("solr.token")}
     overwrite: true
     type: string
   - name: cloud_name
