@@ -35,9 +35,6 @@ jobs:
       with: 
         fetch-depth: '0'
 
-    - name: Authenticate with the GitHub Package Registry
-      run: docker login --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} docker.pkg.github.com
-
     - name: Build the brokerpak and set up the test environment
       run: make build test-env-up 
     
