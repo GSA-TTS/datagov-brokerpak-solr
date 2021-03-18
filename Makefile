@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 
 DOCKER_OPTS=--rm -v $(PWD):/brokerpak -w /brokerpak
-CSB=docker.pkg.github.com/gsa/cloud-service-broker/csb:0.2.1-gsa
+CSB=ghcr.io/gsa/cloud-service-broker:latest-gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
@@ -77,7 +77,7 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 	# Solr CRD definitions.)
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
 	@helm install --namespace kube-system --repo https://charts.pravega.io zookeeper zookeeper-operator
-	@helm install --namespace kube-system --repo https://apache.github.io/lucene-solr-operator/charts solr solr-operator
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts solr solr-operator
 	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host)
 	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details
 	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
