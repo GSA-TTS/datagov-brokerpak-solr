@@ -75,7 +75,7 @@ provision:
     overwrite: false
     type: number
   - name: solrImageTag
-    default: "8.6"
+    default: "6.6.6-slim"
     overwrite: false
     type: string
   - name: solrJavaMem
