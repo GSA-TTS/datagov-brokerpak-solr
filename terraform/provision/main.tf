@@ -20,9 +20,9 @@ resource "helm_release" "solrcloud" {
   chart           = "https://github.com/GSA/datagov-brokerpak/releases/download/helm-chart-release/solr-crd.tar.gz"
   namespace       = data.kubernetes_namespace.namespace.id
   cleanup_on_fail = true
-  atomic = true
-  wait = true
-  timeout = 600
+  atomic          = true
+  wait            = true
+  timeout         = 900
 
   set {
     # How many replicas you want
