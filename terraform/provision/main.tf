@@ -13,6 +13,28 @@ resource "kubernetes_secret" "client_creds" {
   type = "Opaque"
 }
 
+data "template_file" "kubeconfig" {
+  template = <<-EOF
+    apiVersion: v1
+    kind: Config
+    current-context: terraform
+    clusters:
+    - name: cluster
+      cluster:
+        certificate-authority-data: ${var.cluster_ca_certificate}
+        server: ${var.server}
+    contexts:
+    - name: terraform
+      context:
+        namespace: ${var.namespace}
+        cluster: cluster
+        user: terraform
+    users:
+    - name: terraform
+      user:
+        token: ${base64decode(var.token)}
+  EOF
+}
 
 # Instantiate a SolrCloud instance using the CRD
 resource "helm_release" "solrcloud" {
@@ -54,8 +76,21 @@ resource "helm_release" "solrcloud" {
     value = var.domain_name
   }
 
-  # TODO: We should have a local-exec provisioner with a timeout here to verify that Solr is
-  # actually available before returning.
+  # The helm_release "wait" flag is supposed to wait for all pods to be
+  # "ready" before completing but there appears to be a bug in that behavior.
+  # https://github.com/hashicorp/terraform-provider-helm/issues/672
+  # 
+  # This command explicitly waits to get around that.
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    environment = {
+      KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
+    }
+    command = <<-EOF
+      sleep 30
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=900s -n ${data.kubernetes_namespace.namespace.id} pod -l solr-cloud=${local.cloud_name}
+    EOF
+  }
 
 }
 
