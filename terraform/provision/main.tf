@@ -88,7 +88,7 @@ resource "helm_release" "solrcloud" {
     }
     command = <<-EOF
       sleep 30
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=900s -n ${data.kubernetes_namespace.namespace.id} pod -l solr-cloud=${local.cloud_name}
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=3600s -n ${data.kubernetes_namespace.namespace.id} pod -l solr-cloud=${local.cloud_name}
     EOF
   }
 
