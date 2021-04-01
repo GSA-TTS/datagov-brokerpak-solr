@@ -6,10 +6,10 @@
 replicas: 3
 
 # Which Solr Docker image to use. The default is the official images.
-solrImageRepo: "docker.io/solr"
+solrImageRepo: "docker.io/datagov/catalog-solr"
 
 # Which tag to use
-solrImageTag: 8.6
+solrImageTag: inventory2_8
 
 # How much memory to give each container
 solrJavaMem: "-Xms300m -Xmx300m"
