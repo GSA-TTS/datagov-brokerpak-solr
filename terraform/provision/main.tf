@@ -2,7 +2,7 @@
 # credentials to data.auth upon each binding.
 resource "kubernetes_secret" "client_creds" {
   metadata {
-    name = "${local.cloud_name}-creds"
+    name      = "${local.cloud_name}-creds"
     namespace = var.namespace
   }
 
@@ -16,9 +16,9 @@ resource "kubernetes_secret" "client_creds" {
 
 # Instantiate a SolrCloud instance using the CRD
 resource "helm_release" "solrcloud" {
-  name = local.cloud_name
-  chart = "https://github.com/GSA/datagov-brokerpak/releases/download/helm-chart-release/solr-crd.tar.gz"
-  namespace = data.kubernetes_namespace.namespace.id
+  name            = local.cloud_name
+  chart           = "https://github.com/GSA/datagov-brokerpak/releases/download/helm-chart-release/solr-crd.tar.gz"
+  namespace       = data.kubernetes_namespace.namespace.id
   cleanup_on_fail = true
   atomic = true
   wait = true

@@ -9,7 +9,7 @@ variable "solrJavaMem" { type = string }
 
 variable "cloud_name" { type = string }
 variable "domain_name" { type = string }
-variable labels { type = map }
+variable "labels" { type = map(any) }
 
 locals {
   cloud_name = "solr-${substr(sha256(var.cloud_name), 0, 16)}"

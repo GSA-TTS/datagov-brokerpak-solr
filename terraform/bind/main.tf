@@ -1,13 +1,13 @@
 resource "random_uuid" "username" {}
 resource "random_password" "password" {
-  length           = 16
-  special          = false
-#  override_special = "_%@"
+  length  = 16
+  special = false
+  #  override_special = "_%@"
 }
 
 locals {
-    # This is the equivalent of an entry in an auth file managed by htpasswd
-    auth_line = "${random_uuid.username.result}:${bcrypt(random_password.password.result)}"
+  # This is the equivalent of an entry in an auth file managed by htpasswd
+  auth_line = "${random_uuid.username.result}:${bcrypt(random_password.password.result)}"
 }
 
 # Confirm that the necessary CLI binaries are present
@@ -47,7 +47,7 @@ data "template_file" "kubeconfig" {
 # A resource that manages the auth entry for the generated creds
 # Solution comes from https://stackoverflow.com/a/57488946
 resource "null_resource" "manage_auth_entry" {
-  
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {
@@ -65,7 +65,7 @@ resource "null_resource" "manage_auth_entry" {
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    when = destroy
+    when        = destroy
     environment = {
       KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
     }
@@ -75,6 +75,7 @@ resource "null_resource" "manage_auth_entry" {
         kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
     EOF
   }
+
   depends_on = [
     # Since Terraform can't infer dependencies from the content of our
     # provisioners, it's critical that we use dependencies to ensure external
