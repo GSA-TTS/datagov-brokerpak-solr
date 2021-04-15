@@ -8,6 +8,11 @@ spec:
   solrImage:
     repository: {{ .Values.solrImageRepo | quote }} 
     tag: {{ .Values.solrImageTag | quote }}
+  dataStorage:
+    ephemeral:
+      emptyDir: {}
+      # We are not specifying an emptyDir volume source here, but we could
+      # See https://github.com/apache/solr-operator/blob/main/docs/solr-cloud/solr-cloud-crd.md#data-storage
   solrJavaMem: {{ .Values.solrJavaMem | quote }}
   solrAddressability:
     external:
