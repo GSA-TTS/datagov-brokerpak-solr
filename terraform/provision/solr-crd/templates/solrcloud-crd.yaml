@@ -1,3 +1,12 @@
+apiVersion: "zookeeper.pravega.io/v1beta1"
+kind: "ZookeeperCluster"
+metadata:
+  name: {{ .Release.Name }}-zookeeper
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 3        
+  storageType: ephemeral
+---
 apiVersion: solr.bloomberg.com/v1beta1
 kind: SolrCloud
 metadata:
@@ -8,6 +17,9 @@ spec:
   solrImage:
     repository: {{ .Values.solrImageRepo | quote }} 
     tag: {{ .Values.solrImageTag | quote }}
+  zookeeperRef:
+    connectionInfo: 
+      externalConnectionString: {{ .Release.Name }}-zookeeper-client.{{ .Release.Namespace }}:2181
   dataStorage:
     ephemeral:
       emptyDir: {}
