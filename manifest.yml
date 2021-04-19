@@ -1,6 +1,6 @@
 packversion: 1
 name: datagov-services-pak
-version: 0.17.0
+version: current
 metadata:
   author: Bret Mogilefsky
 platforms:
