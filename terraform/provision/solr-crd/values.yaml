@@ -12,7 +12,7 @@ solrImageRepo: "docker.io/solr"
 solrImageTag: 8.6
 
 # How much memory to give each container
-solrJavaMem: "-Xms300m -Xmx300m"
+solrJavaMem: "-Xms4g -Xmx4g"
 
 # The name of a kubernetes secret that you'd like to use for auth
 secretName: basic-auth1

@@ -29,7 +29,7 @@ provision:
   - field_name: solrJavaMem
     required: false
     type: string
-    details: "How much memory to give each replica (default is '-Xms300m -Xmx300m')"
+    details: "How much memory to give each replica (default is '-Xms4g -Xmx4g')"
   - field_name: cloud_name
     required: false
     type: string
@@ -79,7 +79,7 @@ provision:
     overwrite: false
     type: string
   - name: solrJavaMem
-    default: "-Xms300m -Xmx300m"
+    default: "-Xms4g -Xmx4g"
     overwrite: false
     type: string
   outputs: []

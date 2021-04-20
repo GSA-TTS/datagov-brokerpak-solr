@@ -30,8 +30,8 @@ variable "solrImageTag" {
 }
 variable "solrJavaMem" {
   type        = string
-  description = "How much memory to give each replica (default is '-Xms300m -Xmx300m')"
-  default     = "-Xms300m -Xmx300m"
+  description = "How much memory to give each replica (default is '-Xms4g -Xmx4g')"
+  default     = "-Xms4g -Xmx4g"
 }
 
 variable "cloud_name" {
