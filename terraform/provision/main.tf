@@ -39,7 +39,7 @@ data "template_file" "kubeconfig" {
 # Instantiate a SolrCloud instance using the CRD
 resource "helm_release" "solrcloud" {
   name            = local.cloud_name
-  chart           = "https://github.com/GSA/datagov-brokerpak/releases/download/helm-chart-release/solr-crd.tar.gz"
+  chart           = "https://github.com/GSA/datagov-brokerpak/releases/latest/download/solr-crd.tar.gz"
   namespace       = data.kubernetes_namespace.namespace.id
   cleanup_on_fail = true
   atomic          = true
