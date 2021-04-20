@@ -55,7 +55,7 @@ resource "null_resource" "manage_auth_entry" {
     }
     command = <<-EOF
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d > auth
-      echo ${local.auth_line} >> auth
+      echo '${local.auth_line}' >> auth
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
         kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
     EOF
@@ -68,7 +68,7 @@ resource "null_resource" "manage_auth_entry" {
       KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
     }
     command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d | grep -v "${local.auth_line}" > auth
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d | grep -v '${local.auth_line}' > auth
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
         kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
     EOF
