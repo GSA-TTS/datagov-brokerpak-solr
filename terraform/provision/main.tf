@@ -82,11 +82,12 @@ resource "helm_release" "solrcloud" {
   # 
   # This command explicitly waits to get around that.
   provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
     environment = {
       KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
     }
     command = <<-EOF
+      echo should fail
+      exit 1
       sleep 30
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=3600s -n ${data.kubernetes_namespace.namespace.id} pod -l solr-cloud=${local.cloud_name}
     EOF
