@@ -65,6 +65,18 @@ resource "helm_release" "solrcloud" {
   }
 
   set {
+    # How much memory to request from the scheduler
+    name  = "solrMem"
+    value = var.solrMem
+  }
+
+  set {
+    # How much vCPU to request from the scheduler
+    name  = "solrCpu"
+    value = var.solrCpu
+  }
+
+  set {
     # The name of the secret to be used for authentication
     name  = "secretName"
     value = kubernetes_secret.client_creds.metadata[0].name

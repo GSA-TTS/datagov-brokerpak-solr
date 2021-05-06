@@ -14,6 +14,12 @@ solrImageTag: 8.6
 # How much memory to give each container
 solrJavaMem: "-Xms4g -Xmx4g"
 
+# How much memory to request on the host node
+solrMem: "6G"
+
+# How much vCPU to request on the host node
+solrCpu: "2000m"
+
 # The name of a kubernetes secret that you'd like to use for auth
 secretName: basic-auth1
 

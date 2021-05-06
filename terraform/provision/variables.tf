@@ -34,6 +34,18 @@ variable "solrJavaMem" {
   default     = "-Xms4g -Xmx4g"
 }
 
+variable "solrMem" {
+  type        = string
+  description = "How much memory to request for each replica (default is '6G')"
+  default     = "6G"
+}
+
+variable "solrCpu" {
+  type        = string
+  description = "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
+  default     = "2000m"
+}
+
 variable "cloud_name" {
   type        = string
   description = "The name of the cloud to create (used only for demo purposes)"

@@ -32,6 +32,11 @@ spec:
       method: Ingress
       domainName: {{ .Values.domainName | quote }}
   customSolrKubeOptions:
+    podOptions:
+      resources:
+        requests:
+          memory: {{ .Values.solrMem | quote }}
+          cpu: {{ .Values.solrCpu | quote }}
     ingressOptions:
       annotations:
         nginx.ingress.kubernetes.io/auth-type: basic

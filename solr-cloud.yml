@@ -82,6 +82,14 @@ provision:
     default: "-Xms4g -Xmx4g"
     overwrite: false
     type: string
+  - name: solrMem
+    default: "6G"
+    overwrite: false
+    type: string
+  - name: solrCpu
+    default: "2000m"
+    overwrite: false
+    type: string
   outputs: []
   template_refs: 
     main: terraform/provision/main.tf
