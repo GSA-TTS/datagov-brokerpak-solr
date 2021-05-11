@@ -40,3 +40,7 @@ jobs:
     
     - name: Start the broker and run the tests
       run: make up test
+
+    - name: Clean up if there was a failure
+      if: ${{ failure() }}
+      run: make demo-down down
