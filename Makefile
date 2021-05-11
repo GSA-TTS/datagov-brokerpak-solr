@@ -86,7 +86,7 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
       --selector=app.kubernetes.io/component=controller \
       --timeout=90s
 
-.env: $(HOME)/.kube/config
+.env: $(HOME)/.kube/config generate-env.sh
 	@echo Generating a .env file containing k8s config for the broker
 	@./generate-env.sh > .env
 
@@ -94,7 +94,7 @@ test-env-down: ## Tear down the Kubernetes test environment in KinD
 	kind delete cluster --name datagov-broker-test
 	@rm .env
 
-all: clean build up test down ## Clean and rebuild, then bring up the server, run the examples, and bring the system down
+all: clean build test-env-up up test down test-env-down ## Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
 .PHONY: all clean build up down test demo-up demo-down test-env-up test-env-down
 
 examples.json:
