@@ -7,10 +7,12 @@ SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
 EDEN_EXEC=eden --client user --client-secret pass --url http://127.0.0.1:8080
-CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
-CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
+SERVICE_NAME=solr-cloud
+PLAN_NAME=base
+CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("${SERVICENAME}")) | .provision_params')
+CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("${SERVICENAME}")) | .bind_params')
 
-PREREQUISITES = docker jq kind kubectl helm
+PREREQUISITES = docker jq kind kubectl helm eden
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
 clean: demo-down down ## Bring down the broker service if it's up and clean out the database
@@ -53,14 +55,13 @@ down: ## Bring the cloud-service-broker service down
 test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
 
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
-	@$(EDEN_EXEC) provision -i cloudinstance -s solr-cloud  -p base -P '$(CLOUD_PROVISION_PARAMS)'
-	@$(EDEN_EXEC) bind -b cloudbinding -i cloudinstance
-	@$(EDEN_EXEC) credentials -b cloudbinding -i cloudinstance
-	
+	@$(EDEN_EXEC) provision -i instance -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
+	@$(EDEN_EXEC) bind -b binding -i instance
+	@$(EDEN_EXEC) credentials -b binding -i instance
 demo-down: examples.json ## Clean up data left over from tests and demos
-	@echo "Unbinding and deprovisioning the solr-cloud instance"
-	-@$(EDEN_EXEC) unbind -b cloudbinding -i cloudinstance 2>/dev/null
-	-@$(EDEN_EXEC) deprovision -i cloudinstance 2>/dev/null
+	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
+	-@$(EDEN_EXEC) unbind -b binding -i instance 2>/dev/null
+	-@$(EDEN_EXEC) deprovision -i instance 2>/dev/null
 
 	-@rm examples.json 2>/dev/null; true
 
