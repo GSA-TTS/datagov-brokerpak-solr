@@ -28,7 +28,6 @@ spec:
   solrJavaMem: {{ .Values.solrJavaMem | quote }}
   solrAddressability:
     external:
-      hideNodes: true
       method: Ingress
       domainName: {{ .Values.domainName | quote }}
   customSolrKubeOptions:
