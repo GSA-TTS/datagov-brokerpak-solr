@@ -52,12 +52,16 @@ down: ## Bring the cloud-service-broker service down
 # $(CSB) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
 # So, we'll run them manually with eden via "demo-up" and "demo-down" targets.
-test: examples.json demo-up demo-down ## Execute the brokerpak examples against the running broker
+test: examples.json demo-up demo-run demo-down ## Execute the brokerpak examples against the running broker
 
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	@$(EDEN_EXEC) provision -i instance -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
 	@$(EDEN_EXEC) bind -b binding -i instance
 	@$(EDEN_EXEC) credentials -b binding -i instance
+
+demo-run: ## Run tests on the demo instance
+	INSTANCE_NAME=${INSTANCE_NAME} ./test.sh
+
 demo-down: examples.json ## Clean up data left over from tests and demos
 	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
 	-@$(EDEN_EXEC) unbind -b binding -i instance 2>/dev/null
