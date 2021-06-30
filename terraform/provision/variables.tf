@@ -23,11 +23,18 @@ variable "replicas" {
   default     = 3
 }
 
+variable "solrImageRepo" {
+  type        = string
+  description = "Repository for the Solr Docker image to use, defaults to docker.io/solr"
+  default     = "docker.io/solr"
+}
+
 variable "solrImageTag" {
   type        = string
-  description = "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags for options"
+  description = "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
   default     = "8.6"
 }
+
 variable "solrJavaMem" {
   type        = string
   description = "How much memory to give each replica (default is '-Xms4g -Xmx4g')"

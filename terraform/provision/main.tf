@@ -53,6 +53,12 @@ resource "helm_release" "solrcloud" {
   }
 
   set {
+    # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
+    name  = "solrImageRepo"
+    value = var.solrImageRepo
+  }
+
+  set {
     # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
     name  = "solrImageTag"
     value = var.solrImageTag
