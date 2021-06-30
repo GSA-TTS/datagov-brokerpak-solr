@@ -65,7 +65,7 @@ up: .env ## Run the broker service with the brokerpak configured. The broker lis
 	@docker ps -l
 
 down: ## Bring the cloud-service-broker service down
-	@docker stop csb-service
+	-@docker stop csb-service
 
 # Normally we would run 
 # $(CSB) client run-examples --filename examples.json
@@ -99,15 +99,20 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 	# (This is necessary for the service account to be able to create the cluster-wide
 	# Solr CRD definitions.)
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-	@helm install --namespace kube-system --repo https://charts.pravega.io --version 0.2.9 zookeeper zookeeper-operator
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.2.8 solr solr-operator
-	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host)
-	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml
+	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
+	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
+	# Note here we're explicitly deploying an older version of ingress-nginx that still accepts the v1beta1 networking API.
+	# The latest version of ingress-nginx does not support that v1beta1 API, so the solr-operator fails at creating ingresses 
+	# because of a dependency on that API: https://github.com/apache/solr-operator/issues/277
+	# @kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml	
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/release-v1beta1/deploy/static/provider/kind/deploy.yaml
 	@kubectl wait --namespace ingress-nginx \
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
-      --timeout=90s
+      --timeout=270s
+	# Install the ZooKeeper and Solr operators using Helm
+	@helm install --namespace kube-system --repo https://charts.pravega.io --version 0.2.9 zookeeper zookeeper-operator
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.2.8 solr solr-operator
 
 .env: $(HOME)/.kube/config generate-env.sh
 	@echo Generating a .env file containing k8s config for the broker
