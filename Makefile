@@ -9,11 +9,30 @@ SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 EDEN_EXEC=eden --client user --client-secret pass --url http://127.0.0.1:8080
 SERVICE_NAME=solr-cloud
 PLAN_NAME=base
-CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("${SERVICENAME}")) | .provision_params')
-CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("${SERVICENAME}")) | .bind_params')
+
+# Use the env var INSTANCE_NAME for the name of the instance to be created, or
+# "instance-$USER" if it was not specified. 
+#
+# We do this to minimize the chance of people stomping on each other when
+# provisioning resources into a shared account, and to make it easy to recognize
+# who resources belong to.
+#
+# We can also use a job ID during CI to avoid collisions from parallel
+# invocations, and make it obvious which resources correspond to which CI run.
+INSTANCE_NAME ?= instance-$(USER)
+
+CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
+CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
 PREREQUISITES = docker jq kind kubectl helm eden
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
+
+check:
+	@echo EDEN_EXEC: $(EDEN_EXEC)
+	@echo SERVICE_NAME: $(SERVICE_NAME)
+	@echo PLAN_NAME: $(PLAN_NAME)
+	@echo CLOUD_PROVISION_PARAMS: $(CLOUD_PROVISION_PARAMS)
+	@echo CLOUD_BIND_PARAMS: $(CLOUD_BIND_PARAMS)
 
 clean: demo-down down ## Bring down the broker service if it's up and clean out the database
 	@docker rm -f csb-service
@@ -55,17 +74,16 @@ down: ## Bring the cloud-service-broker service down
 test: examples.json demo-up demo-run demo-down ## Execute the brokerpak examples against the running broker
 
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
-	@$(EDEN_EXEC) provision -i instance -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
-	@$(EDEN_EXEC) bind -b binding -i instance
-	@$(EDEN_EXEC) credentials -b binding -i instance
+	@$(EDEN_EXEC) provision -i ${INSTANCE_NAME} -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
+	@$(EDEN_EXEC) bind -b binding -i ${INSTANCE_NAME}
 
 demo-run: ## Run tests on the demo instance
 	INSTANCE_NAME=${INSTANCE_NAME} ./test.sh
 
 demo-down: examples.json ## Clean up data left over from tests and demos
 	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
-	-@$(EDEN_EXEC) unbind -b binding -i instance 2>/dev/null
-	-@$(EDEN_EXEC) deprovision -i instance 2>/dev/null
+	-@$(EDEN_EXEC) unbind -b binding -i ${INSTANCE_NAME} 2>/dev/null
+	-@$(EDEN_EXEC) deprovision -i ${INSTANCE_NAME} 2>/dev/null
 
 	-@rm examples.json 2>/dev/null; true
 
@@ -102,7 +120,7 @@ test-env-down: ## Tear down the Kubernetes test environment in KinD
 all: clean build test-env-up up test down test-env-down ## Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
 .PHONY: all clean build up down test demo-up demo-down test-env-up test-env-down
 
-examples.json:
+examples.json: examples.json-template
 	@./generate-examples.sh > examples.json
 
 # Output documentation for top-level targets
