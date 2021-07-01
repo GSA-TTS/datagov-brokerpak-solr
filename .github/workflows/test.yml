@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Create KinD cluster
-      uses: helm/kind-action@v1.0.0
+      uses: helm/kind-action@v1.2.0
 
     - name: Install the eden OSBAPI CLI tool
       run: |
