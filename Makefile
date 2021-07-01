@@ -35,7 +35,7 @@ check:
 	@echo CLOUD_BIND_PARAMS: $(CLOUD_BIND_PARAMS)
 
 clean: demo-down down ## Bring down the broker service if it's up and clean out the database
-	@docker rm -f csb-service
+	@docker rm -f csb-service-$(SERVICE_NAME)
 	@rm datagov-services-pak-*.brokerpak
 
 # Origin of the subdirectory dependency solution: 
@@ -54,18 +54,18 @@ up: .env ## Run the broker service with the brokerpak configured. The broker lis
 	-e "DB_PATH=/tmp/csb-db" \
 	-e "GSB_DEBUG=true" \
 	--env-file .env \
-	--name csb-service \
+	--name csb-service-$(SERVICE_NAME) \
 	-d --network kind \
 	--health-cmd="wget --header=\"X-Broker-API-Version: 2.16\" --no-verbose --tries=1 --spider http://$(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD)@localhost:8080/v2/catalog || exit 1" \
 	--health-interval=2s \
 	--health-retries=15 \
 	$(CSB) serve
-	@while [ "`docker inspect -f {{.State.Health.Status}} csb-service`" != "healthy" ]; do   echo "Waiting for csb-service to be ready..." ;  sleep 2; done
-	@echo "csb-service is ready!" ; echo ""
+	@while [ "`docker inspect -f {{.State.Health.Status}} csb-service-$(SERVICE_NAME)`" != "healthy" ]; do   echo "Waiting for csb-service-$(SERVICE_NAME) to be ready..." ;  sleep 2; done
+	@echo "csb-service-$(SERVICE_NAME) is ready!" ; echo ""
 	@docker ps -l
 
 down: ## Bring the cloud-service-broker service down
-	-@docker stop csb-service
+	-@docker stop csb-service-$(SERVICE_NAME)
 
 # Normally we would run 
 # $(CSB) client run-examples --filename examples.json
