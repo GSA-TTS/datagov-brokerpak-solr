@@ -101,11 +101,7 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
 	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
 	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
-	# Note here we're explicitly deploying an older version of ingress-nginx that still accepts the v1beta1 networking API.
-	# The latest version of ingress-nginx does not support that v1beta1 API, so the solr-operator fails at creating ingresses 
-	# because of a dependency on that API: https://github.com/apache/solr-operator/issues/277
-	# @kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml	
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0-beta.1/deploy/static/provider/kind/deploy.yaml
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/kind/deploy.yaml	
 	@kubectl wait --namespace ingress-nginx \
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
