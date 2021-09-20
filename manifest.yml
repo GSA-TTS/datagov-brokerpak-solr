@@ -8,8 +8,8 @@ platforms:
   arch: amd64
 terraform_binaries:
 - name: terraform
-  version: 0.12.29
-  source: https://github.com/hashicorp/terraform/archive/v0.12.29.zip  
+  version: 0.12.31
+  source: https://github.com/hashicorp/terraform/archive/v0.12.31.zip  
 - name: terraform-provider-random
   version: 2.3.0
   source: https://releases.hashicorp.com/terraform-provider-random/2.3.0/terraform-provider-random_2.3.0_linux_amd64.zip
