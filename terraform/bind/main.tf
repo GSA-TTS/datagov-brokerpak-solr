@@ -53,6 +53,7 @@ resource "null_resource" "manage_auth_entry" {
     environment = {
       KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
     }
+    # Append the new "user:crypted-password" line to the content of the secret
     command = <<-EOF
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d > auth
       echo '${local.auth_line}' >> auth
@@ -67,6 +68,7 @@ resource "null_resource" "manage_auth_entry" {
     environment = {
       KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
     }
+    # Remove the relevant "user:crypted-password" line from the content of the secret, wherever it appears
     command = <<-EOF
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d | grep --invert-match --fixed-strings '${local.auth_line}' > auth
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
