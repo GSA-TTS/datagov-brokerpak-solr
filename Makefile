@@ -111,8 +111,9 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
       --selector=app.kubernetes.io/component=controller \
       --timeout=270s
 	# Install the ZooKeeper and Solr operators using Helm
-	@helm install --namespace kube-system --repo https://charts.pravega.io --version 0.2.9 zookeeper zookeeper-operator
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.2.8 solr solr-operator
+	# TODO: Update the CRD installation in the eks-brokerpak as well
+	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.4.0/all-with-dependencies.yaml
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.4.0 solr solr-operator
 
 .env: $(HOME)/.kube/config generate-env.sh
 	@echo Generating a .env file containing k8s config for the broker
