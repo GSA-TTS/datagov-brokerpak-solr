@@ -39,59 +39,34 @@ data "template_file" "kubeconfig" {
 # Instantiate a SolrCloud instance using the CRD
 resource "helm_release" "solrcloud" {
   name            = local.cloud_name
-  chart           = "https://github.com/GSA/datagov-brokerpak/releases/latest/download/solr-crd.tar.gz"
+  chart           = "solr"
+  repository      = "https://solr.apache.org/charts"
   namespace       = data.kubernetes_namespace.namespace.id
   cleanup_on_fail = true
   atomic          = true
   wait            = true
   timeout         = 900
 
-  set {
-    # How many replicas you want
-    name  = "replicas"
-    value = var.replicas
-  }
-
-  set {
-    # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
-    name  = "solrImageRepo"
-    value = var.solrImageRepo
-  }
-
-  set {
-    # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
-    name  = "solrImageTag"
-    value = var.solrImageTag
-  }
-
-  set {
-    # How much memory to give each replica
-    name  = "solrJavaMem"
-    value = var.solrJavaMem
-  }
-
-  set {
-    # How much memory to request from the scheduler
-    name  = "solrMem"
-    value = var.solrMem
-  }
-
-  set {
-    # How much vCPU to request from the scheduler
-    name  = "solrCpu"
-    value = var.solrCpu
-  }
-
-  set {
-    # The name of the secret to be used for authentication
-    name  = "secretName"
-    value = kubernetes_secret.client_creds.metadata[0].name
-  }
-
-  set {
-    # The name of the domain to be used for ingress
-    name  = "domainName"
-    value = var.domain_name
+  dynamic "set" {
+    for_each = {
+      "replicas"                                                                = var.replicas                                    # How many replicas you want
+      "image.repository"                                                        = var.solrImageRepo                               # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
+      "image.tag"                                                               = var.solrImageTag                                # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
+      "solrOptions.javaMemory"                                                  = var.solrJavaMem                                 # How much memory to give each replica
+      "solrOptions.security.basicAuthSecret"                                    = kubernetes_secret.client_creds.metadata[0].name # The name of the secret to be used for authentication
+      "solrOptions.security.probesRequireAuth"                                  = false
+      "podOptions.resources.requests.memory"                                    = var.solrMem # How much memory to request from the scheduler
+      "podOptions.resources.requests.cpu"                                       = var.solrCpu # How much vCPU to request from the scheduler
+      "dataStorage.type"                                                        = "ephemeral"
+      "addressability.external.domainName"                                      = var.domain_name # The name of the domain to be used for ingress
+      "addressability.external.method"                                          = "Ingress"
+      # "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-type"  = "basic"
+      # "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-realm" = "Authentication Required - admin"
+    }
+    content {
+      name  = set.key
+      value = set.value
+    }
   }
 
   # The helm_release "wait" flag is supposed to wait for all pods to be
