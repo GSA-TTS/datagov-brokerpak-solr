@@ -29,6 +29,7 @@ brokerpak concept, and to the Pivotal team running with the concept!
 1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
    a local k8s for the broker to populate during tests and demos
 1. [`eden`](https://github.com/starkandwayne/eden) is used as a client for testing the brokerpak
+1. [`terraform` 0.12.31](https://releases.hashicorp.com/terraform/0.12.31/) is used for local development 
 
 Run the `make` command by itself for information on the various targets that are available. 
 
