@@ -105,7 +105,7 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
 	# The latest version of ingress-nginx does not support that v1beta1 API, so the solr-operator fails at creating ingresses 
 	# because of a dependency on that API: https://github.com/apache/solr-operator/issues/277
 	# @kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/kind/deploy.yaml	
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0-beta.1/deploy/static/provider/kind/deploy.yaml
 	@kubectl wait --namespace ingress-nginx \
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
