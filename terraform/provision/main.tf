@@ -49,19 +49,20 @@ resource "helm_release" "solrcloud" {
 
   dynamic "set" {
     for_each = {
-      "replicas"                                                                = var.replicas                                    # How many replicas you want
-      "image.repository"                                                        = var.solrImageRepo                               # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
-      "image.tag"                                                               = var.solrImageTag                                # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
-      "solrOptions.javaMemory"                                                  = var.solrJavaMem                                 # How much memory to give each replica
-      "solrOptions.security.basicAuthSecret"                                    = kubernetes_secret.client_creds.metadata[0].name # The name of the secret to be used for authentication
-      "solrOptions.security.probesRequireAuth"                                  = false
-      "podOptions.resources.requests.memory"                                    = var.solrMem # How much memory to request from the scheduler
-      "podOptions.resources.requests.cpu"                                       = var.solrCpu # How much vCPU to request from the scheduler
-      "dataStorage.type"                                                        = "ephemeral"
       "addressability.external.domainName"                                      = var.domain_name # The name of the domain to be used for ingress
       "addressability.external.method"                                          = "Ingress"
-      # "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-type"  = "basic"
-      # "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-realm" = "Authentication Required - admin"
+      "addressability.external.useExternalAddress"                              = true
+      "dataStorage.type"                                                        = "ephemeral"
+      "image.repository"                                                        = var.solrImageRepo                               # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
+      "image.tag"                                                               = var.solrImageTag                                # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-type"  = "basic"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-realm" = "Authentication Required - admin"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/auth-secret"= kubernetes_secret.client_creds.metadata[0].name # The name of the secret to be used for authentication
+      "podOptions.resources.requests.memory"                                    = var.solrMem # How much memory to request from the scheduler
+      "podOptions.resources.requests.cpu"                                       = var.solrCpu # How much vCPU to request from the scheduler
+      "replicas"                                                                = var.replicas                                    # How many replicas you want
+      "solrOptions.javaMemory"                                                  = var.solrJavaMem                                 # How much memory to give each replica
+      # "solrOptions.security.basicAuthSecret"                                    = kubernetes_secret.client_creds.metadata[0].name # The name of the secret to be used for authentication
     }
     content {
       name  = set.key
