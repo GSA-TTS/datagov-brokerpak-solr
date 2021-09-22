@@ -60,6 +60,23 @@ resource "null_resource" "manage_auth_entry" {
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
         kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
     EOF
+
+    # TODO: Add credentials for solr operator
+    #   1. security-bootstrap: top-level key:value for username:base64(password)
+    # kubectl get secret ${local.cloud_name}-solrcloud-security-bootstrap -o json | jq --arg pass \
+    #   "$(echo ${bcrypt(random_password.password.result)} | base64)" '.data[${random_uuid.username.result}]=$pass' | kubectl apply -f -
+    #
+    #   2. seucrity-bootstrap "security.json": multiple changes
+    #       a. authentication.credentials.<new_username> = some_form_of_encryption(password)
+    #       b. authorization.user-role.<new_username> = ["admin"]
+    #
+    # i.   Get secret
+    # ii.  Get data "security.json"
+    # iii. Decrypt it
+    # iv.  Edit to add new authentication and authorization
+    # v.   Encrypt it
+    # vi.  Overwrite original secret with new changes
+    # kubectl get secret solr-50d858e0985ecc7f-solrcloud-security-bootstrap -o json | jq -r '.data."security.json"' | base64 -d | jq -r '.authentication.credentials["new"]="temp"'
   }
 
   provisioner "local-exec" {
@@ -74,6 +91,21 @@ resource "null_resource" "manage_auth_entry" {
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
         kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
     EOF
+
+    # TODO: Remove credentials for solr operator
+    #   1. security-bootstrap: remove top-level key:value for username:base64(password)
+    # kubectl get secret ${local.cloud_name}-solrcloud-security-bootstrap -o json | jq 'del(.data[${random_uuid.username.result}])' | kubectl apply -f -
+    #
+    #   2. seucrity-bootstrap "security.json": Remove multiple changes
+    #       a. authentication.credentials.<new_username> = some_form_of_encryption(password)
+    #       b. authorization.user-role.<new_username> = ["admin"]
+    #
+    # i.   Get secret
+    # ii.  Get data "security.json"
+    # iii. Decrypt it
+    # iv.  Edit to remove new authentication and authorization
+    # v.   Encrypt it
+    # vi.  Overwrite original secret with new changes
   }
 
   depends_on = [
