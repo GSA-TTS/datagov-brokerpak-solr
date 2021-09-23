@@ -11,3 +11,15 @@ data "kubernetes_ingress" "solrcloud-ingress" {
     namespace = var.namespace
   }
 }
+
+data "kubernetes_secret" "solr_creds" {
+  metadata {
+    name = "${local.cloud_name}-solrcloud-security-bootstrap"
+  }
+}
+
+data "kubernetes_service" "solr_api" {
+  metadata {
+    name = "${local.cloud_name}-solrcloud-common"
+  }
+}

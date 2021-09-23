@@ -6,18 +6,110 @@ resource "random_password" "password" {
 }
 
 locals {
-  # This is the equivalent of an entry in an auth file managed by htpasswd
-  auth_line = "${random_uuid.username.result}:${bcrypt(random_password.password.result)}"
+  admin_password   = data.kubernetes_secret.solr_creds.data.admin
+  create_user_json = <<-EOF
+    {
+      "set-user": {
+        "${random_uuid.username.result}":"${random_password.password.result}"
+      }
+    }
+  EOF
+
+  delete_user_json = <<-EOF
+    {
+      "delete-user": ["${random_uuid.username.result}"]
+    }
+  EOF
+
+  set_role_json = <<-EOF
+    {
+      "set-user-role": {
+        "${random_uuid.username.result}": ["k8s","admin"]
+      }
+    }
+  EOF
+
+  clear_role_json = <<-EOF
+    {
+      "set-user-role": {
+        "${random_uuid.username.result}": null
+      }
+    }
+  EOF
 }
 
-# Confirm that the necessary CLI binaries are present
-resource "null_resource" "prerequisite_binaries_present" {
+# A resource that manages the existence of a user for the duration of the binding
+#
+# Some useful tricks in use here:
+# * Generate a file containing the content of a variable using the BASH "process substitution" <() operator
+# * Output just the HTTP status code from curl:
+#   https://superuser.com/questions/272265/getting-curl-to-output-http-status-code#comment1567079_442395
+
+resource "null_resource" "manage_solr_user" {
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command     = <<-EOF
-      which kubectl
+    environment = {
+      KUBECONFIG         = base64encode(data.template_file.kubeconfig.rendered)
+      ADMIN_PASSWORD     = local.admin_password
+      GENERATED_PASSWORD = random_password.password.result
+      CREATE_USER_JSON   = local.create_user_json
+      SET_ROLE_JSON      = local.set_role_json
+    }
+    # Create the binding's Solr user with the generated password
+    command = <<-EOF
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec pod/${local.cloud_name}-solrcloud-0 -- curl \
+        -s \
+        -o /dev/null \
+        -w "%%{http_code}\n" \
+        --user admin:$${ADMIN_PASSWORD} \
+        'http://${local.cloud_name}-solrcloud-common/solr/admin/authentication' \
+        -H 'Content-type:application/json' --data "$CREATE_USER_JSON"
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec pod/${local.cloud_name}-solrcloud-0 -- curl \
+        -s \
+        -o /dev/null \
+        -w "%%{http_code}\n" \
+        --user admin:$${ADMIN_PASSWORD} \
+        'http://${local.cloud_name}-solrcloud-common/solr/admin/authorization' \
+        -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
     EOF
   }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    when        = destroy
+    environment = {
+      KUBECONFIG       = base64encode(data.template_file.kubeconfig.rendered)
+      ADMIN_PASSWORD   = local.admin_password
+      DELETE_USER_JSON = local.delete_user_json
+      CLEAR_ROLE_JSON  = local.clear_role_json
+    }
+    # Delete the binding's Solr user
+    command = <<-EOF
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec pod/${local.cloud_name}-solrcloud-0 -- curl \
+        -s \
+        -o /dev/null \
+        -w "%%{http_code}\n" \
+        --user admin:$ADMIN_PASSWORD \
+        'http://${local.cloud_name}-solrcloud-common/solr/admin/authorization' \
+        -H 'Content-type:application/json' --data "$CLEAR_ROLE_JSON"
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec pod/${local.cloud_name}-solrcloud-0 -- curl \
+        -s \
+        -o /dev/null \
+        -w "%%{http_code}\n" \
+        --user admin:$ADMIN_PASSWORD \
+        'http://${local.cloud_name}-solrcloud-common/solr/admin/authentication' \
+        -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
+    EOF
+  }
+
+  depends_on = [
+    data.template_file.kubeconfig,
+    data.kubernetes_secret.solr_creds,
+    data.kubernetes_service.solr_api, # TODO: Use this to create the curl target URL instead of generating the URL ourselves!
+    local.cloud_name,
+    null_resource.prerequisite_binaries_present,
+  ]
 }
 
 # Generate a kubeconfig file to be used in the null_resource
@@ -44,77 +136,12 @@ data "template_file" "kubeconfig" {
   EOF
 }
 
-# A resource that manages the auth entry for the generated creds
-# Solution comes from https://stackoverflow.com/a/57488946
-resource "null_resource" "manage_auth_entry" {
-
+# Confirm that the necessary CLI binaries are present
+resource "null_resource" "prerequisite_binaries_present" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    environment = {
-      KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
-    }
-    # Append the new "user:crypted-password" line to the content of the secret
-    command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d > auth
-      echo '${local.auth_line}' >> auth
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
-        kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
+    command     = <<-EOF
+      which kubectl
     EOF
-
-    # TODO: Add credentials for solr operator
-    #   1. security-bootstrap: top-level key:value for username:base64(password)
-    # kubectl get secret ${local.cloud_name}-solrcloud-security-bootstrap -o json | jq --arg pass \
-    #   "$(echo ${bcrypt(random_password.password.result)} | base64)" '.data[${random_uuid.username.result}]=$pass' | kubectl apply -f -
-    #
-    #   2. seucrity-bootstrap "security.json": multiple changes
-    #       a. authentication.credentials.<new_username> = some_form_of_encryption(password)
-    #       b. authorization.user-role.<new_username> = ["admin"]
-    #
-    # i.   Get secret
-    # ii.  Get data "security.json"
-    # iii. Decrypt it
-    # iv.  Edit to add new authentication and authorization
-    # v.   Encrypt it
-    # vi.  Overwrite original secret with new changes
-    # kubectl get secret solr-50d858e0985ecc7f-solrcloud-security-bootstrap -o json | jq -r '.data."security.json"' | base64 -d | jq -r '.authentication.credentials["new"]="temp"'
   }
-
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    when        = destroy
-    environment = {
-      KUBECONFIG = base64encode(data.template_file.kubeconfig.rendered)
-    }
-    # Remove the relevant "user:crypted-password" line from the content of the secret, wherever it appears
-    command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) get secret ${local.cloud_name}-creds -ojsonpath={.data.auth} | base64 -d | grep --invert-match --fixed-strings '${local.auth_line}' > auth
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) create secret generic ${local.cloud_name}-creds --from-file=auth --dry-run=client -o yaml | \
-        kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) apply -f -
-    EOF
-
-    # TODO: Remove credentials for solr operator
-    #   1. security-bootstrap: remove top-level key:value for username:base64(password)
-    # kubectl get secret ${local.cloud_name}-solrcloud-security-bootstrap -o json | jq 'del(.data[${random_uuid.username.result}])' | kubectl apply -f -
-    #
-    #   2. seucrity-bootstrap "security.json": Remove multiple changes
-    #       a. authentication.credentials.<new_username> = some_form_of_encryption(password)
-    #       b. authorization.user-role.<new_username> = ["admin"]
-    #
-    # i.   Get secret
-    # ii.  Get data "security.json"
-    # iii. Decrypt it
-    # iv.  Edit to remove new authentication and authorization
-    # v.   Encrypt it
-    # vi.  Overwrite original secret with new changes
-  }
-
-  depends_on = [
-    # Since Terraform can't infer dependencies from the content of our
-    # provisioners, it's critical that we use dependencies to ensure external
-    # resources exist at the time that they're referenced.
-    null_resource.prerequisite_binaries_present,
-    data.template_file.kubeconfig,
-    local.cloud_name,
-    local.auth_line
-  ]
 }
