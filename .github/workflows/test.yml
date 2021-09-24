@@ -25,7 +25,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install eden
         sudo apt-get install bats
-        sudo apt-get install curl
 
     - name: Check out repository
       uses: actions/checkout@v2
