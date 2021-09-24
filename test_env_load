@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source test.env
+
+exec bash "$@"
