@@ -55,7 +55,7 @@ down: ## Bring the cloud-service-broker service down
 
 test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
-	bats test.bats
+	bats --tap test.bats
 
 test-env-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
