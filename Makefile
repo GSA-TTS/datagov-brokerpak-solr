@@ -51,7 +51,7 @@ up: .env ## Run the broker service with the brokerpak configured. The broker lis
 
 down: SHELL:=./test_env_load
 down: ## Bring the cloud-service-broker service down
-	-@docker stop csb-service-$(SERVICE_NAME)
+	-@docker stop csb-service-$${SERVICE_NAME}
 
 test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
