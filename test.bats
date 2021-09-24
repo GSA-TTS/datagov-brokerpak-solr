@@ -43,7 +43,7 @@ function clean_up_eden () {
 	echo "Removing any orphan services from eden"
 	rm ~/.eden/config  2>/dev/null
 	# helm uninstall example 2>/dev/null
-	kubectl delete secret basic-auth1 2>/dev/null
+	# kubectl delete secret basic-auth1 2>/dev/null
 }
 
 @test 'single provision - single binding' {
