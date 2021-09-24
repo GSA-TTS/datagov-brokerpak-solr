@@ -30,6 +30,7 @@ brokerpak concept, and to the Pivotal team running with the concept!
    a local k8s for the broker to populate during tests and demos
 1. [`eden`](https://github.com/starkandwayne/eden) is used as a client for testing the brokerpak
 1. [`terraform` 0.12.31](https://releases.hashicorp.com/terraform/0.12.31/) is used for local development 
+1. [`bats`](https://bats-core.readthedocs.io/en/stable/installation.html) is used to wrap `eden` tests, may be used to for terraform tests in the future.
 
 Run the `make` command by itself for information on the various targets that are available. 
 
