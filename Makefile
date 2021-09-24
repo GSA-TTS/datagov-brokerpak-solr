@@ -57,6 +57,24 @@ test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
 	bats --tap test.bats
 
+demo-up: SHELL:=./test_env_load
+demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
+	@$(EDEN_EXEC) provision -i ${INSTANCE_NAME} -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
+	@$(EDEN_EXEC) bind -b binding -i ${INSTANCE_NAME}
+
+demo-down: SHELL:=./test_env_load
+demo-down: examples.json ## Clean up data left over from tests and demos
+	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
+	-@$(EDEN_EXEC) unbind -b binding -i ${INSTANCE_NAME} 2>/dev/null
+	-@$(EDEN_EXEC) deprovision -i ${INSTANCE_NAME} 2>/dev/null
+
+	-@rm examples.json 2>/dev/null; true
+
+	@echo "Removing any orphan services from eden"
+	-@rm ~/.eden/config  2>/dev/null ; true
+	-@helm uninstall example 2>/dev/null ; true
+	-@kubectl delete secret basic-auth1 2>/dev/null ; true
+
 test-env-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
 	@kind create cluster --config kind-config.yaml --name datagov-broker-test
