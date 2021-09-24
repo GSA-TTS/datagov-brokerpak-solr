@@ -63,8 +63,8 @@ function clean_up_eden () {
   #echo "Running tests... (none yet)"
   # unbind '1'
   # echo "output = ${output}"
-  deprovision '1'
-  echo "output = ${output}"
+  # deprovision '1'
+  # echo "output = ${output}"
   clean_up_eden
   delete_examples_json
 }
