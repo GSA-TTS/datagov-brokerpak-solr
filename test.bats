@@ -42,7 +42,7 @@ function unbind () {
 function clean_up_eden () {
 	echo "Removing any orphan services from eden"
 	rm ~/.eden/config  2>/dev/null
-	helm uninstall example 2>/dev/null
+	# helm uninstall example 2>/dev/null
 	kubectl delete secret basic-auth1 2>/dev/null
 }
 
@@ -56,11 +56,15 @@ function clean_up_eden () {
 
   provision '1'
   echo "output = ${output}"
-  #bind '1'
+  bind '1'
+  echo "output = ${output}"
   #export SERVICE_INFO=$(echo "eden --client user --client-secret pass --url http://127.0.0.1:8080 credentials -b binding -i ${INSTANCE_NAME:-instance-${USER}}")
   #set -e
   #echo "Running tests... (none yet)"
+  unbind '1'
+  echo "output = ${output}"
   deprovision '1'
+  echo "output = ${output}"
   clean_up_eden
   delete_examples_json
 }
