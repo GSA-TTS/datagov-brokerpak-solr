@@ -44,6 +44,7 @@ function clean_up_eden_helm () {
 	echo "Removing any orphan services from eden"
 
   # Remove old eden services
+  mkdir -p ~/.eden
   touch ~/.eden/config
 	rm ~/.eden/config  2>/dev/null
   # Remove old helm releases
