@@ -6,6 +6,9 @@ CSB=ghcr.io/gsa/cloud-service-broker:latest-gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
+CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
+CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
+
 PREREQUISITES = docker jq kind kubectl helm eden bats
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
@@ -57,16 +60,20 @@ test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
 	bats --tap test.bats
 
+examples.json: examples.json-template
+	@./generate-examples.sh > examples.json
+
 demo-up: SHELL:=./test_env_load
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
-	@$(EDEN_EXEC) provision -i ${INSTANCE_NAME} -s ${SERVICE_NAME} -p ${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
-	@$(EDEN_EXEC) bind -b binding -i ${INSTANCE_NAME}
+	./generate-examples.sh > examples.json
+	@$${EDEN_EXEC} provision -i $${INSTANCE_NAME} -s $${SERVICE_NAME} -p $${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
+	@$${EDEN_EXEC} bind -b binding -i $${INSTANCE_NAME}
 
 demo-down: SHELL:=./test_env_load
 demo-down: examples.json ## Clean up data left over from tests and demos
 	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
-	-@$(EDEN_EXEC) unbind -b binding -i ${INSTANCE_NAME} 2>/dev/null
-	-@$(EDEN_EXEC) deprovision -i ${INSTANCE_NAME} 2>/dev/null
+	-@$${EDEN_EXEC} unbind -b binding -i $${INSTANCE_NAME} 2>/dev/null
+	-@$${EDEN_EXEC} deprovision -i $${INSTANCE_NAME} 2>/dev/null
 
 	-@rm examples.json 2>/dev/null; true
 
