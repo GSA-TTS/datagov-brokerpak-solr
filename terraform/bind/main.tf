@@ -58,20 +58,22 @@ resource "null_resource" "manage_solr_user" {
     }
     # Create the binding's Solr user with the generated password
     command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run curl --rm --image=curlimages/curl -- curl \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$${ADMIN_PASSWORD} \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$CREATE_USER_JSON"
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run curl --rm --image=curlimages/curl -- curl \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp2 --image=curlimages/curl --  \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$${ADMIN_PASSWORD} \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
   }
 
@@ -86,20 +88,22 @@ resource "null_resource" "manage_solr_user" {
     }
     # Delete the binding's Solr user
     command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run curl --rm --image=curlimages/curl -- curl \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$ADMIN_PASSWORD \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$CLEAR_ROLE_JSON"
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run curl --rm --image=curlimages/curl -- curl \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp2 --image=curlimages/curl --  \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$ADMIN_PASSWORD \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
   }
 
