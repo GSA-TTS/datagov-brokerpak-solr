@@ -61,23 +61,46 @@ function clean_up_eden_helm () {
   jq -e '.[].plan_id' examples.json > /dev/null 2>&1
 }
 
-@test 'single provision works' {
+@test 'provision 1 works' {
   clean_up_eden_helm
   provision '1'
 }
 
-@test 'single binding works' {
+@test 'binding 1 works' {
   bind '1'
 }
 
-@test 'single unbinding works' {
-  #export SERVICE_INFO=$(echo "eden --client user --client-secret pass --url http://127.0.0.1:8080 credentials -b binding -i ${INSTANCE_NAME:-instance-${USER}}")
-  #set -e
-  #echo "Running tests... (none yet)"
+@test 'provision 2 works' {
+  # provision '2'
+}
+
+@test 'binding 2 works' {
+  # bind '2'
+}
+
+@test 'bind 1 works for provision 1' {
+  export PROVISION_1_URI=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .uri)
+  export PROVISION_1_USER=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .username)
+  export PROVISION_1_PASS=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .password)
+}
+
+@test 'bind 2 does not work for provision 1' {
+
+}
+
+@test 'unbinding 2 works' {
   unbind '1'
 }
 
-@test 'single deprovision works' {
+@test 'bind 2 does not work for provison 2' {
+
+}
+
+@test 'unbinding 1 works' {
+
+}
+
+@test 'deprovision 1 works' {
   deprovision '1'
   clean_up_eden_helm
   delete_examples_json
