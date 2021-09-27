@@ -1,5 +1,8 @@
 #!/usr/bin/env bats
 
+# Important Notes:
+# Solr Admin UI native Login/Logout only supported from 8.6+
+
 # Normally we would run 
 # $(CSB) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
@@ -7,6 +10,7 @@
 
 function create_examples_json () {
 	./generate-examples.sh > examples.json
+  jq '.[0].provision_params.replicas=1' examples.json > examples.json1 && mv examples.json1 examples.json
   export CLOUD_PROVISION_PARAMS=$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
   export CLOUD_BIND_PARAMS=$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 }
@@ -67,37 +71,62 @@ function clean_up_eden_helm () {
 }
 
 @test 'binding 1 works' {
-  bind '1'
+  # Attempt to login to provision 1 with the bindings for provsion 1
+  # Verify that the credentials actually work
+  uuid='1'
+  bind $uuid
+  export PROVISION_1_DOMAIN=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .domain)
+  export PROVISION_1_URI=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .uri)
+  export PROVISION_1_USER=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .username)
+  export PROVISION_1_PASS=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .password)
+
+  # Add DNS for provision
+  echo -e "127.0.0.1\t$PROVISION_1_DOMAIN" | tee -a /etc/hosts
+
+  # Validate that the response is valid json
+  curl --user $PROVISION_1_USER:$PROVISION_1_PASS "$PROVISION_1_URI""/solr/admin/authentication" | jq .responseHeader
 }
 
+
 @test 'provision 2 works' {
-  # provision '2'
+  provision '2'
 }
 
 @test 'binding 2 works' {
-  # bind '2'
-}
-
-@test 'bind 1 works for provision 1' {
-  export PROVISION_1_URI=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .uri)
-  export PROVISION_1_USER=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .username)
-  export PROVISION_1_PASS=$($EDEN_EXEC credentials -i instance-kalima-1 -b solr-cloud-binding | jq -r .password)
+  bind '2'
 }
 
 @test 'bind 2 does not work for provision 1' {
+  # Attempt to login to provision 1 with the bindings for provision 2
+  # Verify that the credentials for one binding don't work for another
+  uuid='2'
+  export PROVISION_2_DOMAIN=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .domain)
+  export PROVISION_2_URI=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .uri)
+  export PROVISION_2_USER=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .username)
+  export PROVISION_2_PASS=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .password)
 
+  # Add DNS for provision
+  echo -e "127.0.0.1\t$PROVISION_2_DOMAIN" | tee -a /etc/hosts
+
+  # Validate that the response is 401 Bad Credentials
+  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_1_URI""/solr/admin/authentication" | grep 401
 }
 
 @test 'unbinding 2 works' {
-  unbind '1'
-}
+  # Attempt to login to provision 2 with the bindings for provision 2
+  # Verify that the credentials have been destroyed
+  unbind '2'
 
-@test 'bind 2 does not work for provison 2' {
-
+  # Validate that the response is 401 Bad Credentials
+  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_2_URI""/solr/admin/authentication" | grep 401
 }
 
 @test 'unbinding 1 works' {
-
+  unbind '1'
+  # Attempt to login to provision 2 with the bindings for provision 2
+  # Verify that the credentials have been destroyed
+  # Validate that the response is 401 Bad Credentials
+  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_2_URI""/solr/admin/authentication" | grep 401
 }
 
 @test 'deprovision 1 works' {
