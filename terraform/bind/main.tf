@@ -57,6 +57,8 @@ resource "null_resource" "manage_solr_user" {
       SET_ROLE_JSON      = local.set_role_json
     }
     # Create the binding's Solr user with the generated password
+    # Can't reuse containers because they are left in an unpredictable state after a single run
+    # Wait for the command to run before deleting the container
     command = <<-EOF
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
         -s -f -L \
@@ -72,6 +74,7 @@ resource "null_resource" "manage_solr_user" {
         --user admin:$${ADMIN_PASSWORD} \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
+      sleep 10
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
@@ -87,6 +90,8 @@ resource "null_resource" "manage_solr_user" {
       CLEAR_ROLE_JSON  = local.clear_role_json
     }
     # Delete the binding's Solr user
+    # Can't reuse containers because they are left in an unpredictable state after a single run
+    # Wait for the command to run before deleting the container
     command = <<-EOF
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
         -s -f -L \
@@ -102,6 +107,7 @@ resource "null_resource" "manage_solr_user" {
         --user admin:$ADMIN_PASSWORD \
         'http://${local.cloud_name}-solrcloud-common/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
+      sleep 10
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
       kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
