@@ -8,13 +8,6 @@
 # ...to test the brokerpak. However, some of our examples need to run nested.
 # So, we'll run them manually with eden
 
-function create_examples_json () {
-	./generate-examples.sh > examples.json
-  jq '.[0].provision_params.replicas=1' examples.json > examples.json1 && mv examples.json1 examples.json
-  export CLOUD_PROVISION_PARAMS=$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
-  export CLOUD_BIND_PARAMS=$(cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
-}
-
 function delete_examples_json () {
 	rm examples.json 2>/dev/null
 }
@@ -57,7 +50,6 @@ function clean_up_eden_helm () {
 }
 
 @test 'examples.json exists' {
-  create_examples_json
   jq -e '.[].name' examples.json > /dev/null 2>&1
   jq -e '.[].description' examples.json > /dev/null 2>&1
   jq -e '.[].service_name' examples.json > /dev/null 2>&1
