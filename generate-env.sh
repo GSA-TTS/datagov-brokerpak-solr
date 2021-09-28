@@ -32,6 +32,8 @@ replicas=3
 solrImageTag="8.6"
 solrJavaMem="-Xms300m -Xmx300m"
 cloud_name="example"
+solrCpu="1000m"
+solrMem="1G"
 HEREDOC
 
 # Use the same terraform.tfvars config for mucking about directly with terraform/bind.
