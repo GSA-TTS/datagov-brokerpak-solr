@@ -75,7 +75,7 @@ function clean_up_eden_helm () {
   $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  #echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  # echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
   echo -e "127.0.0.1\t$PROVISION_DOMAIN" >> tee -a /etc/hosts
 
   # Validate that the response is valid json
@@ -123,7 +123,8 @@ function clean_up_eden_helm () {
   $get_binding $uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  # echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" >> tee -a /etc/hosts
 
   # Validate that the response is valid json
   curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | jq .responseHeader
@@ -145,7 +146,8 @@ function clean_up_eden_helm () {
   $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  # echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" >> tee -a /etc/hosts
 
   # Validate that the response rejects credentials
   curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | \
@@ -168,7 +170,8 @@ function clean_up_eden_helm () {
   $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  # echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" >> tee -a /etc/hosts
 
   unbind $bind_uuid $bind_name
   # Validate that the response rejects credentials
@@ -192,7 +195,8 @@ function clean_up_eden_helm () {
   $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  # echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" >> tee -a /etc/hosts
 
   unbind $bind_uuid $bind_name
   # Validate that the response rejects credentials

@@ -47,3 +47,4 @@ services/solr-cloud/solr-crd.tar.gz
 examples.json
 .env
 *.swp
+tee
