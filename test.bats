@@ -70,9 +70,9 @@ function clean_up_eden_helm () {
   bind_uuid='1'
   bind_name='cred_1A'
   provision_uuid='1'
-  bind $uuid $bind_name
+  bind $bind_uuid $bind_name
   source test.env
-  get_binding $uuid $bind_name $provision_uuid
+  $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
   echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
@@ -93,16 +93,16 @@ function clean_up_eden_helm () {
   bind_uuid='1'
   bind_name='cred_1B'
   provision_uuid='1'
-  bind $uuid $bind_name
+  bind $bind_uuid $bind_name
 
   # Get Binding 1A
   source test.env
-  get_binding '1' 'cred_1A' '1'
+  $get_binding '1' 'cred_1A' '1'
   # TODO: Store binding in unique variables
 
   # Get Binding 1B
   source test.env
-  get_binding '1' 'cred_1B' '1'
+  $get_binding '1' 'cred_1B' '1'
   # TODO: Store binding in unique variables
 
   # TODO: Compare the credentials to each other
@@ -117,9 +117,9 @@ function clean_up_eden_helm () {
   bind_uuid='2'
   bind_name='cred_2A'
   provision_uuid='2'
-  bind $uuid $bind_name
+  bind $bind_uuid $bind_name
   source test.env
-  get_binding $uuid $bind_name $provision_uuid
+  $get_binding $uuid $bind_name $provision_uuid
 
   # Add DNS for provision
   echo -e "127.0.0.1\t$PROVISION_1_DOMAIN" | tee -a /etc/hosts
@@ -129,7 +129,7 @@ function clean_up_eden_helm () {
 
   # Delete DNS from provision
   cp /etc/hosts hosts
-  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  sed -i -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
   cp hosts /etc/hosts
   rm -f hosts
 }
@@ -141,17 +141,18 @@ function clean_up_eden_helm () {
   bind_name='cred_2A'
   provision_uuid='1'
   source test.env
-  get_binding $uuid $bind_name $provision_uuid
+  $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
   echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
-  # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+  # Validate that the response rejects credentials
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | \
+    jq '.errorMessages | contains(["No authentication configured"])'
 
   # Delete DNS from provision
   cp /etc/hosts hosts
-  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  sed -i -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
   cp hosts /etc/hosts
   rm -f hosts
 }
@@ -163,18 +164,19 @@ function clean_up_eden_helm () {
   bind_name='cred_2A'
   provision_uuid='2'
   source test.env
-  get_binding $uuid $bind_name $provision_uuid
+  $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
   echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
   unbind $bind_uuid $bind_name
-  # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+  # Validate that the response rejects credentials
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | \
+    jq '.errorMessages | contains(["No authentication configured"])'
 
   # Delete DNS from provision
   cp /etc/hosts hosts
-  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  sed -i -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
   cp hosts /etc/hosts
   rm -f hosts
 }
@@ -186,18 +188,19 @@ function clean_up_eden_helm () {
   bind_name='cred_1A'
   provision_uuid='1'
   source test.env
-  get_binding $uuid $bind_name $provision_uuid
+  $get_binding $bind_uuid $bind_name $provision_uuid
 
   # Add DNS for provision
   echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
   unbind $bind_uuid $bind_name
-  # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+  # Validate that the response rejects credentials
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | \
+    jq '.errorMessages | contains(["No authentication configured"])'
 
   # Delete DNS from provision
   cp /etc/hosts hosts
-  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  sed -i -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
   cp hosts /etc/hosts
   rm -f hosts
 }
