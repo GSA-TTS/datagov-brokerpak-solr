@@ -58,7 +58,9 @@ down: ## Bring the cloud-service-broker service down
 
 test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
-	bats --tap test.bats
+	sudo chmod 766 /etc/hosts
+	bats test.bats
+	sudo chmod 744 /etc/hosts
 
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json
