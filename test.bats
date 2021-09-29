@@ -99,14 +99,17 @@ function clean_up_eden_helm () {
   # Get Binding 1A
   source test.env
   $get_binding '1' 'cred_1A' '1'
-  # TODO: Store binding in unique variables
+  bind_a_user=$PROVISION_USER
+  bind_a_pass=$PROVISION_PASS
 
   # Get Binding 1B
   source test.env
   $get_binding '1' 'cred_1B' '1'
-  # TODO: Store binding in unique variables
+  bind_a_user=$PROVISION_USER
+  bind_a_pass=$PROVISION_PASS
 
-  # TODO: Compare the credentials to each other
+  [ "$bind_a_user" != "$bind_b_user" ]
+  [ "$bind_a_pass" != "$bind_b_pass" ]
 }
 
 
