@@ -153,8 +153,15 @@ make test
 The examples and values in the `examples.json` file will be used for end-to-end
 testing of the brokerpak:
 
-- Provision and bind a solr-cloud instance
-- Unbind and deprovision the solr-cloud instance
+- Provision and bind solr-cloud instance 1
+- Check that the credentials work
+- Create a second binding for solr-cloud intance 1
+- Check that the two bindings for instance 1 are unique
+- Provision and bind solr-cloud instance 2
+- Check that the credentails for instance 2A does not work for instance 1
+- Unbind solr-cloud instance 2 and verify that the credentials are destroyed
+- Unbind solr-cloud instance 1 and verify that the credentials are destroyed
+- Deprovision and Clean up
 
 ### Testing manually
 
