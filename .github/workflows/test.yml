@@ -41,7 +41,7 @@ jobs:
       run: make build test-env-up 
     
     - name: Stop for debugging
-			if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
       uses: mxschmitt/action-tmate@v3
       with:
         limit-access-to-actor: true  
