@@ -27,14 +27,16 @@ function deprovision () {
 
 function bind () {
   uuid=$1
+  bind_name=$2
 	echo "Binding the ${SERVICE_NAME}-${uuid} instance"
-	$EDEN_EXEC bind -b binding -i "${INSTANCE_NAME}""-$uuid"
+	$EDEN_EXEC bind -b $bind_name -i "${INSTANCE_NAME}""-$uuid"
 }
 
 function unbind () {
   uuid=$1
+  bind_name=$2
 	echo "Unbinding the ${SERVICE_NAME}-${uuid} instance"
-	$EDEN_EXEC unbind -b binding -i "${INSTANCE_NAME}""-$uuid" 2>/dev/null
+	$EDEN_EXEC unbind -b $bind_name -i "${INSTANCE_NAME}""-$uuid" 2>/dev/null
 }
 
 function clean_up_eden_helm () {
@@ -62,21 +64,48 @@ function clean_up_eden_helm () {
   provision '1'
 }
 
-@test 'binding 1 works' {
+@test 'binding 1A works' {
   # Attempt to login to provision 1 with the bindings for provsion 1
   # Verify that the credentials actually work
-  uuid='1'
-  bind $uuid
-  export PROVISION_1_DOMAIN=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .domain)
-  export PROVISION_1_URI=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .uri)
-  export PROVISION_1_USER=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .username)
-  export PROVISION_1_PASS=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .password)
+  bind_uuid='1'
+  bind_name='cred_1A'
+  provision_uuid='1'
+  bind $uuid $bind_name
+  source test.env
+  get_binding $uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_1_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
   # Validate that the response is valid json
-  curl --user $PROVISION_1_USER:$PROVISION_1_PASS "$PROVISION_1_URI""/solr/admin/authentication" | jq .responseHeader
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | jq .responseHeader
+
+  # Delete DNS from provision
+  cp /etc/hosts hosts
+  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  cp hosts /etc/hosts
+  rm -f hosts
+}
+
+@test 'binding 1A != binding 1B' {
+  # Verify that bindings are unique
+
+  bind_uuid='1'
+  bind_name='cred_1B'
+  provision_uuid='1'
+  bind $uuid $bind_name
+
+  # Get Binding 1A
+  source test.env
+  get_binding '1' 'cred_1A' '1'
+  # TODO: Store binding in unique variables
+
+  # Get Binding 1B
+  source test.env
+  get_binding '1' 'cred_1B' '1'
+  # TODO: Store binding in unique variables
+
+  # TODO: Compare the credentials to each other
 }
 
 
@@ -84,41 +113,93 @@ function clean_up_eden_helm () {
   provision '2'
 }
 
-@test 'binding 2 works' {
-  bind '2'
-}
-
-@test 'bind 2 does not work for provision 1' {
-  # Attempt to login to provision 1 with the bindings for provision 2
-  # Verify that the credentials for one binding don't work for another
-  uuid='2'
-  export PROVISION_2_DOMAIN=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .domain)
-  export PROVISION_2_URI=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .uri)
-  export PROVISION_2_USER=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .username)
-  export PROVISION_2_PASS=$($EDEN_EXEC credentials -i "${INSTANCE_NAME}""-$uuid" -b solr-cloud-binding | jq -r .password)
+@test 'binding 2A works' {
+  bind_uuid='2'
+  bind_name='cred_2A'
+  provision_uuid='2'
+  bind $uuid $bind_name
+  source test.env
+  get_binding $uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_2_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_1_DOMAIN" | tee -a /etc/hosts
+
+  # Validate that the response is valid json
+  curl --user $PROVISION_1_USER:$PROVISION_1_PASS "$PROVISION_1_URI""/solr/admin/authentication" | jq .responseHeader
+
+  # Delete DNS from provision
+  cp /etc/hosts hosts
+  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  cp hosts /etc/hosts
+  rm -f hosts
+}
+
+@test 'bind 2A does not work for provision 1' {
+  # Attempt to login to provision 1 with the bindings for provision 2
+  # Verify that the credentials for one binding don't work for another
+  bind_uuid='2'
+  bind_name='cred_2A'
+  provision_uuid='1'
+  source test.env
+  get_binding $uuid $bind_name $provision_uuid
+
+  # Add DNS for provision
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
   # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_1_URI""/solr/admin/authentication" | grep 401
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+
+  # Delete DNS from provision
+  cp /etc/hosts hosts
+  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  cp hosts /etc/hosts
+  rm -f hosts
 }
 
 @test 'unbinding 2 works' {
   # Attempt to login to provision 2 with the bindings for provision 2
   # Verify that the credentials have been destroyed
-  unbind '2'
+  bind_uuid='2'
+  bind_name='cred_2A'
+  provision_uuid='2'
+  source test.env
+  get_binding $uuid $bind_name $provision_uuid
 
+  # Add DNS for provision
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+
+  unbind $bind_uuid $bind_name
   # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_2_URI""/solr/admin/authentication" | grep 401
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+
+  # Delete DNS from provision
+  cp /etc/hosts hosts
+  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  cp hosts /etc/hosts
+  rm -f hosts
 }
 
 @test 'unbinding 1 works' {
-  unbind '1'
   # Attempt to login to provision 2 with the bindings for provision 2
   # Verify that the credentials have been destroyed
+  bind_uuid='1'
+  bind_name='cred_1A'
+  provision_uuid='1'
+  source test.env
+  get_binding $uuid $bind_name $provision_uuid
+
+  # Add DNS for provision
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
+
+  unbind $bind_uuid $bind_name
   # Validate that the response is 401 Bad Credentials
-  curl --user $PROVISION_2_USER:$PROVISION_2_PASS "$PROVISION_2_URI""/solr/admin/authentication" | grep 401
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | grep 401
+
+  # Delete DNS from provision
+  cp /etc/hosts hosts
+  sed -e "s/127.0.0.1\t$PROVISION_DOMAIN//g" hosts
+  cp hosts /etc/hosts
+  rm -f hosts
 }
 
 @test 'deprovision 1 works' {
