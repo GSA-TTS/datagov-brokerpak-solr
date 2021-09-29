@@ -122,10 +122,10 @@ function clean_up_eden_helm () {
   $get_binding $uuid $bind_name $provision_uuid
 
   # Add DNS for provision
-  echo -e "127.0.0.1\t$PROVISION_1_DOMAIN" | tee -a /etc/hosts
+  echo -e "127.0.0.1\t$PROVISION_DOMAIN" | tee -a /etc/hosts
 
   # Validate that the response is valid json
-  curl --user $PROVISION_1_USER:$PROVISION_1_PASS "$PROVISION_1_URI""/solr/admin/authentication" | jq .responseHeader
+  curl --user $PROVISION_USER:$PROVISION_PASS "$PROVISION_URI""/solr/admin/authentication" | jq .responseHeader
 
   # Delete DNS from provision
   cp /etc/hosts hosts
