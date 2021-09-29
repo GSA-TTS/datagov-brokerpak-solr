@@ -42,9 +42,9 @@ jobs:
     
     - name: Stop for debugging
       uses: mxschmitt/action-tmate@v3
-			if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
       with:
         limit-access-to-actor: true  
+			if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
     
     - name: Start the broker and run the tests
       run: make up test
