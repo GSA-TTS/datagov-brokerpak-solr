@@ -3,6 +3,12 @@
 name: 'test'
 on:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Debug (primarily for brokerpak provisioning constraints)'
+        required: false
+        default: false
 
 jobs:
   test:
@@ -34,10 +40,11 @@ jobs:
     - name: Build the brokerpak and set up the test environment
       run: make build test-env-up 
     
-    # - name: Stop for debugging
-    #   uses: mxschmitt/action-tmate@v3
-    #   with:
-    #     limit-access-to-actor: true  
+    - name: Stop for debugging
+      uses: mxschmitt/action-tmate@v3
+			if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled }}
+      with:
+        limit-access-to-actor: true  
     
     - name: Start the broker and run the tests
       run: make up test
