@@ -105,6 +105,7 @@ provision:
     outputs: terraform/provision/outputs.tf
     providers: terraform/provision/providers.tf
     variables: terraform/provision/variables.tf
+    versions: terraform/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -152,6 +153,8 @@ bind:
     outputs: terraform/bind/outputs.tf
     providers: terraform/bind/providers.tf
     variables: terraform/bind/variables.tf
+    versions: terraform/bind/versions.tf
+
 examples: []
 plan_updateable: false
 requiredenvvars: []
