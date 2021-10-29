@@ -28,7 +28,7 @@ clean: down ## Bring down the broker service if it's up and clean out the databa
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
 build: manifest.yml solr-cloud.yml $(shell find terraform) ## Build the brokerpak(s)
-	@docker run $(DOCKER_OPTS) $(CSB) pak build
+	@docker run --user $(shell id -u):$(shell id -g) $(DOCKER_OPTS) $(CSB) pak build
 
 # Healthcheck solution from https://stackoverflow.com/a/47722899 
 # (Alpine inclues wget, but not curl.)

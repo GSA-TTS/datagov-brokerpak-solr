@@ -48,3 +48,5 @@ examples.json
 .env
 *.swp
 tee
+.ash_history
+.terraform.d/
