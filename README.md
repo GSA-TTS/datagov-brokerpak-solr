@@ -1,8 +1,8 @@
-# datagov-brokerpak
+# datagov-brokerpak-solr
 
 ## Why this project
 
-The datagov brokerpak is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker) plugin that makes services
+This is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker) plugin that makes services
 needed by the data.gov team brokerable via the [Open Service Broker
 API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and
 Kubernetes), using Terraform. In particular, this brokerpak is used by
