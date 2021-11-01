@@ -50,11 +50,11 @@ resource "null_resource" "manage_solr_user" {
   # provisioner via triggers comes from
   # https://github.com/hashicorp/terraform/issues/23679#issuecomment-886020367
   triggers = {
-    kubeconfig = base64encode(data.template_file.kubeconfig.rendered)
-    admin_password = local.admin_password
+    kubeconfig       = base64encode(data.template_file.kubeconfig.rendered)
+    admin_password   = local.admin_password
     delete_user_json = local.delete_user_json
-    clear_role_json = local.clear_role_json
-    cloud_name = local.cloud_name
+    clear_role_json  = local.clear_role_json
+    cloud_name       = local.cloud_name
   }
 
   provisioner "local-exec" {
