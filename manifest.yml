@@ -1,5 +1,5 @@
 packversion: 1
-name: datagov-services-pak
+name: datagov-brokerpak-solr
 version: current
 metadata:
   author: Bret Mogilefsky
