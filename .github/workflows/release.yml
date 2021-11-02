@@ -36,12 +36,9 @@ jobs:
     - name: Rename the brokerpak file based on the tag
       run: mv datagov-brokerpak-solr-current.brokerpak datagov-brokerpak-solr-${GITHUB_REF#refs/*/}.brokerpak
 
-    - name: Create helm chart tarball
-      run: cd terraform/provision && tar czvf ../../solr-crd.tar.gz solr-crd
-
     - name: Create a release and upload the files
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "solr-crd.tar.gz,*.brokerpak"
+        artifacts: "*.brokerpak"
         artifactErrorsFailBuild: true
         token: ${{ secrets.GITHUB_TOKEN }}      
