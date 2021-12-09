@@ -41,7 +41,7 @@ spec:
         nginx.ingress.kubernetes.io/auth-type: basic
         nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - admin'
         nginx.ingress.kubernetes.io/auth-secret: {{ .Values.secretName | quote }}
-        nginx.ingress.kubernetes.io/proxy-body-size: 64m
+        nginx.ingress.kubernetes.io/proxy-body-size: 0
       {{- range $key, $value := .Values.ingress.annotations }}
         {{ $key }}: {{ $value | quote }}
       {{- end }}
