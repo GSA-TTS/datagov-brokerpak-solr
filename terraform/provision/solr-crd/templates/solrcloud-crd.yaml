@@ -41,7 +41,8 @@ spec:
         nginx.ingress.kubernetes.io/auth-type: basic
         nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - admin'
         nginx.ingress.kubernetes.io/auth-secret: {{ .Values.secretName | quote }}
-        nginx.ingress.kubernetes.io/proxy-body-size: 0
+        # 0 doesn't parse as terraform string
+        nginx.ingress.kubernetes.io/proxy-body-size: 999m
       {{- range $key, $value := .Values.ingress.annotations }}
         {{ $key }}: {{ $value | quote }}
       {{- end }}
