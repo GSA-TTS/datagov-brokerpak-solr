@@ -23,7 +23,7 @@ check:
 clean: SHELL:=./test_env_load
 clean: down ## Bring down the broker service if it's up and clean out the database
 	@docker rm -f csb-service-$${SERVICE_NAME}
-	@rm datagov-services-pak-*.brokerpak
+	@rm -f datagov-services-pak-*.brokerpak
 
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
