@@ -30,7 +30,7 @@ service_definitions:
 parameters: []
 required_env_variables: []
 env_config_mapping:
-  SOLR_SERVER: solr.server
+  SOLR_CP_SERVER: solr.server
   SOLR_CLUSTER_CA_CERTIFICATE: solr.cluster_ca_certificate
   SOLR_TOKEN: solr.token
   SOLR_NAMESPACE: solr.namespace

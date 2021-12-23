@@ -4,8 +4,10 @@ set -e
 
 CURRENT_CONTEXT=$(kubectl config current-context)
 CURRENT_CLUSTER=$(kubectl config view --raw -o json | jq -r '.contexts[]| select(.name | contains("'"${CURRENT_CONTEXT}"'"))  .context.cluster')
+CURRENT_USER=$(kubectl config view --raw -o json | jq -r '.contexts[]| select(.name | contains("'"${CURRENT_CONTEXT}"'"))  .context.user')
 SOLR_CLUSTER_CA_CERTIFICATE=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'"${CURRENT_CLUSTER}"'"))  .cluster["certificate-authority-data"]')
 SOLR_TOKEN=$(kubectl get secret "$( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' )" -n default -o json | jq -r .data.token)
+SOLR_TOKEN=$(echo -n `kubectl config view --raw -o json | jq -r '.users[]| select(.name | contains("'"${CURRENT_USER}"'"))  .user["token"]'` | base64 -w 0)
 SOLR_SERVER=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'"${CURRENT_CLUSTER}"'"))  .cluster["server"]')
 
 SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME:-ing.local.domain}
