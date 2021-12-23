@@ -101,7 +101,6 @@ provision:
   outputs: []
   template_refs: 
     main: terraform/provision/main.tf
-    data: terraform/provision/data.tf
     outputs: terraform/provision/outputs.tf
     providers: terraform/provision/providers.tf
     variables: terraform/provision/variables.tf
