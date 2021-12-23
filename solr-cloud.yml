@@ -29,7 +29,7 @@ provision:
   - field_name: solrImageTag
     required: false
     type: string
-    details: "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
+    details: "Tag for the Solr Docker image to use, defaults to 8.11. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
   - field_name: solrJavaMem
     required: false
     type: string
@@ -83,7 +83,7 @@ provision:
     overwrite: false
     type: string
   - name: solrImageTag
-    default: "6.6.6-slim"
+    default: "8.11-slim"
     overwrite: false
     type: string
   - name: solrJavaMem
