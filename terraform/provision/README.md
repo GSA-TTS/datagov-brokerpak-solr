@@ -1,6 +1,6 @@
 # How to iterate on the provisioning code
 
-**WARNING: Communication to the KIND Cluster doesn't currently exist from this
+**WARNING: Communication to the KinD Cluster doesn't currently exist from this
 container.  This needs to be established before terraform can work in this 
 container.**
 
