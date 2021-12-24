@@ -99,8 +99,8 @@ kind-up: ## Set up a Kubernetes test environment using KinD
       --selector=app.kubernetes.io/component=controller \
       --timeout=270s
 	# Install the ZooKeeper and Solr operators using Helm
-	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.4.0/all-with-dependencies.yaml
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.4.0 solr solr-operator
+	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
 
 .env: generate-env.sh
 	@echo Generating a .env file containing the k8s config needed by the broker
