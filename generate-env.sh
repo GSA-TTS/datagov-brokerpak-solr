@@ -24,7 +24,7 @@ fi
 
 # Generate the environment variables needed for configuring the CSB running in Docker
 cat > .env << HEREDOC
-SOLR_CP_SERVER=${SOLR_CP_SERVER}
+SOLR_SERVER=${SOLR_CP_SERVER}
 SOLR_TOKEN=${SOLR_TOKEN}
 SOLR_CLUSTER_CA_CERTIFICATE=${SOLR_CLUSTER_CA_CERTIFICATE}
 SOLR_NAMESPACE=default
