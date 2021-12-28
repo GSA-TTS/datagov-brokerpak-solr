@@ -19,6 +19,13 @@ docs.
 Huge props go to @josephlewis42 of Google for publishing and publicizing the
 brokerpak concept, and to the Pivotal team running with the concept!
 
+### Related Docs
+
+- [Solr Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr)
+- [Solr Operator Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr-operator)
+- [Solr Official Docs](https://solr.apache.org/guide/8_11/)
+- [Solr Operator SolrCloud CRD](https://github.com/apache/solr-operator/blob/main/docs/solr-cloud/solr-cloud-crd.md)
+
 ## Prerequisites
 
 1. `make` is used for executing docker commands in a meaningful build cycle.

@@ -11,14 +11,12 @@ SOLR_SERVER=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.na
 
 SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME:-ing.local.domain}
 
-if [ "${CURRENT_CLUSTER}" == *"kind-datagov-broker-test"* ]; then
+if [[ "${CURRENT_CLUSTER}" == "kind-datagov-broker-test" ]]; then
     # If the test cluster is in KinD we need the CSB to use 
     # a control plane URL resolvable from inside the CSB Docker container
     CURRENT_USER=kind-datagov-broker-test
-    CURRENT_CONTEXT=kind-datagov-broker-test
-    SOLR_SERVER=$(kind get kubeconfig --name=$(kind get clusters | grep datagov-broker-test) | grep server | cut -d ' ' -f 6-)
-    SOLR_CP_SERVER=$(kind get kubeconfig --internal --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
-    SOLR_TOKEN=$(echo -n `kubectl config view --raw -o json | jq -r '.users[]| select(.name | contains("'"${CURRENT_USER}"'"))  .user["client-key-data"]'` | base64 -w 0)
+    SOLR_CP_SERVER=$(kind get kubeconfig --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
+    SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .data.token | tr -d '"')
 else
     # Otherwise it's the same as the normal server control plane URL
     SOLR_CP_SERVER=${SOLR_SERVER}
@@ -35,7 +33,7 @@ HEREDOC
 
 # Generate terraform.tfvars needed for mucking about directly with terraform/provision
 cat > terraform/provision/terraform.tfvars << HEREDOC
-server="${SOLR_SERVER}"
+server="${SOLR_CP_SERVER}"
 token="${SOLR_TOKEN}"
 cluster_ca_certificate="${SOLR_CLUSTER_CA_CERTIFICATE}"
 namespace="default"
