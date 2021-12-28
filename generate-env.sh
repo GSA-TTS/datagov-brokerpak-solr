@@ -15,7 +15,7 @@ if [[ "${CURRENT_CLUSTER}" == "kind-datagov-broker-test" ]]; then
     # If the test cluster is in KinD we need the CSB to use 
     # a control plane URL resolvable from inside the CSB Docker container
     CURRENT_USER=kind-datagov-broker-test
-    SOLR_CP_SERVER=$(kind get kubeconfig --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
+    SOLR_CP_SERVER=$(kind get kubeconfig --internal --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
     SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .data.token | tr -d '"')
 else
     # Otherwise it's the same as the normal server control plane URL
