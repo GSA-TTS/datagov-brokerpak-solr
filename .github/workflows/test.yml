@@ -47,7 +47,7 @@ jobs:
         limit-access-to-actor: true  
     
     - name: Start the broker and run the tests
-      run: make up test
+      run: make .env up test
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
