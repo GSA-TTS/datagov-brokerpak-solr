@@ -17,7 +17,7 @@ if [[ "${CURRENT_CLUSTER}" == "kind-datagov-broker-test" ]]; then
     CURRENT_USER=kind-datagov-broker-test
     SOLR_CP_SERVER=$(kind get kubeconfig --internal --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
     SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .data.token | tr -d '"')
-    if [ -z "$SOLR_TOKEN" ]; then
+    if [[ "$SOLR_TOKEN" == "null" ]]; then
         # The format of the secret is different if there are more than one token associated with a secret.
         # The first token works reliably
         SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .items[0].data.token | tr -d '"')
