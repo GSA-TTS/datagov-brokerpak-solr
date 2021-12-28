@@ -45,7 +45,7 @@ resource "helm_release" "solrcloud" {
       "replicas"                                   = var.replicas      # How many replicas you want
       "solrOptions.javaMemory"                     = var.solrJavaMem   # How much memory to give each replica
       "solrOptions.security.authenticationType"    = "Basic"
-      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size" = 999m
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size" = "999m"
     }
     content {
       name  = set.key
