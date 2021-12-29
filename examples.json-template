@@ -5,7 +5,8 @@
     "service_name": "solr-cloud",
     "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
     "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
-    "provision_params": {"solrJavaMem":"-Xms300m -Xmx300m", "solrMem":"1G", "solrCpu":"1000m", "cloud_name":"demo"},
+    "provision_params": {"solrJavaMem":"-Xms300m -Xmx300m", "solrMem":"1G", "solrCpu":"1000m", "cloud_name":"demo", "solrImageRepo":"ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag":"8-curl"},
     "bind_params": {}
   }
 ]
+

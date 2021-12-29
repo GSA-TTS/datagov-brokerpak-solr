@@ -3,33 +3,48 @@
 set -e
 
 CURRENT_CONTEXT=$(kubectl config current-context)
-SOLR_CLUSTER_CA_CERTIFICATE=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'${CURRENT_CONTEXT}'"))  .cluster["certificate-authority-data"]')
-SOLR_TOKEN=$(kubectl get secret $( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' ) -n default -o json | jq -r .data.token)
+CURRENT_CLUSTER=$(kubectl config view --raw -o json | jq -r '.contexts[]| select(.name | contains("'"${CURRENT_CONTEXT}"'"))  .context.cluster')
+CURRENT_USER=$(kubectl config view --raw -o json | jq -r '.contexts[]| select(.name | contains("'"${CURRENT_CONTEXT}"'"))  .context.user')
+SOLR_CLUSTER_CA_CERTIFICATE=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'"${CURRENT_CLUSTER}"'"))  .cluster["certificate-authority-data"]')
+SOLR_TOKEN=$(echo -n `kubectl config view --raw -o json | jq -r '.users[]| select(.name | contains("'"${CURRENT_USER}"'"))  .user["token"]'` | base64 -w 0)
+SOLR_SERVER=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'"${CURRENT_CLUSTER}"'"))  .cluster["server"]')
 
-# We need the Docker-internal control plane URL to be resolved for the CSB
-# when running in a container
-SOLR_DOCKER_SERVER=$(kind get kubeconfig --internal --name=$(kind get clusters | grep datagov-broker-test) | grep server | cut -d ' ' -f 6-)
+SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME:-ing.local.domain}
 
-# We need the localhost control plan URL to be used for direct access when we
-# work outside the CSB
-SOLR_LOCALHOST_SERVER=$(kind get kubeconfig --name=$(kind get clusters | grep datagov-broker-test) | grep server | cut -d ' ' -f 6-)
+if [[ "${CURRENT_CLUSTER}" == "kind-datagov-broker-test" ]]; then
+    # If the test cluster is in KinD we need the CSB to use 
+    # a control plane URL resolvable from inside the CSB Docker container
+    CURRENT_USER=kind-datagov-broker-test
+    SOLR_CP_SERVER=$(kind get kubeconfig --internal --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
+    SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .data.token | tr -d '"')
+    if [[ "$SOLR_TOKEN" == "null" ]]; then
+        # The format of the secret is different if there are more than one token associated with a secret.
+        # The first token works reliably
+        SOLR_TOKEN=$(kubectl get secret $(kubectl get secrets | grep -oh "default-token-[a-z]*\s") -o json | jq .items[0].data.token | tr -d '"')
+    fi
+else
+    # Otherwise it's the same as the normal server control plane URL
+    SOLR_CP_SERVER=${SOLR_SERVER}
+fi
 
 # Generate the environment variables needed for configuring the CSB running in Docker
-echo SOLR_SERVER=${SOLR_DOCKER_SERVER} > .env
-echo SOLR_TOKEN=${SOLR_TOKEN} >> .env
-echo SOLR_CLUSTER_CA_CERTIFICATE=${SOLR_CLUSTER_CA_CERTIFICATE} >> .env
-echo SOLR_NAMESPACE=default >> .env
-echo SOLR_DOMAIN_NAME=ing.local.domain >> .env
+cat > .env << HEREDOC
+SOLR_SERVER=${SOLR_CP_SERVER}
+SOLR_TOKEN=${SOLR_TOKEN}
+SOLR_CLUSTER_CA_CERTIFICATE=${SOLR_CLUSTER_CA_CERTIFICATE}
+SOLR_NAMESPACE=default
+SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME}
+HEREDOC
 
 # Generate terraform.tfvars needed for mucking about directly with terraform/provision
 cat > terraform/provision/terraform.tfvars << HEREDOC
-server="${SOLR_LOCALHOST_SERVER}"
+server="${SOLR_CP_SERVER}"
 token="${SOLR_TOKEN}"
 cluster_ca_certificate="${SOLR_CLUSTER_CA_CERTIFICATE}"
 namespace="default"
-domain_name="ing.local.domain"
+domain_name="${SOLR_DOMAIN_NAME}"
 replicas=3
-solrImageTag="8.6"
+solrImageTag="8.11"
 solrJavaMem="-Xms300m -Xmx300m"
 cloud_name="example"
 solrCpu="1000m"

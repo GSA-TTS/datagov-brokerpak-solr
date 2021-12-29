@@ -70,23 +70,20 @@ resource "null_resource" "manage_solr_user" {
     # Can't reuse containers because they are left in an unpredictable state after a single run
     # Wait for the command to run before deleting the container
     command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec ${self.triggers.cloud_name}-solrcloud-0 --  curl \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$${ADMIN_PASSWORD} \
         'http://${self.triggers.cloud_name}-solrcloud-common/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$CREATE_USER_JSON"
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp2 --image=curlimages/curl --  \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) exec ${self.triggers.cloud_name}-solrcloud-0 --  curl \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$${ADMIN_PASSWORD} \
         'http://${self.triggers.cloud_name}-solrcloud-common/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
-      sleep 10
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
   }
 
@@ -103,23 +100,20 @@ resource "null_resource" "manage_solr_user" {
     # Can't reuse containers because they are left in an unpredictable state after a single run
     # Wait for the command to run before deleting the container
     command = <<-EOF
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp1 --image=curlimages/curl --  \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d)  exec ${self.triggers.cloud_name}-solrcloud-0 --  curl \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$ADMIN_PASSWORD \
         'http://${self.triggers.cloud_name}-solrcloud-common/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$CLEAR_ROLE_JSON"
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) run temp2 --image=curlimages/curl --  \
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d)  exec ${self.triggers.cloud_name}-solrcloud-0 --  curl \
         -s -f -L \
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user admin:$ADMIN_PASSWORD \
         'http://${self.triggers.cloud_name}-solrcloud-common/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
-      sleep 10
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp2
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) delete pod temp1
     EOF
   }
 

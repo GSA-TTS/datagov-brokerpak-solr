@@ -19,6 +19,13 @@ docs.
 Huge props go to @josephlewis42 of Google for publishing and publicizing the
 brokerpak concept, and to the Pivotal team running with the concept!
 
+### Related Docs
+
+- [Solr Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr)
+- [Solr Operator Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr-operator)
+- [Solr Official Docs](https://solr.apache.org/guide/8_11/)
+- [Solr Operator SolrCloud CRD](https://github.com/apache/solr-operator/blob/main/docs/solr-cloud/solr-cloud-crd.md)
+
 ## Prerequisites
 
 1. `make` is used for executing docker commands in a meaningful build cycle.
@@ -43,41 +50,53 @@ down       Bring the cloud-service-broker service down
 test       Execute the brokerpak examples against the running broker
 demo-up    Provision a SolrCloud instance and output the bound credentials
 demo-down  Clean up data left over from tests and demos
-test-env-up Set up a Kubernetes test environment using KinD
-test-env-down Tear down the Kubernetes test environment in KinD
+kind-up    Set up a local Kubernetes test environment using KinD
+kind-down  Tear down the Kubernetes test environment in KinD
 all        Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
 help       This help
 ```
 
 Notable targets are described below.
 
-## Operating a test/demo Kubernetes environment
+## Providing a test/demo Kubernetes environment
 
-### Creating the environment
+To use an existing Kubernetes cluster for testing:
+
+- Ensure that the [solr-operator Helm chart](https://artifacthub.io/packages/helm/apache-solr/solr-operator) is installed (at least 0.5.0)
+- Ensure that the [ingress-nginx Helm chart](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx) is installed
+- Set the `SOLR_DOMAIN_NAME` environment variable to the subdomain where `ingress-nginx` resources will be mapped
+- Set the `KUBECONFIG` environment variable to point to the kubeconfig file for the cluster
+- If your kubeconfig describes multiple clusters, make sure the current cluster is set to the right one
+
+If you don't have an existing Kubernetes cluster, you can create a local test environment in Docker using the Makefile.
+
+### Creating a local k8s environment for testing
 
 Create a temporary Kubernetes cluster to test against with KinD:
 
 ```bash
-make test-env-up
+make kind-up
 ```
 
-### Tearing down the environment
+### Tearing down the local k8s environment
 
-Run 
+Run
 
 ```bash
-make test-env-down
+make kind-down
 ```
 
 ## Iterating on the Terraform code
 
-To work with the Terraform and KinD cluster directly (eg not through the CSB or brokerpak), you can generate an appropriate .tfvars file by running:
+To work with the Terraform and target cluster directly (eg not through the CSB or brokerpak), you can generate an appropriate .tfvars file by running:
 
 ```bash
 make .env
 ```
 
 From that point on, you can `cd terraform/provision` and iterate with `terraform init/plan/apply/etc`. The same configuration is also available in `terraform/bind`.
+
+(Note if you've been working with the broker the configuration will probably already exist.)
 
 ## Building and starting the brokerpak (while the test environment is available)
 

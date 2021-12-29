@@ -7,8 +7,8 @@ CURRENT_CONTEXT=$(kubectl config current-context)
 CLUSTER_CA_CERTIFICATE=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'${CURRENT_CONTEXT}'"))  .cluster["certificate-authority-data"]')
 TOKEN=$(kubectl get secret $( kubectl get serviceaccount default -n default -o json | jq -r '.secrets[0].name' ) -n default -o json | jq -r .data.token)
 
-# We need the Docker-internal control plane URL to be resolved
-SERVER=$(kind get kubeconfig --internal --name=$(kind get clusters | grep datagov-broker-test) | grep server | cut -d ' ' -f 6-)
+CURRENT_CLUSTER=$(kubectl config view --raw -o json | jq -r '.contexts[]| select(.name | contains("'${CURRENT_CONTEXT}'"))  .context.cluster')
+SERVER=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.name | contains("'${CURRENT_CLUSTER}'"))  .cluster["server"]')
 
 template() {
   file=examples.json-template

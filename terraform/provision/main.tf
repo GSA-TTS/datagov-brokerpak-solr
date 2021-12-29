@@ -26,7 +26,7 @@ resource "helm_release" "solrcloud" {
   name            = local.cloud_name
   chart           = "solr"
   repository      = "https://solr.apache.org/charts"
-  namespace       = data.kubernetes_namespace.namespace.id
+  namespace       = var.namespace
   cleanup_on_fail = true
   atomic          = true
   wait            = true
@@ -45,6 +45,7 @@ resource "helm_release" "solrcloud" {
       "replicas"                                   = var.replicas      # How many replicas you want
       "solrOptions.javaMemory"                     = var.solrJavaMem   # How much memory to give each replica
       "solrOptions.security.authenticationType"    = "Basic"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size" = "999m"
     }
     content {
       name  = set.key
@@ -64,7 +65,7 @@ resource "helm_release" "solrcloud" {
     }
     command = <<-EOF
       sleep 30
-      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=3600s -n ${data.kubernetes_namespace.namespace.id} pod -l solr-cloud=${local.cloud_name}
+      kubectl --kubeconfig <(echo $KUBECONFIG | base64 -d) wait --for=condition=ready --timeout=3600s -n ${var.namespace} pod -l solr-cloud=${local.cloud_name}
     EOF
   }
 

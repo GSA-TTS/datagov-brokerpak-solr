@@ -23,7 +23,7 @@ check:
 clean: SHELL:=./test_env_load
 clean: down ## Bring down the broker service if it's up and clean out the database
 	@docker rm -f csb-service-$${SERVICE_NAME}
-	@rm datagov-services-pak-*.brokerpak
+	@rm -f datagov-services-pak-*.brokerpak
 
 # Origin of the subdirectory dependency solution: 
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
@@ -84,7 +84,7 @@ demo-down: examples.json ## Clean up data left over from tests and demos
 	-@helm uninstall example 2>/dev/null ; true
 	-@kubectl delete secret basic-auth1 2>/dev/null ; true
 
-test-env-up: ## Set up a Kubernetes test environment using KinD
+kind-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
 	@kind create cluster --config kind-config.yaml --name datagov-broker-test
 	# Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
@@ -99,20 +99,19 @@ test-env-up: ## Set up a Kubernetes test environment using KinD
       --selector=app.kubernetes.io/component=controller \
       --timeout=270s
 	# Install the ZooKeeper and Solr operators using Helm
-	# TODO: Update the CRD installation in the eks-brokerpak as well
-	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.4.0/all-with-dependencies.yaml
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.4.0 solr solr-operator
+	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
 
-.env: $(HOME)/.kube/config generate-env.sh
-	@echo Generating a .env file containing k8s config for the broker
-	@./generate-env.sh > .env
+.env: generate-env.sh
+	@echo Generating a .env file containing the k8s config needed by the broker
+	@./generate-env.sh
 
-test-env-down: ## Tear down the Kubernetes test environment in KinD
+kind-down: ## Tear down the Kubernetes test environment in KinD
 	kind delete cluster --name datagov-broker-test
 	@rm .env
 
-all: clean build test-env-up up test down test-env-down ## Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
-.PHONY: all clean build up down test test-env-up test-env-down
+all: clean build kind-up up test down kind-down ## Clean and rebuild, start local test environment, run the broker, run the examples, and tear the broker and test env down
+.PHONY: all clean build up down test kind-up kind-down
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html

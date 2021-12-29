@@ -38,7 +38,7 @@ jobs:
         fetch-depth: '0'
 
     - name: Build the brokerpak and set up the test environment
-      run: make build test-env-up 
+      run: make build kind-up 
     
     - name: Stop for debugging
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
@@ -47,7 +47,7 @@ jobs:
         limit-access-to-actor: true  
     
     - name: Start the broker and run the tests
-      run: make up test
+      run: make .env up test
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
