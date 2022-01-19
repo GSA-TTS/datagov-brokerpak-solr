@@ -34,6 +34,14 @@ provision:
     required: false
     type: string
     details: "How much memory to give each replica (default is '-Xms4g -Xmx4g')"
+  - field_name: solrMem
+    required: false
+    type: string
+    details: "How much memory to request for each replica (default is '6G')"
+  - field_name: solrCpu
+    required: false
+    type: string
+    details: "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
   - field_name: cloud_name
     required: false
     type: string
