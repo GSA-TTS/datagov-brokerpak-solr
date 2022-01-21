@@ -46,6 +46,7 @@ resource "helm_release" "solrcloud" {
       "solrOptions.javaMemory"                     = var.solrJavaMem   # How much memory to give each replica
       "solrOptions.security.authenticationType"    = "Basic"
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size" = "999m"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-read-timeout" = "6000"
     }
     content {
       name  = set.key
