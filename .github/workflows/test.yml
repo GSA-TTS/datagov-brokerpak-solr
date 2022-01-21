@@ -2,7 +2,7 @@
 
 name: 'test'
 on:
-  pull_request:
+  push:
   workflow_dispatch:
     inputs:
       debug_enabled:
