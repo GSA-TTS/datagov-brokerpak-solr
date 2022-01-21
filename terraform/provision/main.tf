@@ -34,21 +34,21 @@ resource "helm_release" "solrcloud" {
 
   dynamic "set" {
     for_each = {
-      "addressability.external.domainName"         = var.domain_name # The name of the domain to be used for ingress
-      "addressability.external.method"             = "Ingress"
-      "addressability.external.useExternalAddress" = true
-      "dataStorage.type"                           = "ephemeral"
-      "image.repository"                           = var.solrImageRepo # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
-      "image.tag"                                  = var.solrImageTag  # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
-      "podOptions.resources.requests.memory"       = var.solrMem       # How much memory to request from the scheduler
-      "podOptions.resources.requests.cpu"          = var.solrCpu       # How much vCPU to request from the scheduler
-      "replicas"                                   = var.replicas      # How many replicas you want
-      "solrOptions.javaMemory"                     = var.solrJavaMem   # How much memory to give each replica
-      "solrOptions.security.authenticationType"    = "Basic"
-      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size" = "999m"
-      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-connect-timeout" = 6000
-      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-read-timeout" = 6000
-      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-send-timeout" = 6000
+      "addressability.external.domainName"                                                 = var.domain_name # The name of the domain to be used for ingress
+      "addressability.external.method"                                                     = "Ingress"
+      "addressability.external.useExternalAddress"                                         = true
+      "dataStorage.type"                                                                   = "ephemeral"
+      "image.repository"                                                                   = var.solrImageRepo # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
+      "image.tag"                                                                          = var.solrImageTag  # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
+      "podOptions.resources.requests.memory"                                               = var.solrMem       # How much memory to request from the scheduler
+      "podOptions.resources.requests.cpu"                                                  = var.solrCpu       # How much vCPU to request from the scheduler
+      "replicas"                                                                           = var.replicas      # How many replicas you want
+      "solrOptions.javaMemory"                                                             = var.solrJavaMem   # How much memory to give each replica
+      "solrOptions.security.authenticationType"                                            = "Basic"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size"       = "999m"
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-connect-timeout" = "\"6000\""
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-read-timeout"    = "\"6000\""
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-send-timeout"    = "\"6000\""
     }
     content {
       name  = set.key
