@@ -51,3 +51,5 @@ tee
 .ash_history
 .terraform.d/
 terraform/provision/.cache
+*kubeconfig*
+.kube*
