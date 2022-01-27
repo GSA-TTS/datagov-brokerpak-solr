@@ -22,6 +22,10 @@ provision:
     required: false
     type: number
     details: "How many replicas to stand up in the SolrCloud instance (defaults to 3)"
+  - field_name: restartCron
+    required: false
+    type: string
+    details: "The Restart Schedule specificied through a cron expression (https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format)"
   - field_name: solrImageRepo
     required: false
     type: string
@@ -91,7 +95,7 @@ provision:
     overwrite: false
     type: string
   - name: solrImageTag
-    default: "8.11-slim"
+    default: "8.11"
     overwrite: false
     type: string
   - name: solrJavaMem
@@ -104,6 +108,10 @@ provision:
     type: string
   - name: solrCpu
     default: "2000m"
+    overwrite: false
+    type: string
+  - name: restartCron
+    default: "0 * * * *"
     overwrite: false
     type: string
   outputs: []
