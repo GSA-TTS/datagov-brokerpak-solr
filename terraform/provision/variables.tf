@@ -23,6 +23,12 @@ variable "replicas" {
   default     = 3
 }
 
+variable "restartCron" {
+  type        = string
+  description = "A CRON schedule for automatically restarting the Solr Cloud. Refer to https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format for all possible CRON syntaxes accepted."
+  default     = "0 * * * *"
+}
+
 variable "solrImageRepo" {
   type        = string
   description = "Repository for the Solr Docker image to use, defaults to docker.io/solr"
@@ -32,7 +38,7 @@ variable "solrImageRepo" {
 variable "solrImageTag" {
   type        = string
   description = "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
-  default     = "8.6"
+  default     = "8.11"
 }
 
 variable "solrJavaMem" {

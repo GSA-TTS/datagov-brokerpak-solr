@@ -49,6 +49,7 @@ solrJavaMem="-Xms300m -Xmx300m"
 cloud_name="example"
 solrCpu="1000m"
 solrMem="1G"
+restartCron="*/10 * * * *"
 HEREDOC
 
 # Use the same terraform.tfvars config for mucking about directly with terraform/bind.

@@ -37,7 +37,9 @@ resource "helm_release" "solrcloud" {
       "addressability.external.domainName"                                                 = var.domain_name # The name of the domain to be used for ingress
       "addressability.external.method"                                                     = "Ingress"
       "addressability.external.useExternalAddress"                                         = true
-      "dataStorage.type"                                                                   = "ephemeral"
+      "dataStorage.type"                                                                   = "persistent"
+      "dataStorage.capacity"                                                               = "32Gi"
+      "updateStrategy.restartSchedule"                                                     = var.restartCron
       "image.repository"                                                                   = var.solrImageRepo # Which Docker repo to use for pulling the Solr image (defaults to docker.io/solr)
       "image.tag"                                                                          = var.solrImageTag  # Which version of Solr to use (specify a tag from the official Solr images at https://hub.docker.com/_/solr)
       "podOptions.resources.requests.memory"                                               = var.solrMem       # How much memory to request from the scheduler
@@ -49,6 +51,7 @@ resource "helm_release" "solrcloud" {
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-connect-timeout" = "\"6000\""
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-read-timeout"    = "\"6000\""
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-send-timeout"    = "\"6000\""
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/send-timeout"          = "\"6000\""
     }
     content {
       name  = set.key

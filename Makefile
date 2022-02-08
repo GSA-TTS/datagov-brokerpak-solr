@@ -86,7 +86,7 @@ demo-down: examples.json ## Clean up data left over from tests and demos
 
 kind-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
-	@kind create cluster --config kind-config.yaml --name datagov-broker-test
+	@kind create cluster --config kind/kind-config.yaml --name datagov-broker-test
 	# Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
 	# (This is necessary for the service account to be able to create the cluster-wide
 	# Solr CRD definitions.)
@@ -98,6 +98,7 @@ kind-up: ## Set up a Kubernetes test environment using KinD
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
       --timeout=270s
+	@kubectl apply -f kind/persistent-storage.yml
 	# Install the ZooKeeper and Solr operators using Helm
 	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
 	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
