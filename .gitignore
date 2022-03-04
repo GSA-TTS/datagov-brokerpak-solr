@@ -46,3 +46,8 @@ k8s-creds.yml
 services/solr-cloud/solr-crd.tar.gz
 examples.json
 .env
+.cache/
+.ash_history
+.terraform.d/
+*kubeconfig*
+.kube/

@@ -7,7 +7,7 @@ spec:
   replicas: 3        
   storageType: ephemeral
 ---
-apiVersion: solr.bloomberg.com/v1beta1
+apiVersion: solr.apache.org/v1beta1
 kind: SolrCloud
 metadata:
   name: {{ .Release.Name }}
