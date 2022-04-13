@@ -53,3 +53,4 @@ tee
 terraform/provision/.cache
 *kubeconfig*
 .kube*
+*.binding.json

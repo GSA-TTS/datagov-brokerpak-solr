@@ -2,19 +2,36 @@
 .DEFAULT_GOAL := help
 
 DOCKER_OPTS=--rm -v $(PWD):/brokerpak -w /brokerpak
-CSB=ghcr.io/gsa/cloud-service-broker:v0.4.1gsa
+CSB=ghcr.io/gsa/cloud-service-broker:v0.10.0gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
+
+# Execute the cloud-service-broker binary inside the running container
+CSB_EXEC=docker exec csb-service-$(SERVICE_NAME) /bin/cloud-service-broker
+
+# Generate IDs for the serviceid and planid, formatted like so (suitable for eval):
+#   serviceid=SERVICEID
+#   planid=PLANID
+CSB_SET_IDS=$(CSB_EXEC) client catalog | jq -r '.response.services[]| select(.name=="$(SERVICE_NAME)") | {serviceid: .id, planid: .plans[0].id} | to_entries | .[] | "export " + .key + "=" + (.value | @sh)'
+
+# Wait for an instance operation to complete; append with the instance id
+CSB_INSTANCE_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/instance-wait.sh
+
+# Wait for an binding operation to complete; append with the instance id and binding id
+CSB_BINDING_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-wait.sh
+
+# Fetch the content of a binding; append with the instance id and binding id
+CSB_BINDING_FETCH=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-fetch.sh
 
 CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
 CLOUD_BIND_PARAMS=$(shell cat examples.json |jq '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 
-PREREQUISITES = docker jq kind kubectl helm eden bats
+PREREQUISITES = docker jq kind kubectl helm bats
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
 check: SHELL:=./test_env_load
 check:
-	@echo EDEN_EXEC: $${EDEN_EXEC}
+	@echo CSB_EXEC: $${CSB_EXEC}
 	@echo SERVICE_NAME: $${SERVICE_NAME}
 	@echo PLAN_NAME: $${PLAN_NAME}
 	@echo CLOUD_PROVISION_PARAMS: $${CLOUD_PROVISION_PARAMS}
@@ -25,15 +42,15 @@ clean: down ## Bring down the broker service if it's up and clean out the databa
 	@docker rm -f csb-service-$${SERVICE_NAME}
 	@rm -f datagov-services-pak-*.brokerpak
 
-# Origin of the subdirectory dependency solution: 
+# Origin of the subdirectory dependency solution:
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
 build: manifest.yml solr-cloud.yml $(shell find terraform) ## Build the brokerpak(s)
 	@docker run --user $(shell id -u):$(shell id -g) $(DOCKER_OPTS) $(CSB) pak build
 
-# Healthcheck solution from https://stackoverflow.com/a/47722899 
+# Healthcheck solution from https://stackoverflow.com/a/47722899
 # (Alpine inclues wget, but not curl.)
 up: SHELL:=./test_env_load
-up: .env ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser. 
+up: .env ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
 	docker run $(DOCKER_OPTS) \
 	-p 8080:8080 \
 	-e SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
@@ -62,25 +79,38 @@ test: ## Execute the brokerpak examples against the running broker
 	bats test.bats
 	sudo chmod 744 /etc/hosts
 
+check-ids:
+	@( \
+	eval "$$( $(CSB_SET_IDS) )" ;\
+	echo Service ID: $$serviceid ;\
+	echo Plan ID: $$planid ;\
+	)
+
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json
 
 demo-up: SHELL:=./test_env_load
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	./generate-examples.sh > examples.json
-	@$${EDEN_EXEC} provision -i $${INSTANCE_NAME} -s $${SERVICE_NAME} -p $${PLAN_NAME} -P '$(CLOUD_PROVISION_PARAMS)'
-	@$${EDEN_EXEC} bind -b binding -i $${INSTANCE_NAME}
+	@( \
+	set -e ;\
+	eval "$$( $(CSB_SET_IDS) )" ;\
+	echo "Provisioning ${SERVICE_NAME}:${PLAN_NAME}:${INSTANCE_NAME}" ;\
+	$(CSB_EXEC) client provision --serviceid $$serviceid --planid $$planid --instanceid ${INSTANCE_NAME}                     --params $(CLOUD_PROVISION_PARAMS) 2>&1 > /dev/null ;\
+	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
+	echo "Binding ${SERVICE_NAME}:${PLAN_NAME}:${INSTANCE_NAME}:binding" ;\
+	$(CSB_EXEC) client bind      --serviceid $$serviceid --planid $$planid --instanceid ${INSTANCE_NAME} --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > ${INSTANCE_NAME}.binding.json ;\
+	)
 
 demo-down: SHELL:=./test_env_load
 demo-down: examples.json ## Clean up data left over from tests and demos
 	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
-	-@$${EDEN_EXEC} unbind -b binding -i $${INSTANCE_NAME} 2>/dev/null
-	-@$${EDEN_EXEC} deprovision -i $${INSTANCE_NAME} 2>/dev/null
+	-@$${CSB_EXEC} unbind -b binding -i $${INSTANCE_NAME} 2>/dev/null
+	-@$${CSB_EXEC} deprovision -i $${INSTANCE_NAME} 2>/dev/null
 
 	-@rm examples.json 2>/dev/null; true
 
-	@echo "Removing any orphan services from eden"
-	-@rm ~/.eden/config  2>/dev/null ; true
+	@echo "Removing any orphan services"
 	-@helm uninstall example 2>/dev/null ; true
 	-@kubectl delete secret basic-auth1 2>/dev/null ; true
 
@@ -93,7 +123,7 @@ kind-up: ## Set up a Kubernetes test environment using KinD
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
 	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
 	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.1/deploy/static/provider/kind/deploy.yaml	
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.1/deploy/static/provider/kind/deploy.yaml
 	@kubectl wait --namespace ingress-nginx \
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
@@ -116,7 +146,7 @@ all: clean build kind-up up test down kind-down ## Clean and rebuild, start loca
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
-.PHONY: help 
+.PHONY: help
 help: ## This help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-10s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 

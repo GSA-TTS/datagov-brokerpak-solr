@@ -3,52 +3,49 @@
 # Important Notes:
 # Solr Admin UI native Login/Logout only supported from 8.6+
 
-# Normally we would run 
+# Normally we would run
 # $(CSB) client run-examples --filename examples.json
 # ...to test the brokerpak. However, some of our examples need to run nested.
-# So, we'll run them manually with eden
+# So, we'll run them manually with csb client
 
 function delete_examples_json () {
-	rm examples.json 2>/dev/null
+  rm examples.json 2>/dev/null
 }
 
 function provision () {
   # Takes about 180-210 sec
   uuid=$1
   echo "Provisioning the ${SERVICE_NAME}-${uuid} instance"
-  $EDEN_EXEC provision -i "${INSTANCE_NAME}""-$uuid" -s "${SERVICE_NAME}" -p ${PLAN_NAME} -P "${CLOUD_PROVISION_PARAMS}"
+  $CSB_EXEC client provision --instanceid "${INSTANCE_NAME}""-$uuid" --serviceid "${SERVICE_ID}" --planid ${PLAN_ID} --params "${CLOUD_PROVISION_PARAMS}"
+  ${CSB_INSTANCE_WAIT} "${INSTANCE_NAME}""-$uuid" ;\
 }
 
 function deprovision () {
   uuid=$1
-	echo "Deprovisioning the ${SERVICE_NAME}-${uuid} instance"
-	$EDEN_EXEC deprovision -i "${INSTANCE_NAME}""-$uuid" 2>/dev/null
+  echo "Deprovisioning the ${SERVICE_NAME}-${uuid} instance"
+  $CSB_EXEC client deprovision --instanceid "${INSTANCE_NAME}""-$uuid" --serviceid "${SERVICE_ID}" --planid ${PLAN_ID} 2>/dev/null
 }
 
 function bind () {
   uuid=$1
   bind_name=$2
-	echo "Binding the ${SERVICE_NAME}-${uuid} instance"
-	$EDEN_EXEC bind -b $bind_name -i "${INSTANCE_NAME}""-$uuid"
+  echo "Binding the ${SERVICE_NAME}-${uuid} instance"
+  $CSB_EXEC client bind --bindingid $bind_name --instanceid "${INSTANCE_NAME}""-$uuid" --serviceid $$serviceid --planid $$planid | jq -r .response > ${INSTANCE_NAME}-${uuid}-${bind_name}.binding.json
 }
 
 function unbind () {
   uuid=$1
   bind_name=$2
-	echo "Unbinding the ${SERVICE_NAME}-${uuid} instance"
-	$EDEN_EXEC unbind -b $bind_name -i "${INSTANCE_NAME}""-$uuid" 2>/dev/null
+  echo "Unbinding the ${SERVICE_NAME}-${uuid} instance"
+  $CSB_EXEC client unbind --bindingid $bind_name --instanceid "${INSTANCE_NAME}""-$uuid" --serviceid $$serviceid --planid $$planid 2>/dev/null
 }
 
-function clean_up_eden_helm () {
-	echo "Removing any orphan services from eden"
+function clean_up_helm () {
+  echo "Removing any orphan services"
 
-  # Remove old eden services
-  mkdir -p ~/.eden
-  touch ~/.eden/config
-	rm ~/.eden/config  2>/dev/null
   # Remove old helm releases
   for i in $(helm list -a | grep -oE 'solr-([0-9]|[a-z]){16}'); do helm uninstall $i; done;
-	# kubectl delete secret basic-auth1 2>/dev/null
+  # kubectl delete secret basic-auth1 2>/dev/null
 }
 
 @test 'examples.json exists' {
@@ -60,7 +57,7 @@ function clean_up_eden_helm () {
 }
 
 @test 'provision 1 works' {
-  clean_up_eden_helm
+  clean_up_helm
   provision '1'
 }
 
@@ -215,7 +212,7 @@ function clean_up_eden_helm () {
 
 @test 'deprovision 1 works' {
   deprovision '1'
-  clean_up_eden_helm
+  clean_up_helm
   delete_examples_json
 }
 
