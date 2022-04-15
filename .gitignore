@@ -50,6 +50,7 @@ examples.json
 tee
 .ash_history
 .terraform.d/
+.terraform.lock.hcl
 terraform/provision/.cache
 *kubeconfig*
 .kube*

@@ -52,6 +52,7 @@ resource "helm_release" "solrcloud" {
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-read-timeout"    = "\"6000\""
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-send-timeout"    = "\"6000\""
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/send-timeout"          = "\"6000\""
+      "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/keepalive_timeout"     = "\"6000\""
     }
     content {
       name  = set.key
