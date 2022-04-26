@@ -46,6 +46,7 @@ resource "helm_release" "solrcloud" {
       "podOptions.resources.requests.cpu"                                                  = var.solrCpu       # How much vCPU to request from the scheduler
       "replicas"                                                                           = var.replicas      # How many replicas you want
       "solrOptions.javaMemory"                                                             = var.solrJavaMem   # How much memory to give each replica
+      "solrOptions.javaOpts"                                                               = "-DzkClientTimeout=600000"
       "solrOptions.security.authenticationType"                                            = "Basic"
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-body-size"       = "999m"
       "ingressOptions.annotations.nginx\\.ingress\\.kubernetes\\.io/proxy-connect-timeout" = "\"6000\""
