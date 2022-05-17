@@ -54,3 +54,4 @@ terraform/provision/.cache
 *kubeconfig*
 .kube*
 *.binding.json
+.terraform.lock.hcl
