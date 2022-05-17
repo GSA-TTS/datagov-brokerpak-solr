@@ -3,6 +3,23 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_cluster" "solr-cluster" {
   name = "solr-cluster"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
+  configuration {
+    execute_command_configuration {
+      kms_key_id = aws_kms_key.ecs-log-key.arn
+      logging    = "OVERRIDE"
+
+      log_configuration {
+        cloud_watch_encryption_enabled = true
+        cloud_watch_log_group_name     = aws_cloudwatch_log_group.ecs-logs.name
+      }
+    }
+  }
 }
 
 resource "aws_ecs_cluster_capacity_providers" "fargate" {
@@ -18,11 +35,13 @@ resource "aws_ecs_cluster_capacity_providers" "fargate" {
 }
 
 resource "aws_ecs_task_definition" "solr" {
-  family = "service"
+  family = "solr-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 2048
   memory                   = 14336
+  task_role_arn            = "${aws_iam_role.solr-task-execution.arn}"
+  execution_role_arn       = "${aws_iam_role.solr-task-execution.arn}"
   container_definitions = jsonencode([
     {
       name      = "solr"
@@ -30,39 +49,44 @@ resource "aws_ecs_task_definition" "solr" {
       cpu       = 2048
       memory    = 14336
       essential = true
+      # command   = ["wget -o start.sh", "https://gist.githubusercontent.com/FuhuXia/91cac09b23ef29e5f219ba83df8b808e/raw/76de04dd7edf0faef2c04d8a8bbd51ee2cef237f/solr-setup-for-catalog.sh", "&&", "./start.sh"]
       portMappings = [
         {
           containerPort = 8983
           hostPort      = 8983
         }
       ]
-      # mountPoints = [
-      #   {
-      #     containerPath = "/var/solr/data",
-      #     sourceVolume = "solr-data"
-      #   }
-      # ]
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group = aws_cloudwatch_log_group.ecs-logs.name,
+          awslogs-region = "us-west-2",
+          awslogs-stream-prefix = "application"
+        }
+      }
+      mountPoints = [
+        {
+          containerPath = "/var/solr/data",
+          sourceVolume = "solr-data",
+          readOnly = false
+        }
+      ]
     },
   ])
 
-  # volume {
-  #   name      = "solr-data"
-  #   efs_volume_configuration {
-  #     file_system_id          = aws_efs_file_system.solr-data.id
-  #     root_directory          = "/"
-  #     # transit_encryption      = "ENABLED"
-  #     # transit_encryption_port = 2999
-  #     # authorization_config {
-  #     #   access_point_id = aws_efs_access_point.solr-data-access.id
-  #     #   iam             = "ENABLED"
-  #     # }
-  #   }
-  # }
-
-  # placement_constraints {
-  #   type       = "memberOf"
-  #   expression = "attribute:ecs.availability-zone in [us-west-2a]"
-  # }
+  volume {
+    name      = "solr-data"
+    efs_volume_configuration {
+      file_system_id          = aws_efs_file_system.solr-data.id
+      root_directory          = "/"
+      transit_encryption      = "ENABLED"
+      transit_encryption_port = 2049
+      authorization_config {
+        access_point_id = aws_efs_access_point.solr-data-ap.id
+        iam             = "ENABLED"
+      }
+    }
+  }
 }
 
 resource "aws_ecs_service" "solr" {
@@ -77,9 +101,4 @@ resource "aws_ecs_service" "solr" {
     subnets = module.vpc.public_subnets
     assign_public_ip = true
   }
-
-  # placement_constraints {
-  #   type       = "memberOf"
-  #   expression = "attribute:ecs.availability-zone in [us-west-2a, us-west-2b]"
-  # }
 }

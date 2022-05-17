@@ -8,7 +8,6 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.4"
-  # insert the 23 required variables here
   name = "eks-vpc"
   cidr = "10.31.0.0/16"
 
@@ -30,3 +29,19 @@ module "vpc" {
   # })
 }
 
+resource "aws_security_group_rule" "allow-efs" {
+  type              = "ingress"
+  from_port         = 2049
+  to_port           = 2049
+  protocol          = "tcp"
+  cidr_blocks       = module.vpc.private_subnets_cidr_blocks
+  security_group_id = module.vpc.default_security_group_id
+}
+resource "aws_security_group_rule" "allow-efs-b" {
+  type              = "egress"
+  from_port         = 2049
+  to_port           = 2049
+  protocol          = "tcp"
+  cidr_blocks       = module.vpc.private_subnets_cidr_blocks
+  security_group_id = module.vpc.default_security_group_id
+}

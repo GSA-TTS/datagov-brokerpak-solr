@@ -1,9 +1,7 @@
 
-resource "aws_iam_role" "solr" {
-  name = "solr_role"
+resource "aws_iam_role" "solr-task-execution" {
+  name = "solr_task_role"
 
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -12,7 +10,7 @@ resource "aws_iam_role" "solr" {
         Effect = "Allow"
         Sid    = ""
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = "ecs-tasks.amazonaws.com"
         }
       },
     ]
@@ -21,17 +19,27 @@ resource "aws_iam_role" "solr" {
 
 resource "aws_iam_policy_attachment" "solr-efs-ecs" {
   name       = "solr-efs-ecs-attachment"
-  roles      = [aws_iam_role.solr.name]
+  roles      = [aws_iam_role.solr-task-execution.name]
   policy_arn = aws_iam_policy.ecs-solr-efs.arn
+}
+
+# resource "aws_iam_policy_attachment" "solr-ecs-basic" {
+#   name       = "solr-efs-ecs-attachment"
+#   roles      = [aws_iam_role.solr-task-execution.name]
+#   policy_arn = aws_iam_policy.ecs-basic.arn
+# }
+
+resource "aws_iam_policy_attachment" "solr-ecs-execution-role" {
+  name       = "solr-ecs-execution-role-attachment"
+  roles      = [aws_iam_role.solr-task-execution.name]
+  policy_arn = aws_iam_policy.ecs-tasks.arn
 }
 
 resource "aws_iam_policy" "ecs-solr-efs" {
   name        = "efs-policy"
   path        = "/"
-  description = "Solr EFS ECS Policy"
+  description = "Allow ECS to talk to EFS"
 
-  # Terraform's "jsonencode" function converts a
-  # Terraform expression result to valid JSON syntax.
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -43,6 +51,55 @@ resource "aws_iam_policy" "ecs-solr-efs" {
         ]
         Effect   = "Allow"
         Resource = "arn:aws:elasticfilesystem:${var.region}:${data.aws_caller_identity.current.id}:file-system/${aws_efs_file_system.solr-data.id}"
+      },
+    ]
+  })
+}
+
+# resource "aws_iam_policy" "ecs-basic" {
+#   name        = "ecs-basic-policy"
+#   path        = "/"
+#   description = "Allow solr to run on ecs"
+# 
+#   policy = jsonencode({
+#     Version = "2012-10-17"
+#     Statement = [
+#       {
+#         Action = [
+#           "ec2:AttachNetworkInterface",
+#           "ec2:CreateNetworkInterface",
+#           "ec2:CreateNetworkInterfacePermission",
+#           "ec2:DeleteNetworkInterface",
+#           "ec2:DeleteNetworkInterfacePermission",
+#           "ec2:Describe*",
+#           "ec2:DetachNetworkInterface",
+#         ]
+#         Effect   = "Allow"
+#         Resource = "*"
+#       },
+#     ]
+#   })
+# }
+
+resource "aws_iam_policy" "ecs-tasks" {
+  name        = "ecs-tasks"
+  path        = "/"
+  description = "Allow solr task role to run on ecs"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "ecr:*",
+          # "s3:*",
+          # "efs:*"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
       },
     ]
   })
