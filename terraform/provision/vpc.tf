@@ -45,3 +45,11 @@ resource "aws_security_group_rule" "allow-efs-b" {
   cidr_blocks       = module.vpc.private_subnets_cidr_blocks
   security_group_id = module.vpc.default_security_group_id
 }
+resource "aws_security_group_rule" "allow-lb" {
+  type              = "ingress"
+  from_port         = 8983
+  to_port           = 8983
+  protocol          = "tcp"
+  source_security_group_id = aws_security_group.solr-lb-sg.id
+  security_group_id = module.vpc.default_security_group_id
+}

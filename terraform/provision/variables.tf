@@ -14,3 +14,8 @@ variable "labels" {
   type    = map(any)
   default = {}
 }
+
+variable "zone" {
+  type = string
+  description = "DNS Zone to host Solr service"
+}

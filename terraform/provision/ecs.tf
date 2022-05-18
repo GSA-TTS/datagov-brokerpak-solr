@@ -98,7 +98,12 @@ resource "aws_ecs_service" "solr" {
   # iam_role        = aws_iam_role.solr.arn
 
   network_configuration {
-    subnets = module.vpc.public_subnets
+    subnets = module.vpc.private_subnets
     assign_public_ip = true
+  }
+  load_balancer {
+    target_group_arn = aws_lb_target_group.solr-target.id
+    container_name   = "solr"
+    container_port   = 8983
   }
 }
