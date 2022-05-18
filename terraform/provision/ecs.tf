@@ -2,7 +2,7 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_cluster" "solr-cluster" {
-  name = "solr-cluster"
+  name = "solr-${var.instance_name}-cluster"
 
   setting {
     name  = "containerInsights"
@@ -35,7 +35,7 @@ resource "aws_ecs_cluster_capacity_providers" "fargate" {
 }
 
 resource "aws_ecs_task_definition" "solr" {
-  family = "solr-service"
+  family = "solr-${var.instance_name}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 2048
@@ -67,7 +67,7 @@ resource "aws_ecs_task_definition" "solr" {
       mountPoints = [
         {
           containerPath = "/var/solr/data",
-          sourceVolume = "solr-data",
+          sourceVolume = "solr-${var.instance_name}-data",
           readOnly = false
         }
       ]
@@ -75,7 +75,7 @@ resource "aws_ecs_task_definition" "solr" {
   ])
 
   volume {
-    name      = "solr-data"
+    name      = "solr-${var.instance_name}-data"
     efs_volume_configuration {
       file_system_id          = aws_efs_file_system.solr-data.id
       root_directory          = "/"
@@ -90,7 +90,7 @@ resource "aws_ecs_task_definition" "solr" {
 }
 
 resource "aws_ecs_service" "solr" {
-  name            = "solr"
+  name            = "solr-${var.instance_name}"
   cluster         = aws_ecs_cluster.solr-cluster.id
   task_definition = aws_ecs_task_definition.solr.arn
   desired_count   = 1

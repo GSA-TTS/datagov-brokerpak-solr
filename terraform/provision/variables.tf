@@ -1,4 +1,9 @@
 
+variable "instance_name" {
+  type = string
+  description = "Unique ID to separate solr instanceresources"
+}
+
 variable "region" {
   type        = string
   description = "region to create solr ecs cluster"

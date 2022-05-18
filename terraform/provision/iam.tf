@@ -1,6 +1,6 @@
 
 resource "aws_iam_role" "solr-task-execution" {
-  name = "solr_task_role"
+  name = "solr-${var.instance_name}-task_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -18,7 +18,7 @@ resource "aws_iam_role" "solr-task-execution" {
 }
 
 resource "aws_iam_policy_attachment" "solr-efs-ecs" {
-  name       = "solr-efs-ecs-attachment"
+  name       = "solr-${var.instance_name}-efs-ecs-attachment"
   roles      = [aws_iam_role.solr-task-execution.name]
   policy_arn = aws_iam_policy.ecs-solr-efs.arn
 }
@@ -30,13 +30,13 @@ resource "aws_iam_policy_attachment" "solr-efs-ecs" {
 # }
 
 resource "aws_iam_policy_attachment" "solr-ecs-execution-role" {
-  name       = "solr-ecs-execution-role-attachment"
+  name       = "solr-${var.instance_name}-ecs-execution-role-attachment"
   roles      = [aws_iam_role.solr-task-execution.name]
   policy_arn = aws_iam_policy.ecs-tasks.arn
 }
 
 resource "aws_iam_policy" "ecs-solr-efs" {
-  name        = "efs-policy"
+  name        = "solr-${var.instance_name}-efs-policy"
   path        = "/"
   description = "Allow ECS to talk to EFS"
 
@@ -82,7 +82,7 @@ resource "aws_iam_policy" "ecs-solr-efs" {
 # }
 
 resource "aws_iam_policy" "ecs-tasks" {
-  name        = "ecs-tasks"
+  name        = "solr-${var.instance_name}-ecs-tasks"
   path        = "/"
   description = "Allow solr task role to run on ecs"
 

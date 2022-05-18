@@ -1,6 +1,6 @@
 
 resource "aws_efs_file_system" "solr-data" {
-  creation_token = "solr-data"
+  creation_token = "solr-${var.instance_name}-data"
 
   # encryption-at-rest
   encrypted = true
