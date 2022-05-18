@@ -8,13 +8,13 @@ data "aws_availability_zones" "available" {
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.4"
-  name = "eks-vpc"
-  cidr = "10.31.0.0/16"
+  name    = "eks-vpc"
+  cidr    = "10.31.0.0/16"
 
   azs = data.aws_availability_zones.available.names
   # These subnets represent AZs us-west-2a, us-west-2b, and us-west-2c
   # This gives us 8187 IP addresses that can be given to nodes and (via the VPC-CNI add-on) pods.
-  private_subnets = ["10.31.0.0/19", "10.31.32.0/19"] # , "10.31.64.0/19"]
+  private_subnets = ["10.31.0.0/19", "10.31.32.0/19"]    # , "10.31.64.0/19"]
   public_subnets  = ["10.31.128.0/19", "10.31.160.0/19"] # , "10.31.192.0/19"]
 
   enable_nat_gateway   = true
@@ -46,10 +46,10 @@ resource "aws_security_group_rule" "allow-efs-b" {
   security_group_id = module.vpc.default_security_group_id
 }
 resource "aws_security_group_rule" "allow-lb" {
-  type              = "ingress"
-  from_port         = 8983
-  to_port           = 8983
-  protocol          = "tcp"
+  type                     = "ingress"
+  from_port                = 8983
+  to_port                  = 8983
+  protocol                 = "tcp"
   source_security_group_id = aws_security_group.solr-lb-sg.id
-  security_group_id = module.vpc.default_security_group_id
+  security_group_id        = module.vpc.default_security_group_id
 }

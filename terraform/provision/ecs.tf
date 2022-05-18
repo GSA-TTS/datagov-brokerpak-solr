@@ -35,13 +35,13 @@ resource "aws_ecs_cluster_capacity_providers" "fargate" {
 }
 
 resource "aws_ecs_task_definition" "solr" {
-  family = "solr-${var.instance_name}-service"
+  family                   = "solr-${var.instance_name}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = 2048
   memory                   = 14336
-  task_role_arn            = "${aws_iam_role.solr-task-execution.arn}"
-  execution_role_arn       = "${aws_iam_role.solr-task-execution.arn}"
+  task_role_arn            = aws_iam_role.solr-task-execution.arn
+  execution_role_arn       = aws_iam_role.solr-task-execution.arn
   container_definitions = jsonencode([
     {
       name      = "solr"
@@ -59,23 +59,23 @@ resource "aws_ecs_task_definition" "solr" {
       logConfiguration = {
         logDriver = "awslogs",
         options = {
-          awslogs-group = aws_cloudwatch_log_group.ecs-logs.name,
-          awslogs-region = "us-west-2",
+          awslogs-group         = aws_cloudwatch_log_group.ecs-logs.name,
+          awslogs-region        = "us-west-2",
           awslogs-stream-prefix = "application"
         }
       }
       mountPoints = [
         {
           containerPath = "/var/solr/data",
-          sourceVolume = "solr-${var.instance_name}-data",
-          readOnly = false
+          sourceVolume  = "solr-${var.instance_name}-data",
+          readOnly      = false
         }
       ]
     },
   ])
 
   volume {
-    name      = "solr-${var.instance_name}-data"
+    name = "solr-${var.instance_name}-data"
     efs_volume_configuration {
       file_system_id          = aws_efs_file_system.solr-data.id
       root_directory          = "/"
@@ -94,11 +94,11 @@ resource "aws_ecs_service" "solr" {
   cluster         = aws_ecs_cluster.solr-cluster.id
   task_definition = aws_ecs_task_definition.solr.arn
   desired_count   = 1
-  launch_type = "FARGATE"
+  launch_type     = "FARGATE"
   # iam_role        = aws_iam_role.solr.arn
 
   network_configuration {
-    subnets = module.vpc.private_subnets
+    subnets          = module.vpc.private_subnets
     assign_public_ip = true
   }
   load_balancer {

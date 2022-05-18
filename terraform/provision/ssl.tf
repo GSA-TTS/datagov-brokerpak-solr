@@ -5,7 +5,7 @@ locals {
 
 # Create ACM certificate for the sub-domain
 resource "aws_acm_certificate" "cert" {
-  domain_name = local.domain
+  domain_name       = local.domain
   validation_method = "DNS"
   tags = merge(var.labels, {
     environment = var.instance_name
