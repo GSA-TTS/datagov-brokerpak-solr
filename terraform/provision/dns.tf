@@ -115,8 +115,8 @@ resource "aws_route53_record" "cluster-ds" {
 
 # Alias to Solr Load Balancer
 resource "aws_route53_record" "solr" {
-  zone_id = data.aws_route53_zone.zone.zone_id
-  name    = "${var.instance_name}.${data.aws_route53_zone.zone.name}"
+  zone_id = aws_route53_zone.cluster.zone_id
+  name    = "solr-${var.instance_name}.${data.aws_route53_zone.zone.name}"
   type    = "A"
   alias {
     name                   = aws_lb.solr.dns_name

@@ -4,9 +4,9 @@ resource "aws_lb" "solr" {
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.solr-lb-sg.id]
-  subnets            = module.vpc.private_subnets
+  subnets            = module.vpc.public_subnets
 
-  enable_deletion_protection = true
+  enable_deletion_protection = false
 
   # access_logs {
   #   bucket  = aws_s3_bucket.lb_logs.bucket
@@ -89,13 +89,13 @@ resource "aws_security_group" "solr-lb-sg" {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
+    security_groups = [module.vpc.default_security_group_id]
   }
   egress {
     description = "solr cluster"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
+    security_groups = [module.vpc.default_security_group_id]
   }
 }

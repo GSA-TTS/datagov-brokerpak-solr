@@ -42,7 +42,7 @@ resource "aws_ecs_task_definition" "solr" {
   memory                   = 14336
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
-  container_definitions = jsonencode([
+  container_definitions    = jsonencode([
     {
       name      = "solr"
       image     = "solr:8.11"
@@ -99,7 +99,7 @@ resource "aws_ecs_service" "solr" {
 
   network_configuration {
     subnets          = module.vpc.private_subnets
-    assign_public_ip = true
+    assign_public_ip = false
   }
   load_balancer {
     target_group_arn = aws_lb_target_group.solr-target.id
