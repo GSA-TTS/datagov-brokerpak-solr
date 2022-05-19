@@ -45,11 +45,12 @@ resource "aws_ecs_task_definition" "solr" {
   container_definitions    = jsonencode([
     {
       name      = "solr"
-      image     = "solr:8.11"
+      image     = "ghcr.io/gsa/catalog.data.gov.solr:8-curl"
       cpu       = 2048
       memory    = 14336
       essential = true
-      # command   = ["wget -o start.sh", "https://gist.githubusercontent.com/FuhuXia/91cac09b23ef29e5f219ba83df8b808e/raw/76de04dd7edf0faef2c04d8a8bbd51ee2cef237f/solr-setup-for-catalog.sh", "&&", "./start.sh"]
+      # command   = ["/bin/bash", "-c", "cd /tmp; /usr/bin/wget https://gist.githubusercontent.com/FuhuXia/91cac09b23ef29e5f219ba83df8b808e/raw/9a99a5621a2ebd204ed1b19a3843e2fd743c3fea/solr-setup-for-catalog.sh; chmod 755 solr-setup-for-catalog.sh; ./solr-setup-for-catalog.sh; cd -; solr-fg -m 12g"]
+      command   = ["/bin/bash", "-c", "cd /tmp; /usr/bin/wget https://gist.githubusercontent.com/nickumia-reisys/18544d2c6aad4160293bda1fec6ead7f/raw/b1d234953c79771c78a5aa4731bfdbe6cfe7bf12/solr_setup.sh; chmod 755 solr_setup.sh; ./solr_setup.sh; cd -; init-var-solr; precreate-core ckan /var/solr/data/ckan_config; solr-fg -m 12g"]
       portMappings = [
         {
           containerPort = 8983
@@ -66,7 +67,7 @@ resource "aws_ecs_task_definition" "solr" {
       }
       mountPoints = [
         {
-          containerPath = "/var/solr/data",
+          containerPath = "/var/solr",
           sourceVolume  = "solr-${var.instance_name}-data",
           readOnly      = false
         }
@@ -78,7 +79,7 @@ resource "aws_ecs_task_definition" "solr" {
     name = "solr-${var.instance_name}-data"
     efs_volume_configuration {
       file_system_id          = aws_efs_file_system.solr-data.id
-      root_directory          = "/"
+      root_directory          = "/data1"
       transit_encryption      = "ENABLED"
       transit_encryption_port = 2049
       authorization_config {

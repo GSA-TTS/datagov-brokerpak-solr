@@ -98,4 +98,15 @@ resource "aws_security_group" "solr-lb-sg" {
     protocol    = "-1"
     security_groups = [module.vpc.default_security_group_id]
   }
+  egress {
+    description = "GHCR Pull Images"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
+  }
+}
+
+data "dns_a_record_set" "ghcr" {
+  host = "ghcr.io"
 }
