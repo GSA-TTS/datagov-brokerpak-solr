@@ -67,7 +67,7 @@ resource "aws_ecs_task_definition" "solr" {
       }
       mountPoints = [
         {
-          containerPath = "/var/solr",
+          containerPath = "/var/solr/data",
           sourceVolume  = "solr-${var.instance_name}-data",
           readOnly      = false
         }
@@ -79,11 +79,10 @@ resource "aws_ecs_task_definition" "solr" {
     name = "solr-${var.instance_name}-data"
     efs_volume_configuration {
       file_system_id          = aws_efs_file_system.solr-data.id
-      root_directory          = "/data1"
       transit_encryption      = "ENABLED"
       transit_encryption_port = 2049
       authorization_config {
-        access_point_id = aws_efs_access_point.solr-data-ap.id
+        access_point_id = aws_efs_access_point.solr-data-main.id
         iam             = "ENABLED"
       }
     }
@@ -91,11 +90,12 @@ resource "aws_ecs_task_definition" "solr" {
 }
 
 resource "aws_ecs_service" "solr" {
-  name            = "solr-${var.instance_name}"
-  cluster         = aws_ecs_cluster.solr-cluster.id
-  task_definition = aws_ecs_task_definition.solr.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
+  name                  = "solr-${var.instance_name}"
+  cluster               = aws_ecs_cluster.solr-cluster.id
+  task_definition       = aws_ecs_task_definition.solr.arn
+  desired_count         = 1
+  launch_type           = "FARGATE"
+  wait_for_steady_state = true
   # iam_role        = aws_iam_role.solr.arn
 
   network_configuration {
@@ -107,4 +107,8 @@ resource "aws_ecs_service" "solr" {
     container_name   = "solr"
     container_port   = 8983
   }
+
+  depends_on = [
+    aws_efs_mount_target.all
+  ]
 }

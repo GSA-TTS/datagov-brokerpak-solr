@@ -9,12 +9,15 @@ resource "aws_efs_file_system" "solr-data" {
   }
 }
 
-resource "aws_efs_access_point" "solr-data-ap" {
+resource "aws_efs_access_point" "solr-data-main" {
   file_system_id = aws_efs_file_system.solr-data.id
-  # EFS needs to be mounted as root to be able to write-to/create files
-  posix_user {
-    gid = "0"
-    uid = "0"
+  root_directory {
+    path = "/data1"
+    creation_info {
+      owner_gid   = "8983"
+      owner_uid   = "8983"
+      permissions = "777"
+    }
   }
 }
 
