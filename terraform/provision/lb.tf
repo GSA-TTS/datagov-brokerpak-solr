@@ -1,6 +1,10 @@
 
+locals {
+  lb_name = substr(var.instance_name, 0, 29)
+}
+
 resource "aws_lb" "solr" {
-  name               = "solr-${var.instance_name}-lb"
+  name               = "${local.lb_name}-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.solr-lb-sg.id]
@@ -48,20 +52,21 @@ resource "aws_lb_listener" "https_response" {
 }
 
 resource "aws_lb_target_group" "solr-target" {
-  name        = "solr-${var.instance_name}-tg"
+  name        = "${local.lb_name}-tg"
   port        = 8983
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
 
   health_check {
-    healthy_threshold   = 2
-    unhealthy_threshold = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
     interval            = 30
     path                = "/"
     port                = 8983
     protocol            = "HTTP"
     timeout             = 10
+    matcher             = "200-399"
   }
 }
 
@@ -101,8 +106,8 @@ resource "aws_security_group" "solr-lb-sg" {
   egress {
     description = "GHCR Pull Images"
     from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    to_port     = 65535
+    protocol    = "tcp"
     cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
   }
 }

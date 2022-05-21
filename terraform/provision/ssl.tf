@@ -1,6 +1,6 @@
 
 locals {
-  domain = "solr-${var.instance_name}.${var.zone}"
+  domain = "solr-${local.lb_name}.${var.zone}"
 }
 
 # Create ACM certificate for the sub-domain

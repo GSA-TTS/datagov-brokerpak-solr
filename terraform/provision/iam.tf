@@ -1,6 +1,10 @@
 
+locals {
+  id_64char = substr(var.instance_name, 0, 54)
+}
+
 resource "aws_iam_role" "solr-task-execution" {
-  name = "solr-${var.instance_name}-task_role"
+  name = "${local.id_64char}-task_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -22,12 +26,6 @@ resource "aws_iam_policy_attachment" "solr-efs-ecs" {
   roles      = [aws_iam_role.solr-task-execution.name]
   policy_arn = aws_iam_policy.ecs-solr-efs.arn
 }
-
-# resource "aws_iam_policy_attachment" "solr-ecs-basic" {
-#   name       = "solr-efs-ecs-attachment"
-#   roles      = [aws_iam_role.solr-task-execution.name]
-#   policy_arn = aws_iam_policy.ecs-basic.arn
-# }
 
 resource "aws_iam_policy_attachment" "solr-ecs-execution-role" {
   name       = "solr-${var.instance_name}-ecs-execution-role-attachment"
@@ -56,31 +54,6 @@ resource "aws_iam_policy" "ecs-solr-efs" {
   })
 }
 
-# resource "aws_iam_policy" "ecs-basic" {
-#   name        = "ecs-basic-policy"
-#   path        = "/"
-#   description = "Allow solr to run on ecs"
-# 
-#   policy = jsonencode({
-#     Version = "2012-10-17"
-#     Statement = [
-#       {
-#         Action = [
-#           "ec2:AttachNetworkInterface",
-#           "ec2:CreateNetworkInterface",
-#           "ec2:CreateNetworkInterfacePermission",
-#           "ec2:DeleteNetworkInterface",
-#           "ec2:DeleteNetworkInterfacePermission",
-#           "ec2:Describe*",
-#           "ec2:DetachNetworkInterface",
-#         ]
-#         Effect   = "Allow"
-#         Resource = "*"
-#       },
-#     ]
-#   })
-# }
-
 resource "aws_iam_policy" "ecs-tasks" {
   name        = "solr-${var.instance_name}-ecs-tasks"
   path        = "/"
@@ -96,11 +69,42 @@ resource "aws_iam_policy" "ecs-tasks" {
           "logs:PutLogEvents",
           "ecr:*",
           # "s3:*",
-          # "efs:*"
+          "efs:*",
+          "ec2:AttachNetworkInterface",
+          "ec2:CreateNetworkInterface",
+          "ec2:CreateNetworkInterfacePermission",
+          "ec2:DeleteNetworkInterface",
+          "ec2:DeleteNetworkInterfacePermission",
+          "ec2:Describe*",
+          "ec2:DetachNetworkInterface",
+          "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:Describe*",
+          "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+          "elasticloadbalancing:RegisterTargets",
+          "route53:ChangeResourceRecordSets",
+          "route53:CreateHealthCheck",
+          "route53:DeleteHealthCheck",
+          "route53:Get*",
+          "route53:List*",
+          "route53:UpdateHealthCheck",
+          "servicediscovery:DeregisterInstance",
+          "servicediscovery:Get*",
+          "servicediscovery:List*",
+          "servicediscovery:RegisterInstance",
+          "servicediscovery:UpdateInstanceCustomHealthStatus"
         ]
         Effect   = "Allow"
         Resource = "*"
       },
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreateServiceLinkedRole"
+        ],
+        Resource  = "arn:aws:iam::*:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS*",
+        Condition = { "StringLike" : { "iam:AWSServiceName" : "ecs.amazonaws.com" } }
+      }
     ]
   })
 }
