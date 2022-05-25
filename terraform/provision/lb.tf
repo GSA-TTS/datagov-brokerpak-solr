@@ -90,17 +90,17 @@ resource "aws_security_group" "solr-lb-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
-    description = "solr cluster"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description     = "solr cluster"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [module.vpc.default_security_group_id]
   }
   egress {
-    description = "solr cluster"
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    description     = "solr cluster"
+    from_port       = 0
+    to_port         = 0
+    protocol        = "-1"
     security_groups = [module.vpc.default_security_group_id]
   }
   egress {

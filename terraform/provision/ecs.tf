@@ -42,16 +42,14 @@ resource "aws_ecs_task_definition" "solr" {
   memory                   = 14336
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
-  container_definitions    = jsonencode([
+  container_definitions = jsonencode([
     {
       name      = "solr"
       image     = "ghcr.io/gsa/catalog.data.gov.solr:8-stunnel-root"
       cpu       = 1024
       memory    = 14336
       essential = true
-      # enableExecuteCommand = true
-      # command   = ["/bin/bash", "-c", "cd /tmp; /usr/bin/wget https://gist.githubusercontent.com/FuhuXia/91cac09b23ef29e5f219ba83df8b808e/raw/9a99a5621a2ebd204ed1b19a3843e2fd743c3fea/solr-setup-for-catalog.sh; chmod 755 solr-setup-for-catalog.sh; ./solr-setup-for-catalog.sh; cd -; solr-fg -m 12g"]
-      command   = ["/bin/bash", "-c", join(" ", [
+      command = ["/bin/bash", "-c", join(" ", [
         "sed -i 's/{region}/${var.region}/g' /etc/amazon/efs/efs-utils.conf;",
         "printf \"\n${aws_efs_file_system.solr-data.id}:/data1 /var/solr/data efs tls,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,_netdev 0 0\n\" >> /etc/fstab;",
         "mount -t efs -o tls,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport ${aws_efs_file_system.solr-data.id}:/data1 /var/solr/data;",
@@ -84,7 +82,7 @@ resource "aws_ecs_service" "solr" {
   task_definition       = aws_ecs_task_definition.solr.arn
   desired_count         = 1
   launch_type           = "FARGATE"
-  platform_version = "1.4.0"
+  platform_version      = "1.4.0"
   wait_for_steady_state = true
 
   network_configuration {

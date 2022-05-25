@@ -22,7 +22,7 @@ resource "aws_efs_file_system" "solr-data" {
   creation_token = "solr-${local.id_64char}-data"
 
   # encryption-at-rest
-  encrypted = true
+  encrypted  = true
   kms_key_id = aws_kms_key.solr-data-key.arn
   tags = {
     Name = "SolrData"
@@ -30,10 +30,10 @@ resource "aws_efs_file_system" "solr-data" {
 }
 
 resource "aws_efs_mount_target" "all" {
-  count          = length(module.vpc.public_subnets)
-  file_system_id = aws_efs_file_system.solr-data.id
-  subnet_id      = module.vpc.private_subnets[count.index]
-  security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
+  count           = length(module.vpc.public_subnets)
+  file_system_id  = aws_efs_file_system.solr-data.id
+  subnet_id       = module.vpc.private_subnets[count.index]
+  security_groups = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
 }
 
 resource "aws_security_group" "solr-ecs-efs-ingress" {

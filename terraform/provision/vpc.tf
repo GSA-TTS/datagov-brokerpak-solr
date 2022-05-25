@@ -59,19 +59,19 @@ resource "aws_security_group_rule" "allow-lb-b" {
   security_group_id        = module.vpc.default_security_group_id
 }
 resource "aws_security_group_rule" "allow-egress-vpc" {
-  type                     = "egress"
-  from_port                = 0
-  to_port                  = 65535
-  protocol                 = "-1"
-  cidr_blocks              = [module.vpc.vpc_cidr_block]
-  security_group_id        = module.vpc.default_security_group_id
+  type              = "egress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "-1"
+  cidr_blocks       = [module.vpc.vpc_cidr_block]
+  security_group_id = module.vpc.default_security_group_id
 }
 
 resource "aws_security_group_rule" "allow-ingress-vpc" {
-  type                     = "ingress"
-  from_port                = 0
-  to_port                  = 65535
-  protocol                 = "-1"
-  cidr_blocks              = [module.vpc.vpc_cidr_block]
-  security_group_id        = module.vpc.default_security_group_id
+  type              = "ingress"
+  from_port         = 0
+  to_port           = 65535
+  protocol          = "-1"
+  cidr_blocks       = [module.vpc.vpc_cidr_block]
+  security_group_id = module.vpc.default_security_group_id
 }
