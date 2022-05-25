@@ -110,36 +110,12 @@ demo-down: examples.json ## Clean up data left over from tests and demos
 
 	-@rm examples.json 2>/dev/null; true
 
-	@echo "Removing any orphan services"
-	-@helm uninstall example 2>/dev/null ; true
-	-@kubectl delete secret basic-auth1 2>/dev/null ; true
-
-kind-up: ## Set up a Kubernetes test environment using KinD
-	# Creating a temporary Kubernetes cluster to test against with KinD
-	@kind create cluster --config kind/kind-config.yaml --name datagov-broker-test
-	# Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
-	# (This is necessary for the service account to be able to create the cluster-wide
-	# Solr CRD definitions.)
-	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
-	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.1/deploy/static/provider/kind/deploy.yaml
-	@kubectl wait --namespace ingress-nginx \
-      --for=condition=ready pod \
-      --selector=app.kubernetes.io/component=controller \
-      --timeout=270s
-	@kubectl apply -f kind/persistent-storage.yml
-	# Install the ZooKeeper and Solr operators using Helm
-	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
-
 .env: generate-env.sh
 	@echo Generating a .env file containing the k8s config needed by the broker
 	@./generate-env.sh
 
-kind-down: ## Tear down the Kubernetes test environment in KinD
-	kind delete cluster --name datagov-broker-test
-	@rm .env
+.env.secrets:
+  $(error Copy .env.secrets-template to .env.secrets, then edit in your own values)
 
 all: clean build kind-up up test down kind-down ## Clean and rebuild, start local test environment, run the broker, run the examples, and tear the broker and test env down
 .PHONY: all clean build up down test kind-up kind-down
