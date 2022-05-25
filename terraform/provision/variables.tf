@@ -33,13 +33,13 @@ variable "solrImageTag" {
 }
 
 variable "solrMem" {
-  type        = string
+  type        = number
   description = "How much memory to request for each replica (default is '12G')"
-  default     = "12288"
+  default     = 12288
 }
 
 variable "solrCpu" {
-  type        = string
+  type        = number
   description = "How much vCPU to request for each replica (default is '2048' aka '2 vCPUs')"
-  default     = "2048"
+  default     = 2048
 }

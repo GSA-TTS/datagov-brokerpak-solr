@@ -63,6 +63,7 @@ resource "null_resource" "create_solr_admin" {
     # Can't reuse containers because they are left in an unpredictable state after a single run
     # Wait for the command to run before deleting the container
     command = <<-EOF
+      sleep 20
       curl \
         -s -f -L \
         -o /dev/null \

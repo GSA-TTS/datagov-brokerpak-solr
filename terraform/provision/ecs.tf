@@ -45,7 +45,7 @@ resource "aws_ecs_task_definition" "solr" {
   container_definitions = jsonencode([
     {
       name      = "solr"
-      image     = "${var.solrImageRepo}${var.solrImageTag}"
+      image     = "${var.solrImageRepo}:${var.solrImageTag}"
       cpu       = var.solrCpu
       memory    = var.solrMem
       essential = true
