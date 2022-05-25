@@ -99,6 +99,7 @@ resource "aws_ecs_service" "solr" {
   }
 
   depends_on = [
-    aws_efs_mount_target.all
+    aws_efs_mount_target.all,
+    aws_efs_file_system.solr-data
   ]
 }

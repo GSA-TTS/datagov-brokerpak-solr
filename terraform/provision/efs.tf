@@ -87,7 +87,24 @@ resource "aws_efs_file_system_policy" "policy" {
           "elasticfilesystem:ClientRootAccess",
           "elasticfilesystem:ClientWrite",
           "elasticfilesystem:ClientMount"
-        ]
+        ],
+        "Condition": {
+          "Bool": {
+            "elasticfilesystem:AccessedViaMountTarget": "true"
+          }
+        }
+      },
+      {
+        "Effect": "Deny",
+        "Principal": {
+          "AWS": "*"
+        },
+        "Action": "*",
+        "Condition": {
+          "Bool": {
+            "aws:SecureTransport": "false"
+          }
+        }
       }
     ]
   }
