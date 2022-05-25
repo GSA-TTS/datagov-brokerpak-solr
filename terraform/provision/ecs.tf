@@ -38,7 +38,7 @@ resource "aws_ecs_task_definition" "solr" {
   family                   = "solr-${var.instance_name}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = 2048
+  cpu                      = 3072
   memory                   = 14336
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
@@ -46,7 +46,7 @@ resource "aws_ecs_task_definition" "solr" {
     {
       name      = "solr"
       image     = "ghcr.io/gsa/catalog.data.gov.solr:8-stunnel-root"
-      cpu       = 1024
+      cpu       = 3072
       memory    = 14336
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
