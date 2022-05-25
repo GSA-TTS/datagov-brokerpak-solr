@@ -18,14 +18,6 @@ plans:
 provision:
   plan_inputs: []
   user_inputs:
-  - field_name: replicas
-    required: false
-    type: number
-    details: "How many replicas to stand up in the SolrCloud instance (defaults to 3)"
-  - field_name: restartCron
-    required: false
-    type: string
-    details: "The Restart Schedule specificied through a cron expression (https://pkg.go.dev/github.com/robfig/cron/v3#hdr-CRON_Expression_Format)"
   - field_name: solrImageRepo
     required: false
     type: string
@@ -34,10 +26,6 @@ provision:
     required: false
     type: string
     details: "Tag for the Solr Docker image to use, defaults to 8.11. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
-  - field_name: solrJavaMem
-    required: false
-    type: string
-    details: "How much memory to give each replica (default is '-Xms4g -Xmx4g')"
   - field_name: solrMem
     required: false
     type: string
@@ -46,12 +34,8 @@ provision:
     required: false
     type: string
     details: "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
-  - field_name: cloud_name
-    required: false
-    type: string
-    details: "Name of the SolrCloud instance (only for testing purposes)"
   computed_inputs:
-  - name: cloud_name
+  - name: instance_name
     type: string
     details: "The name of the cloud to create (used only for demo purposes)"
     overwrite: true
@@ -61,35 +45,6 @@ provision:
     overwrite: true
     type: object
     details: "Labels with the org, space, and instance ID"
-  - name: server
-    type: string
-    details: "The service URL (for your target k8s)"
-    overwrite: true
-    default: ${config("solr.server")}
-  - name: cluster_ca_certificate
-    overwrite: true
-    type: string
-    details: "The CA certificate (for your target k8s)"
-    default: ${config("solr.cluster_ca_certificate")}
-  - name: token
-    overwrite: true
-    type: string
-    details: "The service account token (for your target k8s)"
-    default: ${config("solr.token")}
-  - name: namespace
-    overwrite: true
-    type: string
-    details: The namespace (where you want SolrClouds deployed in your target k8s)
-    default: ${config("solr.namespace")}
-  - name: domain_name
-    overwrite: true
-    type: string
-    details: The domain to use for ingress (for your target k8s)
-    default: ${config("solr.domain_name")}
-  - name: replicas
-    default: 3
-    overwrite: false
-    type: number
   - name: solrImageRepo
     default: "docker.io/solr"
     overwrite: false
@@ -98,50 +53,33 @@ provision:
     default: "8.11"
     overwrite: false
     type: string
-  - name: solrJavaMem
-    default: "-Xms4g -Xmx4g"
-    overwrite: false
-    type: string
   - name: solrMem
-    default: "6G"
+    default: "14336"
     overwrite: false
     type: string
   - name: solrCpu
-    default: "2000m"
-    overwrite: false
-    type: string
-  - name: restartCron
-    default: "0 * * * *"
+    default: "3072"
     overwrite: false
     type: string
   outputs: []
   template_refs: 
-    main: terraform/provision/main.tf
+    admin: terraform/provision/admin.tf
+    dns: terraform/provision/dns.tf
+    ecs: terraform/provision/ecs.tf
+    efs: terraform/provision/efs.tf
+    iam: terraform/provision/iam.tf
+    lb: terraform/provision/lb.tf
+    logging: terraform/provision/logging.tf
+    ssl: terraform/provision/ssl.tf
+    vpc: terraform/provision/vpc.tf
     outputs: terraform/provision/outputs.tf
-    providers: terraform/provision/providers.tf
     variables: terraform/provision/variables.tf
     versions: terraform/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
   computed_inputs:
-  - name: namespace
-    default: ${config("solr.namespace")}
-    overwrite: true
-    type: string
-  - name: server
-    default: ${config("solr.server")}
-    overwrite: true
-    type: string
-  - name: cluster_ca_certificate
-    default: ${config("solr.cluster_ca_certificate")}
-    overwrite: true
-    type: string
-  - name: token
-    default: ${config("solr.token")}
-    overwrite: true
-    type: string
-  - name: cloud_name
+  - name: instance_name
     default: ${request.instance_id}
     overwrite: true
     type: string
@@ -164,9 +102,7 @@ bind:
     details: The URL to use for working with the SolrCloud instance
   template_refs: 
     main: terraform/bind/main.tf
-    data: terraform/bind/data.tf
     outputs: terraform/bind/outputs.tf
-    providers: terraform/bind/providers.tf
     variables: terraform/bind/variables.tf
     versions: terraform/bind/versions.tf
 
