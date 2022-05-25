@@ -38,16 +38,16 @@ resource "aws_ecs_task_definition" "solr" {
   family                   = "solr-${var.instance_name}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = 3072
-  memory                   = 14336
+  cpu                      = var.solrCpu
+  memory                   = var.solrMem
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
   container_definitions = jsonencode([
     {
       name      = "solr"
-      image     = "ghcr.io/gsa/catalog.data.gov.solr:8-stunnel-root"
-      cpu       = 3072
-      memory    = 14336
+      image     = "${var.solrImageRepo}${var.solrImageTag}"
+      cpu       = var.solrCpu
+      memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
         "sed -i 's/{region}/${var.region}/g' /etc/amazon/efs/efs-utils.conf;",
