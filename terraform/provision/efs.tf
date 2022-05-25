@@ -29,18 +29,6 @@ resource "aws_efs_file_system" "solr-data" {
   }
 }
 
-resource "aws_efs_access_point" "solr-data-main" {
-  file_system_id = aws_efs_file_system.solr-data.id
-  root_directory {
-    path = "/data1"
-    creation_info {
-      owner_gid   = "8983"
-      owner_uid   = "8983"
-      permissions = "755"
-    }
-  }
-}
-
 resource "aws_efs_mount_target" "all" {
   count          = length(module.vpc.public_subnets)
   file_system_id = aws_efs_file_system.solr-data.id
