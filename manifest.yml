@@ -8,8 +8,8 @@ platforms:
   arch: amd64
 terraform_binaries:
 - name: terraform
-  version: 0.13.7
-  source: https://github.com/hashicorp/terraform/archive/v0.13.7.zip
+  version: 1.1.5
+  source: https://github.com/hashicorp/terraform/archive/v1.1.5.zip
 - name: terraform-provider-aws
   version: 3.75.1
   source: https://releases.hashicorp.com/terraform-provider-aws/3.75.1/terraform-provider-aws_3.75.1_linux_amd64.zip

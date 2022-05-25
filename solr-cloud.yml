@@ -28,11 +28,11 @@ provision:
     details: "Tag for the Solr Docker image to use, defaults to 8.11. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
   - field_name: solrMem
     required: false
-    type: string
+    type: number
     details: "How much memory to request for each replica (default is '6G')"
   - field_name: solrCpu
     required: false
-    type: string
+    type: number
     details: "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
   computed_inputs:
   - name: instance_name
@@ -54,15 +54,37 @@ provision:
     overwrite: false
     type: string
   - name: solrMem
-    default: "14336"
+    default: 14336
     overwrite: false
-    type: string
+    type: number
   - name: solrCpu
-    default: "3072"
+    default: 4096
     overwrite: false
+    type: number
+  - name: region
     type: string
-  outputs: []
-  template_refs: 
+    details: "The AWS region in which to create k8s instances"
+    overwrite: true
+    default: ${config("aws.default_region")}
+  - name: zone
+    type: string
+    details: "The Route53 zone in which to create k8s instances"
+    overwrite: true
+    default: ${config("aws.zone")}
+  outputs:
+  - field_name: solr_admin_url
+    details: "The Solr url for the created instance"
+    type: string
+    required: true
+  - field_name: solr_admin_user
+    details: "The admin username for access to the Solr Instance"
+    type: string
+    required: true
+  - field_name: solr_admin_pass
+    details: "The admin password for access to the Solr Instance"
+    type: string
+    required: true
+  template_refs:
     admin: terraform/provision/admin.tf
     dns: terraform/provision/dns.tf
     ecs: terraform/provision/ecs.tf
@@ -83,6 +105,18 @@ bind:
     default: ${request.instance_id}
     overwrite: true
     type: string
+  - name: solr_admin_pass
+    default: ${instance.details["solr_admin_pass"]}
+    overwrite: true
+    type: string
+  - name: solr_admin_user
+    default: ${instance.details["solr_admin_user"]}
+    overwrite: true
+    type: string
+  - name: solr_admin_url
+    default: ${instance.details["solr_admin_url"]}
+    overwrite: true
+    type: string
   outputs:
   - field_name: domain
     required: false
@@ -100,7 +134,7 @@ bind:
     required: true
     type: string
     details: The URL to use for working with the SolrCloud instance
-  template_refs: 
+  template_refs:
     main: terraform/bind/main.tf
     outputs: terraform/bind/outputs.tf
     variables: terraform/bind/variables.tf
