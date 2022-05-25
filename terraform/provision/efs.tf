@@ -1,9 +1,29 @@
 
+resource "aws_kms_key" "solr-data-key" {
+  description             = "Solr Data Key (${var.instance_name}"
+  deletion_window_in_days = 7
+  policy = jsonencode({
+    Statement = [
+      {
+        Action = "kms:*"
+        Effect = "Allow"
+        Principal = {
+          AWS = "*"
+        }
+        Resource = "*"
+        Sid      = "IAM User Permissions"
+      }
+    ]
+    Version = "2012-10-17"
+  })
+}
+
 resource "aws_efs_file_system" "solr-data" {
   creation_token = "solr-${local.id_64char}-data"
 
   # encryption-at-rest
   encrypted = true
+  kms_key_id = aws_kms_key.solr-data-key.arn
   tags = {
     Name = "SolrData"
   }
@@ -25,6 +45,7 @@ resource "aws_efs_mount_target" "all" {
   count          = length(module.vpc.public_subnets)
   file_system_id = aws_efs_file_system.solr-data.id
   subnet_id      = module.vpc.private_subnets[count.index]
+  security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
 }
 
 resource "aws_security_group" "solr-ecs-efs-ingress" {
@@ -37,14 +58,14 @@ resource "aws_security_group" "solr-ecs-efs-ingress" {
     from_port   = 80
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = module.vpc.private_subnets_cidr_blocks
+    cidr_blocks = [module.vpc.vpc_cidr_block]
   }
   egress {
-    description = "GHCR Pull Images"
+    description = "Well... not sure."
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
+    cidr_blocks = [module.vpc.vpc_cidr_block]
   }
 }
 
@@ -66,24 +87,7 @@ resource "aws_efs_file_system_policy" "policy" {
           "elasticfilesystem:ClientRootAccess",
           "elasticfilesystem:ClientWrite",
           "elasticfilesystem:ClientMount"
-        ],
-        "Condition": {
-          "Bool": {
-            "elasticfilesystem:AccessedViaMountTarget": "true"
-          }
-        }
-      },
-      {
-        "Effect": "Deny",
-        "Principal": {
-          "AWS": "*"
-        },
-        "Action": "*",
-        "Condition": {
-          "Bool": {
-            "aws:SecureTransport": "false"
-          }
-        }
+        ]
       }
     ]
   }

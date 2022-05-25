@@ -66,10 +66,13 @@ resource "aws_iam_policy" "ecs-tasks" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams",
           "logs:PutLogEvents",
           "ecr:*",
           # "s3:*",
           "efs:*",
+          "elasticfilesystem:*",
           "ec2:AttachNetworkInterface",
           "ec2:CreateNetworkInterface",
           "ec2:CreateNetworkInterfacePermission",
@@ -82,6 +85,7 @@ resource "aws_iam_policy" "ecs-tasks" {
           "elasticloadbalancing:Describe*",
           "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
           "elasticloadbalancing:RegisterTargets",
+          "kms:*",
           "route53:ChangeResourceRecordSets",
           "route53:CreateHealthCheck",
           "route53:DeleteHealthCheck",
@@ -92,7 +96,12 @@ resource "aws_iam_policy" "ecs-tasks" {
           "servicediscovery:Get*",
           "servicediscovery:List*",
           "servicediscovery:RegisterInstance",
-          "servicediscovery:UpdateInstanceCustomHealthStatus"
+          "servicediscovery:UpdateInstanceCustomHealthStatus",
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel",
+          "ssm:UpdateInstanceInformation"
         ]
         Effect   = "Allow"
         Resource = "*"

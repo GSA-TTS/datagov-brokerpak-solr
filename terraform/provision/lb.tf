@@ -108,7 +108,8 @@ resource "aws_security_group" "solr-lb-sg" {
     from_port   = 0
     to_port     = 65535
     protocol    = "tcp"
-    cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
+    # cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
   }
 }
 
