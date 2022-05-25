@@ -89,7 +89,7 @@ resource "null_resource" "create_solr_admin" {
         -o /dev/null \
         -w "%%{http_code}\n" \
         --user '${self.triggers.new_username}:${self.triggers.new_password}' \
-        'https://${self.triggers.domain}/solr/admin/authorization' \
+        'https://${self.triggers.domain}/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
     EOF
   }
