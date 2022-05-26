@@ -17,14 +17,14 @@ terraform_binaries:
   version: 3.2.3
   source: https://releases.hashicorp.com/terraform-provider-dns/3.2.3/terraform-provider-dns_3.2.3_linux_amd64.zip
 - name: terraform-provider-random
-  version: 2.3.0
-  source: https://releases.hashicorp.com/terraform-provider-random/2.3.0/terraform-provider-random_2.3.0_linux_amd64.zip
+  version: 3.2.0
+  source: https://releases.hashicorp.com/terraform-provider-random/3.2.0/terraform-provider-random_3.2.0_linux_amd64.zip
 - name: terraform-provider-null
-  version: 2.1.0
-  source: https://releases.hashicorp.com/terraform-provider-null/2.1.0/terraform-provider-null_2.1.0_linux_amd64.zip
+  version: 3.1.1
+  source: https://releases.hashicorp.com/terraform-provider-null/3.1.1/terraform-provider-null_3.1.1_linux_amd64.zip
 - name: terraform-provider-template
-  version: 2.1.0
-  source: https://releases.hashicorp.com/terraform-provider-template/2.1.0/terraform-provider-template_2.1.0_linux_amd64.zip
+  version: 2.2.0
+  source: https://releases.hashicorp.com/terraform-provider-template/2.2.0/terraform-provider-template_2.2.0_linux_amd64.zip
 
 service_definitions:
 - solr-cloud.yml

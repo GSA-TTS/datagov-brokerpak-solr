@@ -54,8 +54,6 @@ resource "null_resource" "create_solr_admin" {
     environment = {
       CREATE_USER_JSON = local.create_user_json
       SET_ROLE_JSON    = local.set_role_json
-      # GENERATED_USERNAME = random_uuid.username.result
-      # GENERATED_PASSWORD = random_password.password.result
       DELETE_USER_JSON = self.triggers.delete_user_json
       CLEAR_ROLE_JSON  = self.triggers.clear_role_json
     }
@@ -63,7 +61,7 @@ resource "null_resource" "create_solr_admin" {
     # Can't reuse containers because they are left in an unpredictable state after a single run
     # Wait for the command to run before deleting the container
     command = <<-EOF
-      sleep 20; 
+      sleep 100 &&
       curl \
         -s -f -L \
         -o /dev/null \
