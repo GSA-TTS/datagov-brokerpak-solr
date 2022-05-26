@@ -8,7 +8,9 @@ SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
 SERVICE_NAME=solr-cloud
 PLAN_NAME=base
-INSTANCE_NAME ?= instance-$(USER)
+SERVICE_ID='b9013a91-9ce8-4c18-8035-a135a8cd6ff9'
+PLAN_ID='e35e9675-413f-4f42-83de-ad5003357e77'
+INSTANCE_NAME ?= instance-$(USER)2
 
 # Execute the cloud-service-broker binary inside the running container
 CSB_EXEC=docker exec csb-service-$(SERVICE_NAME) /bin/cloud-service-broker
@@ -27,24 +29,24 @@ CSB_BINDING_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-wait.sh
 # Fetch the content of a binding; append with the instance id and binding id
 CSB_BINDING_FETCH=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-fetch.sh
 
+# This doesn't work, so simplify the provision/bind params
 # CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
+# CLOUD_BIND_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 CLOUD_PROVISION_PARAMS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root" }'
-CLOUD_BIND_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
+CLOUD_BIND_PARAMS='{}'
 
 PREREQUISITES = docker jq bats
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
-check: SHELL:=./test_env_load
 check:
-	@echo CSB_EXEC: $${CSB_EXEC}
-	@echo SERVICE_NAME: $${SERVICE_NAME}
-	@echo PLAN_NAME: $${PLAN_NAME}
-	@echo CLOUD_PROVISION_PARAMS: $${CLOUD_PROVISION_PARAMS}
-	@echo CLOUD_BIND_PARAMS: $${CLOUD_BIND_PARAMS}
+	@echo CSB_EXEC: $(CSB_EXEC)
+	@echo SERVICE_NAME: $(SERVICE_NAME)
+	@echo PLAN_NAME: $(PLAN_NAME)
+	@echo CLOUD_PROVISION_PARAMS: $(CLOUD_PROVISION_PARAMS)
+	@echo CLOUD_BIND_PARAMS: $(CLOUD_BIND_PARAMS)
 
-clean: SHELL:=./test_env_load
 clean: down ## Bring down the broker service if it's up and clean out the database
-	@docker rm -f csb-service-$${SERVICE_NAME}
+	@docker rm -f csb-service-$(SERVICE_NAME)
 	@rm -f datagov-services-pak-*.brokerpak
 
 # Origin of the subdirectory dependency solution:
@@ -54,7 +56,6 @@ build: manifest.yml solr-cloud.yml $(shell find terraform) ## Build the brokerpa
 
 # Healthcheck solution from https://stackoverflow.com/a/47722899
 # (Alpine inclues wget, but not curl.)
-up: SHELL:=./test_env_load
 up: .env ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
 	docker run $(DOCKER_OPTS) \
 	-p 8080:8080 \
@@ -74,11 +75,9 @@ up: .env ## Run the broker service with the brokerpak configured. The broker lis
 	@echo "csb-service-$(SERVICE_NAME) is ready!" ; echo ""
 	@docker ps -l
 
-down: SHELL:=./test_env_load
 down: ## Bring the cloud-service-broker service down
 	-@docker stop csb-service-$(SERVICE_NAME)
 
-test: SHELL:=./test_env_load
 test: ## Execute the brokerpak examples against the running broker
 	sudo chmod 766 /etc/hosts
 	bats test.bats
@@ -87,34 +86,32 @@ test: ## Execute the brokerpak examples against the running broker
 check-ids:
 	@( \
 	eval "$$( $(CSB_SET_IDS) )" ;\
-	echo Service ID: $$serviceid ;\
-	echo Plan ID: $$planid ;\
+	echo Service ID: $(SERVICE_ID) ;\
+	echo Plan ID: $(PLAN_ID) ;\
 	)
 
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json
 
-demo-up: SHELL:=./test_env_load
 demo-up: examples.json ## Provision a SolrCloud instance and output the bound credentials
 	./generate-examples.sh > examples.json
 	@( \
 	set -e ;\
 	eval "$$( $(CSB_SET_IDS) )" ;\
 	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $$serviceid --planid $$planid --instanceid $(INSTANCE_NAME)                     --params $(CLOUD_PROVISION_PARAMS);\
+	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(CLOUD_PROVISION_PARAMS);\
 	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $$serviceid --planid $$planid --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
-demo-down: SHELL:=./test_env_load
 demo-down: examples.json ## Clean up data left over from tests and demos
 	@( \
 	set -e ;\
 	eval "$$( $(CSB_SET_IDS) )" ;\
 	echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance";\
-	$(CSB_EXEC) client unbind --bindingid binding --instanceid $${INSTANCE_NAME} --serviceid $$serviceid --planid $$planid 2>/dev/null;\
-	$(CSB_EXEC) client deprovision --instanceid $${INSTANCE_NAME} --serviceid $$serviceid --planid $$planid 2>/dev/null;\
+	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
+	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
 	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
 	)
 
