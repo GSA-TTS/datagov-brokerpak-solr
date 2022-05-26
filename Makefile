@@ -101,7 +101,6 @@ demo-up: examples.json ## Provision a SolrCloud instance and output the bound cr
 	set -e ;\
 	eval "$$( $(CSB_SET_IDS) )" ;\
 	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
-	echo $(CLOUD_PROVISION_PARAMS);\
 	$(CSB_EXEC) client provision --serviceid $$serviceid --planid $$planid --instanceid $(INSTANCE_NAME)                     --params $(CLOUD_PROVISION_PARAMS);\
 	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
@@ -110,9 +109,14 @@ demo-up: examples.json ## Provision a SolrCloud instance and output the bound cr
 
 demo-down: SHELL:=./test_env_load
 demo-down: examples.json ## Clean up data left over from tests and demos
-	@echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance"
-	-@$${CSB_EXEC} client unbind -b binding -i $${INSTANCE_NAME} 2>/dev/null
-	-@$${CSB_EXEC} client deprovision -i $${INSTANCE_NAME} 2>/dev/null
+	@( \
+	set -e ;\
+	eval "$$( $(CSB_SET_IDS) )" ;\
+	echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance";\
+	$(CSB_EXEC) client unbind --bindingid binding --instanceid $${INSTANCE_NAME} --serviceid $$serviceid --planid $$planid 2>/dev/null;\
+	$(CSB_EXEC) client deprovision --instanceid $${INSTANCE_NAME} --serviceid $$serviceid --planid $$planid 2>/dev/null;\
+	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
+	)
 
 	-@rm examples.json 2>/dev/null; true
 
