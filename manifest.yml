@@ -27,13 +27,8 @@ terraform_binaries:
   source: https://releases.hashicorp.com/terraform-provider-template/2.2.0/terraform-provider-template_2.2.0_linux_amd64.zip
 
 service_definitions:
-- solr-cloud.yml
+- solr-on-ecs.yml
 parameters: []
-required_env_variables:
-- AWS_ZONE
-- AWS_ACCESS_KEY_ID
-- AWS_SECRET_ACCESS_KEY
-- AWS_DEFAULT_REGION
 env_config_mapping:
   AWS_ZONE: aws.zone
   AWS_ACCESS_KEY_ID: aws.access_key_id

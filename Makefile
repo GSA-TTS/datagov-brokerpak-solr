@@ -6,10 +6,10 @@ CSB=ghcr.io/gsa/cloud-service-broker:v0.10.0gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
-SERVICE_NAME=solr-cloud
-PLAN_NAME=base
-SERVICE_ID='b9013a91-9ce8-4c18-8035-a135a8cd6ff9'
-PLAN_ID='e35e9675-413f-4f42-83de-ad5003357e77'
+SERVICE_NAME=solr-on-ecs
+PLAN_NAME=standalone_ecs
+SERVICE_ID='182612a5-e2b7-4afc-b2b2-9f9d066875d1'
+PLAN_ID='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
 INSTANCE_NAME ?= instance-$(USER)2
 
 # Execute the cloud-service-broker binary inside the running container
@@ -21,12 +21,10 @@ CSB_EXEC=docker exec csb-service-$(SERVICE_NAME) /bin/cloud-service-broker
 CSB_SET_IDS=$(CSB_EXEC) client catalog | jq -r '.response.services[]| select(.name=="$(SERVICE_NAME)") | {serviceid: .id, planid: .plans[0].id} | to_entries | .[] | "export " + .key + "=" + (.value | @sh)'
 
 # Wait for an instance operation to complete; append with the instance id
-CSB_INSTANCE_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/instance-wait.sh
-
 # Wait for an binding operation to complete; append with the instance id and binding id
-CSB_BINDING_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-wait.sh
-
 # Fetch the content of a binding; append with the instance id and binding id
+CSB_INSTANCE_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/instance-wait.sh
+CSB_BINDING_WAIT=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-wait.sh
 CSB_BINDING_FETCH=docker exec csb-service-$(SERVICE_NAME) ./bin/binding-fetch.sh
 
 # This doesn't work, so simplify the provision/bind params
@@ -45,13 +43,20 @@ check:
 	@echo CLOUD_PROVISION_PARAMS: $(CLOUD_PROVISION_PARAMS)
 	@echo CLOUD_BIND_PARAMS: $(CLOUD_BIND_PARAMS)
 
+check-ids:
+	@( \
+	eval "$$( $(CSB_SET_IDS) )" ;\
+	echo Service ID: $(SERVICE_ID) ;\
+	echo Plan ID: $(PLAN_ID) ;\
+	)
+
 clean: down ## Bring down the broker service if it's up and clean out the database
 	@docker rm -f csb-service-$(SERVICE_NAME)
 	@rm -f datagov-services-pak-*.brokerpak
 
 # Origin of the subdirectory dependency solution:
 # https://stackoverflow.com/questions/14289513/makefile-rule-that-depends-on-all-files-under-a-directory-including-within-subd#comment19860124_14289872
-build: manifest.yml solr-cloud.yml $(shell find terraform) ## Build the brokerpak(s)
+build: manifest.yml solr-on-ecs.yml $(shell find terraform) ## Build the brokerpak(s)
 	@docker run --user $(shell id -u):$(shell id -g) $(DOCKER_OPTS) $(CSB) pak build
 
 # Healthcheck solution from https://stackoverflow.com/a/47722899
@@ -82,13 +87,6 @@ test: ## Execute the brokerpak examples against the running broker
 	sudo chmod 766 /etc/hosts
 	bats test.bats
 	sudo chmod 744 /etc/hosts
-
-check-ids:
-	@( \
-	eval "$$( $(CSB_SET_IDS) )" ;\
-	echo Service ID: $(SERVICE_ID) ;\
-	echo Plan ID: $(PLAN_ID) ;\
-	)
 
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json

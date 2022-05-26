@@ -1,19 +1,20 @@
 version: 1
-name: solr-cloud
-id: b9013a91-9ce8-4c18-8035-a135a8cd6ff9
+name: solr-on-ecs
+id: 182612a5-e2b7-4afc-b2b2-9f9d066875d1
 description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr
 display_name: SolrCloud
 image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
 documentation_url: https://lucene.apache.org/solr/resources.html
 support_url: https://github.com/GSA/datagov-brokerpak-solr
 tags: [apache, search, index, k8s]
+
 plans:
 - name: base
-  id: e35e9675-413f-4f42-83de-ad5003357e77
-  description: Provision a fault-tolerant instance of Solr for use by applications
-  display_name: Provision and use SolrCloud in your app
+  id: 4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d
+  description: Provision a standalone leader/follower Solr deployment for use by applications
+  display_name: Provision and use standalone Solr in your app
   bullets:
-  - "REQUIRED prerequisite: The target k8s must already have the solr-operator and zookeeper-operator installed!"
+  - "REQUIRED prerequisite: An AWS Account into which Solr resources with be launched."
   properties: {}
 provision:
   plan_inputs: []
@@ -85,18 +86,18 @@ provision:
     type: string
     required: true
   template_refs:
-    admin: terraform/provision/admin.tf
-    dns: terraform/provision/dns.tf
-    ecs: terraform/provision/ecs.tf
-    efs: terraform/provision/efs.tf
-    iam: terraform/provision/iam.tf
-    lb: terraform/provision/lb.tf
-    logging: terraform/provision/logging.tf
-    ssl: terraform/provision/ssl.tf
-    vpc: terraform/provision/vpc.tf
-    outputs: terraform/provision/outputs.tf
-    variables: terraform/provision/variables.tf
-    versions: terraform/provision/versions.tf
+    admin: terraform/standalone_ecs/provision/admin.tf
+    dns: terraform/standalone_ecs/provision/dns.tf
+    ecs: terraform/standalone_ecs/provision/ecs.tf
+    efs: terraform/standalone_ecs/provision/efs.tf
+    iam: terraform/standalone_ecs/provision/iam.tf
+    lb: terraform/standalone_ecs/provision/lb.tf
+    logging: terraform/standalone_ecs/provision/logging.tf
+    ssl: terraform/standalone_ecs/provision/ssl.tf
+    vpc: terraform/standalone_ecs/provision/vpc.tf
+    outputs: terraform/standalone_ecs/provision/outputs.tf
+    variables: terraform/standalone_ecs/provision/variables.tf
+    versions: terraform/standalone_ecs/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -135,10 +136,10 @@ bind:
     type: string
     details: The URL to use for working with the SolrCloud instance
   template_refs:
-    main: terraform/bind/main.tf
-    outputs: terraform/bind/outputs.tf
-    variables: terraform/bind/variables.tf
-    versions: terraform/bind/versions.tf
+    main: terraform/standalone_ecs/bind/main.tf
+    outputs: terraform/standalone_ecs/bind/outputs.tf
+    variables: terraform/standalone_ecs/bind/variables.tf
+    versions: terraform/standalone_ecs/bind/versions.tf
 
 examples: []
 plan_updateable: false

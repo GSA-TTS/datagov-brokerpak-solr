@@ -51,7 +51,7 @@ examples.json
 tee
 .ash_history
 .terraform.d/
-terraform/provision/.cache
+terraform/*/provision/.cache
 *kubeconfig*
 .kube*
 *.binding.json
