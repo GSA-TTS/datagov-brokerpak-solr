@@ -49,7 +49,6 @@ resource "null_resource" "manage_solr_user" {
   # provisioner via triggers comes from
   # https://github.com/hashicorp/terraform/issues/23679#issuecomment-886020367
   triggers = {
-    kubeconfig       = base64encode(data.template_file.kubeconfig.rendered)
     admin_username   = var.solr_admin_user
     admin_password   = var.solr_admin_pass
     delete_user_json = local.delete_user_json
@@ -60,7 +59,6 @@ resource "null_resource" "manage_solr_user" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     environment = {
-      KUBECONFIG         = self.triggers.kubeconfig
       ADMIN_USERNAME     = self.triggers.admin_username
       ADMIN_PASSWORD     = self.triggers.admin_password
       GENERATED_PASSWORD = random_password.password.result
@@ -92,7 +90,6 @@ resource "null_resource" "manage_solr_user" {
     interpreter = ["/bin/bash", "-c"]
     when        = destroy
     environment = {
-      KUBECONFIG       = self.triggers.kubeconfig
       ADMIN_USERNAME   = self.triggers.admin_username
       ADMIN_PASSWORD   = self.triggers.admin_password
       DELETE_USER_JSON = self.triggers.delete_user_json
