@@ -25,7 +25,7 @@ resource "aws_efs_file_system" "solr-data" {
   encrypted  = true
   kms_key_id = aws_kms_key.solr-data-key.arn
   tags = {
-    Name = "SolrData"
+    Name = "SolrData-${var.instance_name}"
   }
 }
 
