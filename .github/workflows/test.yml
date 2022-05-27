@@ -1,4 +1,4 @@
-# On pull request events, this workflow will run `make build-and-test`. 
+# On pull request events, this workflow will run `make build-and-test`.
 
 name: 'test'
 on:
@@ -11,8 +11,8 @@ on:
         default: false
 
 jobs:
-  test:
-    name: 'Test'
+  test-solrcloud:
+    name: 'Test Solrcloud'
     runs-on: ubuntu-latest
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
@@ -24,27 +24,56 @@ jobs:
     - name: Create KinD cluster
       uses: helm/kind-action@v1.2.0
 
-    - name: Install testing tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install bats
-
     - name: Check out repository
       uses: actions/checkout@v2
-      with: 
+      with:
         fetch-depth: '0'
 
     - name: Build the brokerpak and set up the test environment
-      run: make build kind-up 
-    
+      run: make build kind-up
+
     - name: Stop for debugging
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
       uses: mxschmitt/action-tmate@v3
       with:
-        limit-access-to-actor: true  
-    
+        limit-access-to-actor: true
+
     - name: Start the broker and run the tests
-      run: make .env up test
+      run: make .env up k8s-demo-up k8s-demo-down
+
+    - name: Clean up if there was a failure
+      if: ${{ failure() }}
+      run: make down
+
+  test-solr-on-ecs:
+    name: 'Test standalone Solr on ECS'
+    runs-on: ubuntu-latest
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Create KinD cluster
+      uses: helm/kind-action@v1.2.0
+
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+
+    - name: Build the brokerpak and set up the test environment
+      run: make build kind-up
+
+    - name: Stop for debugging
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    - name: Start the broker and run the tests
+      run: make .env up ecs-demo-up ecs-demo-down
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
