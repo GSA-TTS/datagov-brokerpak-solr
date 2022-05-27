@@ -47,11 +47,11 @@ provision:
     type: object
     details: "Labels with the org, space, and instance ID"
   - name: solrImageRepo
-    default: "docker.io/solr"
+    default: "ghcr.io/gsa/catalog.data.gov.solr"
     overwrite: false
     type: string
   - name: solrImageTag
-    default: "8.11"
+    default: "8-stunnel-root"
     overwrite: false
     type: string
   - name: solrMem
@@ -135,6 +135,18 @@ bind:
     required: true
     type: string
     details: The URL to use for working with the SolrCloud instance
+  - field_name: solr_admin_url
+    details: "The Solr url for the created instance"
+    type: string
+    required: false
+  - field_name: solr_admin_user
+    details: "The admin username for access to the Solr Instance"
+    type: string
+    required: false
+  - field_name: solr_admin_pass
+    details: "The admin password for access to the Solr Instance"
+    type: string
+    required: false
   template_refs:
     main: terraform/standalone_ecs/bind/main.tf
     outputs: terraform/standalone_ecs/bind/outputs.tf

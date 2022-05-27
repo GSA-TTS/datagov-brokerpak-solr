@@ -23,13 +23,13 @@ variable "zone" {
 variable "solrImageRepo" {
   type        = string
   description = "Repository for the Solr Docker image to use, defaults to docker.io/solr"
-  default     = "docker.io/solr"
+  default     = "ghcr.io/gsa/catalog.data.gov.solr"
 }
 
 variable "solrImageTag" {
   type        = string
   description = "Tag for the Solr Docker image to use, defaults to 8.6. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
-  default     = "8.11"
+  default     = "8-stunnel-root"
 }
 
 variable "solrMem" {

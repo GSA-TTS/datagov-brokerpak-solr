@@ -61,7 +61,14 @@ resource "null_resource" "create_solr_admin" {
     # Can't reuse containers because they are left in an unpredictable state after a single run
     # Wait for the command to run before deleting the container
     command = <<-EOF
-      sleep 100 &&
+      AVAILABLE=$(curl -s -f -L -o /dev/null -w "%%{http_code}\n" 'https://${self.triggers.domain}/solr/');
+      COUNTER=0
+      while [ "$AVAILABLE" != "200" ] && [ $COUNTER -lt 1200 ]; do
+        AVAILABLE=$(curl -s -f -L -o /dev/null -w "%%{http_code}\n" 'https://${self.triggers.domain}/solr/');
+        [ "$AVAILABLE" != "200" ] && sleep 3
+        ((COUNTER++))
+      done;
+
       curl \
         -s -f -L \
         -o /dev/null \
