@@ -111,10 +111,10 @@ ecs-demo-up: ## Provision a Solr instance on ECS and output the bound credential
 	set -e ;\
 	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
 	echo "Provisioning $(ECS_SERVICE_NAME):$(ECS_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(CLOUD_PROVISION_PARAMS);\
+	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(ECS_CLOUD_PROVISION_PARAMS);\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	$(CSB_EXEC) client bind      --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(ECS_CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
 ecs-demo-down: ## Clean up data left over from tests and demos
@@ -149,10 +149,10 @@ k8s-demo-up: ## Provision a SolrCloud instance and output the bound credentials
 	set -e ;\
 	eval "$$( $(CSB_SET_K8S_IDS) )" ;\
 	echo "Provisioning $(K8S_SERVICE_NAME):$(K8S_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(CLOUD_PROVISION_PARAMS);\
+	$(CSB_EXEC) client provision --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(K8S_CLOUD_PROVISION_PARAMS);\
 	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
 	echo "Binding $(K8S_SERVICE_NAME):$(K8S_PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	$(CSB_EXEC) client bind      --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(K8S_CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
 k8s-demo-down: ## Clean up data left over from tests and demos
