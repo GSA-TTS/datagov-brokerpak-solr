@@ -68,7 +68,7 @@ jobs:
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
-      run: make down
+      run: make k8s-demo-down down
 
   test-solr-on-ecs:
     name: 'Test standalone Solr on ECS'
@@ -127,4 +127,4 @@ jobs:
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
-      run: make down
+      run: make ecs-demo-down down
