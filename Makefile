@@ -15,7 +15,7 @@ ECS_SERVICE_NAME=solr-on-ecs
 ECS_PLAN_NAME=standalone_ecs
 ECS_SERVICE_ID='182612a5-e2b7-4afc-b2b2-9f9d066875d1'
 ECS_PLAN_ID='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
-INSTANCE_NAME ?= instance-$(USER)3
+INSTANCE_NAME ?= instance-$(USER)
 
 # Execute the cloud-service-broker binary inside the running container
 CSB_EXEC=docker exec csb-service-$(BROKER__NAME) /bin/cloud-service-broker
