@@ -18,7 +18,7 @@ ECS_PLAN_ID='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
 INSTANCE_NAME ?= instance-$(USER)
 
 # Execute the cloud-service-broker binary inside the running container
-CSB_EXEC=docker exec csb-service-$(BROKER__NAME) /bin/cloud-service-broker
+CSB_EXEC=docker exec csb-service-$(BROKER_NAME) /bin/cloud-service-broker
 
 # Generate IDs for the serviceid and planid, formatted like so (suitable for eval):
 #   serviceid=SERVICEID
