@@ -40,7 +40,7 @@ ECS_CLOUD_PROVISION_PARAMS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo"
 K8S_CLOUD_PROVISION_PARAMS='{ "solrJavaMem":"-Xms300m -Xmx300m", "solrMem":"1G", "solrCpu":"1000m", "cloud_name":"demo", "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-curl" }'
 CLOUD_BIND_PARAMS='{}'
 
-PREREQUISITES = docker jq bats
+PREREQUISITES = docker jq kind kubectl helm
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
 
