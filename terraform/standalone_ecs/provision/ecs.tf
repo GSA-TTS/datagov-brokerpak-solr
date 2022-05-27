@@ -95,6 +95,11 @@ resource "aws_ecs_service" "solr" {
     container_name   = "solr"
     container_port   = 8983
   }
+  service_registries {
+    registry_arn = aws_service_discovery_service.solr.arn
+    container_name = "solr"
+    # container_port = 8983
+  }
 
   depends_on = [
     aws_efs_mount_target.all,

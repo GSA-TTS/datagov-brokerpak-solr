@@ -6,6 +6,7 @@ resource "random_password" "password" {
 }
 
 locals {
+  solr_url = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
   create_user_json = <<-EOF
     {
       "set-user": {
@@ -37,67 +38,55 @@ locals {
   EOF
 }
 
-resource "null_resource" "create_solr_admin" {
-  # The method used below for referencing external resources in a destroy
-  # provisioner via triggers comes from
-  # https://github.com/hashicorp/terraform/issues/23679#issuecomment-886020367
-  triggers = {
-    delete_user_json = local.delete_user_json
-    clear_role_json  = local.clear_role_json
-    domain           = local.domain
-    new_username     = random_uuid.username.result
-    new_password     = random_password.password.result
-  }
+resource "aws_ecs_task_definition" "solr-admin-init" {
+  family                   = "solr-${var.instance_name}-admin-init-service"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  task_role_arn            = aws_iam_role.solr-task-execution.arn
+  execution_role_arn       = aws_iam_role.solr-task-execution.arn
+  container_definitions = jsonencode([
+    {
+      name      = "solr-admin-init"
+      image     = "${var.solrImageRepo}:8-efs-dns-root"
+      cpu       = 1024
+      memory    = 2048
+      essential = true
+      command = ["/bin/bash", "-c", join(" ", [
+        "solr_ip=$(nslookup ${local.solr_url} | awk '/^Address: / { print $2 }');",
+        "echo $solr_ip;",
+        "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.create_user_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.set_role_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.clear_role_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.delete_user_json}'",
+      ])]
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    environment = {
-      CREATE_USER_JSON = local.create_user_json
-      SET_ROLE_JSON    = local.set_role_json
-      DELETE_USER_JSON = self.triggers.delete_user_json
-      CLEAR_ROLE_JSON  = self.triggers.clear_role_json
-    }
-    # Create the binding's Solr user with the generated password
-    # Can't reuse containers because they are left in an unpredictable state after a single run
-    # Wait for the command to run before deleting the container
-    command = <<-EOF
-      AVAILABLE=$(curl -s -f -L -o /dev/null -w "%%{http_code}\n" 'https://${self.triggers.domain}/solr/');
-      COUNTER=0
-      while [ "$AVAILABLE" != "200" ] && [ $COUNTER -lt 1200 ]; do
-        AVAILABLE=$(curl -s -f -L -o /dev/null -w "%%{http_code}\n" 'https://${self.triggers.domain}/solr/');
-        [ "$AVAILABLE" != "200" ] && sleep 3
-        ((COUNTER++))
-      done;
+      logConfiguration = {
+        logDriver = "awslogs",
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs-logs.name,
+          awslogs-region        = "us-west-2",
+          awslogs-stream-prefix = "application"
+        }
+      }
+    },
+  ])
+}
 
-      curl \
-        -s -f -L \
-        -o /dev/null \
-        -w "%%{http_code}\n" \
-        --user 'catalog:Bleeding-Edge' \
-        'https://${self.triggers.domain}/solr/admin/authentication' \
-        -H 'Content-type:application/json' --data "$CREATE_USER_JSON"
-      curl \
-        -s -f -L \
-        -o /dev/null \
-        -w "%%{http_code}\n" \
-        --user 'catalog:Bleeding-Edge' \
-        'https://${self.triggers.domain}/solr/admin/authorization' \
-        -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
-      curl \
-        -s -f -L \
-        -o /dev/null \
-        -w "%%{http_code}\n" \
-        --user '${self.triggers.new_username}:${self.triggers.new_password}' \
-        'https://${self.triggers.domain}/solr/admin/authorization' \
-        -H 'Content-type:application/json' --data "$CLEAR_ROLE_JSON"
-      curl \
-        -s -f -L \
-        -o /dev/null \
-        -w "%%{http_code}\n" \
-        --user '${self.triggers.new_username}:${self.triggers.new_password}' \
-        'https://${self.triggers.domain}/solr/admin/authentication' \
-        -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
-    EOF
+resource "aws_ecs_service" "solr-init" {
+  name                  = "solr-init-${var.instance_name}"
+  cluster               = aws_ecs_cluster.solr-cluster.id
+  task_definition       = aws_ecs_task_definition.solr-admin-init.arn
+  desired_count         = 1
+  launch_type           = "FARGATE"
+  platform_version      = "1.4.0"
+  wait_for_steady_state = true
+
+  network_configuration {
+    security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
+    subnets          = module.vpc.private_subnets
+    assign_public_ip = false
   }
 
   depends_on = [
