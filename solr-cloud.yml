@@ -116,11 +116,11 @@ provision:
     type: string
   outputs: []
   template_refs: 
-    main: terraform/provision/main.tf
-    outputs: terraform/provision/outputs.tf
-    providers: terraform/provision/providers.tf
-    variables: terraform/provision/variables.tf
-    versions: terraform/provision/versions.tf
+    main: terraform/solrcloud/provision/main.tf
+    outputs: terraform/solrcloud/provision/outputs.tf
+    providers: terraform/solrcloud/provision/providers.tf
+    variables: terraform/solrcloud/provision/variables.tf
+    versions: terraform/solrcloud/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -163,12 +163,12 @@ bind:
     type: string
     details: The URL to use for working with the SolrCloud instance
   template_refs: 
-    main: terraform/bind/main.tf
-    data: terraform/bind/data.tf
-    outputs: terraform/bind/outputs.tf
-    providers: terraform/bind/providers.tf
-    variables: terraform/bind/variables.tf
-    versions: terraform/bind/versions.tf
+    main: terraform/solrcloud/bind/main.tf
+    data: terraform/solrcloud/bind/data.tf
+    outputs: terraform/solrcloud/bind/outputs.tf
+    providers: terraform/solrcloud/bind/providers.tf
+    variables: terraform/solrcloud/bind/variables.tf
+    versions: terraform/solrcloud/bind/versions.tf
 
 examples: []
 plan_updateable: false

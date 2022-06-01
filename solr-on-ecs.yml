@@ -1,0 +1,158 @@
+version: 1
+name: solr-on-ecs
+id: 182612a5-e2b7-4afc-b2b2-9f9d066875d1
+description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr
+display_name: SolrCloud
+image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
+documentation_url: https://lucene.apache.org/solr/resources.html
+support_url: https://github.com/GSA/datagov-brokerpak-solr
+tags: [apache, search, index, k8s]
+
+plans:
+- name: base
+  id: 4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d
+  description: Provision a standalone leader/follower Solr deployment for use by applications
+  display_name: Provision and use standalone Solr in your app
+  bullets:
+  - "REQUIRED prerequisite: An AWS Account into which Solr resources with be launched."
+  properties: {}
+provision:
+  plan_inputs: []
+  user_inputs:
+  - field_name: solrImageRepo
+    required: false
+    type: string
+    details: "Repo for the Solr Docker image to use, defaults to docker.io/solr"
+  - field_name: solrImageTag
+    required: false
+    type: string
+    details: "Tag for the Solr Docker image to use, defaults to 8.11. See https://hub.docker.com/_/solr?tab=tags (or your configured solrImageRepo) for options"
+  - field_name: solrMem
+    required: false
+    type: number
+    details: "How much memory to request for each replica (default is '6G')"
+  - field_name: solrCpu
+    required: false
+    type: number
+    details: "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
+  computed_inputs:
+  - name: instance_name
+    type: string
+    details: "The name of the cloud to create (used only for demo purposes)"
+    overwrite: true
+    default: ${request.instance_id}
+  - name: labels
+    default: ${json.marshal(request.default_labels)}
+    overwrite: true
+    type: object
+    details: "Labels with the org, space, and instance ID"
+  - name: solrImageRepo
+    default: "ghcr.io/gsa/catalog.data.gov.solr"
+    overwrite: false
+    type: string
+  - name: solrImageTag
+    default: "8-stunnel-root"
+    overwrite: false
+    type: string
+  - name: solrMem
+    default: 14336
+    overwrite: false
+    type: number
+  - name: solrCpu
+    default: 4096
+    overwrite: false
+    type: number
+  - name: region
+    type: string
+    details: "The AWS region in which to create k8s instances"
+    overwrite: true
+    default: ${config("aws.default_region")}
+  - name: zone
+    type: string
+    details: "The Route53 zone in which to create k8s instances"
+    overwrite: true
+    default: ${config("aws.zone")}
+  outputs:
+  - field_name: solr_admin_url
+    details: "The Solr url for the created instance"
+    type: string
+    required: true
+  - field_name: solr_admin_user
+    details: "The admin username for access to the Solr Instance"
+    type: string
+    required: true
+  - field_name: solr_admin_pass
+    details: "The admin password for access to the Solr Instance"
+    type: string
+    required: true
+  template_refs:
+    admin: terraform/standalone_ecs/provision/admin.tf
+    dns: terraform/standalone_ecs/provision/dns.tf
+    ecs: terraform/standalone_ecs/provision/ecs.tf
+    efs: terraform/standalone_ecs/provision/efs.tf
+    iam: terraform/standalone_ecs/provision/iam.tf
+    lb: terraform/standalone_ecs/provision/lb.tf
+    logging: terraform/standalone_ecs/provision/logging.tf
+    ssl: terraform/standalone_ecs/provision/ssl.tf
+    vpc: terraform/standalone_ecs/provision/vpc.tf
+    outputs: terraform/standalone_ecs/provision/outputs.tf
+    variables: terraform/standalone_ecs/provision/variables.tf
+    versions: terraform/standalone_ecs/provision/versions.tf
+bind:
+  plan_inputs: []
+  user_inputs: []
+  computed_inputs:
+  - name: instance_name
+    default: ${request.instance_id}
+    overwrite: true
+    type: string
+  - name: solr_admin_pass
+    default: ${instance.details["solr_admin_pass"]}
+    overwrite: true
+    type: string
+  - name: solr_admin_user
+    default: ${instance.details["solr_admin_user"]}
+    overwrite: true
+    type: string
+  - name: solr_admin_url
+    default: ${instance.details["solr_admin_url"]}
+    overwrite: true
+    type: string
+  outputs:
+  - field_name: domain
+    required: false
+    type: string
+    details: The domain of the SolrCloud instance that was created
+  - field_name: username
+    required: false
+    type: string
+    details: The username of the SolrCloud instance that was created
+  - field_name: password
+    required: false
+    type: string
+    details: The password of the SolrCloud instance that was created
+  - field_name: uri
+    required: true
+    type: string
+    details: The URL to use for working with the SolrCloud instance
+  - field_name: solr_admin_url
+    details: "The Solr url for the created instance"
+    type: string
+    required: false
+  - field_name: solr_admin_user
+    details: "The admin username for access to the Solr Instance"
+    type: string
+    required: false
+  - field_name: solr_admin_pass
+    details: "The admin password for access to the Solr Instance"
+    type: string
+    required: false
+  template_refs:
+    main: terraform/standalone_ecs/bind/main.tf
+    outputs: terraform/standalone_ecs/bind/outputs.tf
+    variables: terraform/standalone_ecs/bind/variables.tf
+    versions: terraform/standalone_ecs/bind/versions.tf
+
+examples: []
+plan_updateable: false
+requiredenvvars: []

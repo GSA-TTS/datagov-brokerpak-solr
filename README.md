@@ -6,8 +6,9 @@ This is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker
 needed by the data.gov team brokerable via the [Open Service Broker
 API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and
 Kubernetes), using Terraform. In particular, this brokerpak is used by
-[`datagov-ssb`](https://github.com/GSA/datagov-ssb) to broker instances of
-[SolrCloud](https://lucene.apache.org/solr/) through cloud.gov.
+[`datagov-ssb`](https://github.com/GSA/datagov-ssb) to broker instances of either of the following on cloud.gov,
+- [SolrCloud](https://solr.apache.org/guide/8_11/solrcloud.html)
+- [Solr Standalone](https://solr.apache.org/guide/8_11/a-quick-overview.html)
 
 For more information about the brokerpak concept, here's a [5-minute lightning
 talk](https://www.youtube.com/watch?v=BXIvzEfHil0) from the 2019 Cloud Foundry Summit. You may also want to check out the brokerpak
@@ -26,7 +27,7 @@ brokerpak concept, and to the Pivotal team running with the concept!
 - [Solr Official Docs](https://solr.apache.org/guide/8_11/)
 - [Solr Operator SolrCloud CRD](https://github.com/apache/solr-operator/blob/main/docs/solr-cloud/solr-cloud-crd.md)
 
-## Prerequisites
+## Prerequisites (solr-cloud)
 
 1. `make` is used for executing docker commands in a meaningful build cycle.
 1. `jq` is used for running certain tests
@@ -35,21 +36,34 @@ brokerpak concept, and to the Pivotal team running with the concept!
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
 1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
    a local k8s for the broker to populate during tests and demos
-1. [`eden`](https://github.com/starkandwayne/eden) is used as a client for testing the brokerpak
-1. [`terraform` 0.12.31](https://releases.hashicorp.com/terraform/0.12.31/) is used for local development 
-1. [`bats`](https://bats-core.readthedocs.io/en/stable/installation.html) is used to wrap `eden` tests, may be used to for terraform tests in the future.
+1. [`terraform` 1.1.5](https://releases.hashicorp.com/terraform/1.1.5/) is used for local development.
+
+## Prerequisites (solr-on-ecs)
+
+1. `make` is used for executing docker commands in a meaningful build cycle.
+1. `jq` is used for running certain tests
+1. [Docker Desktop (for Mac or
+   Windows)](https://www.docker.com/products/docker-desktop) or [Docker Engine
+   (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
+1. [`terraform` 1.1.5](https://releases.hashicorp.com/terraform/1.1.5/) is used for local development.
+1. AWS account credentials (as environment variables) are used for actual service provisioning. The corresponding user must have at least the permissions described in permission-policies.tf. Set at least these variables:
+    - AWS_ACCESS_KEY_ID
+    - AWS_SECRET_ACCESS_KEY
+    - AWS_DEFAULT_REGION
 
 Run the `make` command by itself for information on the various targets that are available. 
 
 ```bash
 $ make
-clean      Bring down the broker service if it's up and clean out the database
+clean      Bring down the broker service if it is up and clean out the database
 build      Build the brokerpak(s)
 up         Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser. 
 down       Bring the cloud-service-broker service down
-test       Execute the brokerpak examples against the running broker
-demo-up    Provision a SolrCloud instance and output the bound credentials
-demo-down  Clean up data left over from tests and demos
+test       Execute the brokerpak examples against the running broker (TODO)
+k8s-demo-up    Provision a SolrCloud instance and output the bound credentials
+k8s-demo-down  Clean up data left over from tests and demos
+ecs-demo-up    Provision a Solr standalone instance (configured for ckan) and output the bound credentials
+ecs-demo-down  Clean up data left over from tests and demos
 kind-up    Set up a local Kubernetes test environment using KinD
 kind-down  Tear down the Kubernetes test environment in KinD
 all        Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
@@ -58,7 +72,7 @@ help       This help
 
 Notable targets are described below.
 
-## Providing a test/demo Kubernetes environment
+## Providing a test/demo Kubernetes environment (solr-cloud)
 
 To use an existing Kubernetes cluster for testing:
 
@@ -131,7 +145,7 @@ by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your b
 Run
 
 ```bash
-make demo-up
+make k8s-demo-up
 ```
 
 The examples and values in the `examples.json` file will be used to provision and bind a solr-cloud instance.
@@ -151,36 +165,13 @@ The service will be available once there is at least one `pod/example-solrcloud-
 Run
 
 ```bash
-make demo-down
+make k8s-demo-down
 ```
 
 The examples and values in the `examples.json` file will be used to unbind and deprovision the solr-cloud instance.
 
 Any stray resources left over from a failed demo will also be removed, so you
 can use this command to reset the environment.
-
-## Running tests
-
-### Testing automatically
-
-Run 
-
-```bash
-make test
-```
-
-The examples and values in the `examples.json` file will be used for end-to-end
-testing of the brokerpak:
-
-- Provision and bind solr-cloud instance 1
-- Check that the credentials work
-- Create a second binding for solr-cloud intance 1
-- Check that the two bindings for instance 1 are unique
-- Provision and bind solr-cloud instance 2
-- Check that the credentails for instance 2A does not work for instance 1
-- Unbind solr-cloud instance 2 and verify that the credentials are destroyed
-- Unbind solr-cloud instance 1 and verify that the credentials are destroyed
-- Deprovision and Clean up
 
 ### Testing manually
 
@@ -208,31 +199,14 @@ docker-compose exec -T broker /bin/cloud-service-broker client provision --insta
 
 ...and so on.
 
-Using the CLI in this way will give you very precise JSON results for each
-query. For a more human-friendly workflow, use `eden` to manually manipulate the
-broker.
-
-For example, listing the catalog and provisioning a service instance with `eden`
-looks like this:
-
-```bash
-$ export SB_BROKER_URL=http://user:pass@127.0.0.1:8080
-$ export SB_BROKER_USERNAME=user
-$ export SB_BROKER_PASSWORD=pass
-$ eden catalog
-$ eden provision -s solr-cloud -p base -i <instance-name> -P "$(cat k8s-creds.yml)"
-$ eden bind -i <instance-name>
-$ eden credentials -i <instance-name> -b <binding-name>
-```
-
 ## Iterating on the brokerpak itself
 
 To rebuild the brokerpak and launch it, then provision a test instance:
 
 ```bash
-make down build up demo-up
+make down build up eks-demo-up
 # Poke and prod 
-make demo-down down
+make eks-demo-down down
 ```
 
 ## Tearing down the brokerpak

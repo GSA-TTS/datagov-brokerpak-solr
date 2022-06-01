@@ -46,11 +46,12 @@ k8s-creds.yml
 services/solr-cloud/solr-crd.tar.gz
 examples.json
 .env
+.env.secrets
 *.swp
-tee
 .ash_history
 .terraform.d/
-terraform/provision/.cache
+terraform/*/provision/.cache
 *kubeconfig*
 .kube*
 *.binding.json
+.terraform.lock.hcl

@@ -12,7 +12,7 @@ SOLR_SERVER=$(kubectl config view --raw -o json | jq -r '.clusters[]| select(.na
 SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME:-ing.local.domain}
 
 if [[ "${CURRENT_CLUSTER}" == "kind-datagov-broker-test" ]]; then
-    # If the test cluster is in KinD we need the CSB to use 
+    # If the test cluster is in KinD we need the CSB to use
     # a control plane URL resolvable from inside the CSB Docker container
     CURRENT_USER=kind-datagov-broker-test
     SOLR_CP_SERVER=$(kind get kubeconfig --internal --name="$(kind get clusters | grep datagov-broker-test)" | grep server | cut -d ' ' -f 6-)
@@ -37,7 +37,7 @@ SOLR_DOMAIN_NAME=${SOLR_DOMAIN_NAME}
 HEREDOC
 
 # Generate terraform.tfvars needed for mucking about directly with terraform/provision
-cat > terraform/provision/terraform.tfvars << HEREDOC
+cat > terraform/solrcloud/provision/terraform.tfvars << HEREDOC
 server="${SOLR_CP_SERVER}"
 token="${SOLR_TOKEN}"
 cluster_ca_certificate="${SOLR_CLUSTER_CA_CERTIFICATE}"
@@ -53,4 +53,4 @@ restartCron="*/10 * * * *"
 HEREDOC
 
 # Use the same terraform.tfvars config for mucking about directly with terraform/bind.
-cp terraform/provision/terraform.tfvars terraform/bind/terraform.tfvars
+cp terraform/solrcloud/provision/terraform.tfvars terraform/solrcloud/bind/terraform.tfvars

@@ -18,4 +18,4 @@ cat <<EOF
 EOF"
 }
 
-template 
+template
