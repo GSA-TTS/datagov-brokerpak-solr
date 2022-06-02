@@ -6,7 +6,7 @@ resource "random_password" "password" {
 }
 
 locals {
-  solr_url = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  solr_url         = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
   create_user_json = <<-EOF
     {
       "set-user": {
@@ -42,16 +42,16 @@ resource "aws_ecs_task_definition" "solr-admin-init" {
   family                   = "solr-${var.instance_name}-admin-init-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
-  cpu                      = 1024
-  memory                   = 2048
+  cpu                      = 256
+  memory                   = 512
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
   container_definitions = jsonencode([
     {
       name      = "solr-admin-init"
       image     = "${var.solrImageRepo}:8-efs-dns-root"
-      cpu       = 1024
-      memory    = 2048
+      cpu       = 256
+      memory    = 512
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
         "solr_ip=$(nslookup ${local.solr_url} | awk '/^Address: / { print $2 }');",

@@ -1,4 +1,8 @@
 
+locals {
+  solrMemInG = floor(var.solrMem / 1000)
+}
+
 data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_cluster" "solr-cluster" {
@@ -50,10 +54,10 @@ resource "aws_ecs_task_definition" "solr" {
       memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
-        "cd /tmp; /usr/bin/wget https://gist.githubusercontent.com/nickumia-reisys/18544d2c6aad4160293bda1fec6ead7f/raw/bf668a33a1e3ac2c20342389ab9c8cb6cadeed8b/solr_setup.sh; /bin/bash solr_setup.sh;",
+        "cd /tmp; /usr/bin/wget https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh; /bin/bash solr_setup.sh;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m 12g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
       ])]
 
       portMappings = [
@@ -83,8 +87,8 @@ resource "aws_ecs_task_definition" "solr" {
   volume {
     name = "solr-${var.instance_name}-data"
     efs_volume_configuration {
-      file_system_id          = aws_efs_file_system.solr-data.id
-      transit_encryption      = "DISABLED"
+      file_system_id     = aws_efs_file_system.solr-data.id
+      transit_encryption = "DISABLED"
     }
   }
 }
@@ -109,7 +113,7 @@ resource "aws_ecs_service" "solr" {
     container_port   = 8983
   }
   service_registries {
-    registry_arn = aws_service_discovery_service.solr.arn
+    registry_arn   = aws_service_discovery_service.solr.arn
     container_name = "solr"
     # container_port = 8983
   }
