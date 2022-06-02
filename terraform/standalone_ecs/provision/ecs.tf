@@ -1,4 +1,8 @@
 
+locals {
+  solrMemInG = floor(var.solrMem/1000)
+}
+
 data "aws_caller_identity" "current" {}
 
 resource "aws_ecs_cluster" "solr-cluster" {
@@ -53,7 +57,7 @@ resource "aws_ecs_task_definition" "solr" {
         "cd /tmp; /usr/bin/wget https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh; /bin/bash solr_setup.sh;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m 12g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
       ])]
 
       portMappings = [
