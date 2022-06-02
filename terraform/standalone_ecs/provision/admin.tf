@@ -6,7 +6,7 @@ resource "random_password" "password" {
 }
 
 locals {
-  solr_url = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  solr_url         = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
   create_user_json = <<-EOF
     {
       "set-user": {
