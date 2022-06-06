@@ -1,8 +1,8 @@
 version: 1
 name: solr-on-ecs
 id: 182612a5-e2b7-4afc-b2b2-9f9d066875d1
-description: Fault-tolerant and highly-available distributed indexing and searching using Apache Solr
-display_name: SolrCloud
+description: Independent indexing and searching using Apache Solr
+display_name: Solr on ECS
 image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
 documentation_url: https://lucene.apache.org/solr/resources.html
 support_url: https://github.com/GSA/datagov-brokerpak-solr
