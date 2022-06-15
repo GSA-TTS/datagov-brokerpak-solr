@@ -35,6 +35,10 @@ provision:
     required: false
     type: number
     details: "How much vCPU to request for each replica (default is '2000m' aka '2 vCPUs')"
+  - field_name: setupLink
+    required: false
+    type: string
+    details: "The Solr setup file for initialization of cores/authentication/et cetera..."
   computed_inputs:
   - name: instance_name
     type: string
@@ -62,6 +66,10 @@ provision:
     default: 4096
     overwrite: false
     type: number
+  - name: setupLink
+    default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
+    overwrite: false
+    type: string
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"

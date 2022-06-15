@@ -43,3 +43,9 @@ variable "solrCpu" {
   description = "How much vCPU to request for each replica (default is '2048' aka '2 vCPUs')"
   default     = 2048
 }
+
+variable "setupLink" {
+  type        = string
+  description = "The Solr setup file for initialization of cores/authentication/et cetera..."
+  default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
+}
