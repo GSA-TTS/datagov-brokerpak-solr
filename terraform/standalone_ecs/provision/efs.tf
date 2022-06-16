@@ -81,3 +81,11 @@ resource "aws_efs_file_system_policy" "policy" {
   }
   POLICY
 }
+
+resource "aws_efs_backup_policy" "solr-data-backup" {
+  file_system_id = aws_efs_file_system.solr-data.id
+
+  backup_policy {
+    status = "ENABLED"
+  }
+}
