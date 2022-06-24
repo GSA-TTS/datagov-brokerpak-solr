@@ -54,7 +54,7 @@ resource "aws_ecs_task_definition" "solr" {
       memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
-        "cd /tmp; /usr/bin/wget -o solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
+        "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
         "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
