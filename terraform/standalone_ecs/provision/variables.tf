@@ -53,5 +53,5 @@ variable "setupLink" {
 variable "efsProvisionedThroughput" {
   type        = number
   description = "The throughput, measured in MiB/s, that you want to provision for the file system"
-  default     = 100
+  default     = 1
 }

@@ -75,7 +75,7 @@ provision:
     overwrite: false
     type: string
   - name: efsProvisionedThroughput
-    default: 100
+    default: 1
     overwrite: false
     type: number
   - name: region
