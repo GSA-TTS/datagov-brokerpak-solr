@@ -39,6 +39,10 @@ provision:
     required: false
     type: string
     details: "The Solr setup file for initialization of cores/authentication/et cetera..."
+  - field_name: efsProvisionedThroughput
+    required: false
+    type: number
+    details: "The throughput, measured in MiB/s, that you want to provision for the file system"
   computed_inputs:
   - name: instance_name
     type: string
@@ -70,6 +74,10 @@ provision:
     default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
     overwrite: false
     type: string
+  - name: efsProvisionedThroughput
+    default: 1
+    overwrite: false
+    type: number
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"
