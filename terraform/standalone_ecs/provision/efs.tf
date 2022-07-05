@@ -22,7 +22,7 @@ resource "aws_efs_file_system" "solr-data" {
   creation_token = "solr-${local.id_64char}-data"
 
   performance_mode                = "generalPurpose"
-  throughput_moe                  = "provisioned"
+  throughput_mode                 = "provisioned"
   provisioned_throughput_in_mibps = var.efsProvisionedThroughput
 
   # encryption-at-rest
