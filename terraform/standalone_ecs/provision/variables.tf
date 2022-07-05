@@ -49,3 +49,9 @@ variable "setupLink" {
   description = "The Solr setup file for initialization of cores/authentication/et cetera..."
   default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
 }
+
+variable "efsProvisionedThroughput" {
+  type        = number
+  description = "The throughput, measured in MiB/s, that you want to provision for the file system"
+  default     = 100
+}

@@ -21,6 +21,10 @@ resource "aws_kms_key" "solr-data-key" {
 resource "aws_efs_file_system" "solr-data" {
   creation_token = "solr-${local.id_64char}-data"
 
+  performance_mode                = "generalPurpose"
+  throughput_moe                  = "provisioned"
+  provisioned_throughput_in_mibps = var.efsProvisionedThroughput
+
   # encryption-at-rest
   encrypted  = true
   kms_key_id = aws_kms_key.solr-data-key.arn
