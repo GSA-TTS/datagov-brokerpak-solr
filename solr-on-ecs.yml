@@ -43,6 +43,10 @@ provision:
     required: false
     type: number
     details: "The throughput, measured in MiB/s, that you want to provision for the file system"
+  - field_name: efsPerformanceMode
+    required: false
+    type: string
+    details: "The file system performance mode. Can be either \"generalPurpose\" or \"maxIO\" (Default: \"generalPurpose\")"
   computed_inputs:
   - name: instance_name
     type: string
@@ -78,6 +82,10 @@ provision:
     default: 1
     overwrite: false
     type: number
+  - name: efsPerformanceMode
+    default: "generalPurpose"
+    overwrite: false
+    type: string
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"

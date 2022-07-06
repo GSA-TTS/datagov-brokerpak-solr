@@ -55,3 +55,9 @@ variable "efsProvisionedThroughput" {
   description = "The throughput, measured in MiB/s, that you want to provision for the file system"
   default     = 1
 }
+
+variable "efsPerformanceMode" {
+  type        = string
+  description = "The file system performance mode. Can be either \"generalPurpose\" or \"maxIO\" (Default: \"generalPurpose\")"
+  default     = "generalPurpose"
+}
