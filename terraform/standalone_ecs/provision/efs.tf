@@ -21,7 +21,7 @@ resource "aws_kms_key" "solr-data-key" {
 resource "aws_efs_file_system" "solr-data" {
   creation_token = "solr-${local.id_64char}-data"
 
-  performance_mode                = "generalPurpose"
+  performance_mode                = var.efsPerformanceMode
   throughput_mode                 = "provisioned"
   provisioned_throughput_in_mibps = var.efsProvisionedThroughput
 
