@@ -27,7 +27,7 @@ module "vpc" {
 }
 
 resource "aws_service_discovery_private_dns_namespace" "solr" {
-  name        = "local${split("-", local.lb_name)[0]}"
+  name        = "solr-${local.lb_name}"
   description = "Internal solr-to-solr communication link"
   vpc         = module.vpc.vpc_id
 }
