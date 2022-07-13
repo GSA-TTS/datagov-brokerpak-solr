@@ -37,7 +37,7 @@ CSB_BINDING_FETCH=docker exec csb-service-$(BROKER_NAME) ./bin/binding-fetch.sh
 # CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
 # CLOUD_BIND_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
 ECS_CLOUD_PROVISION_PARAMS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root" }'
-ECS_CLOUD_PROVISION_PARAMS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root", "disableEfs": true }'
+ECS_CLOUD_PROVISION_PARAMS_NO_EFS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root", "disableEfs": true }'
 K8S_CLOUD_PROVISION_PARAMS='{ "solrJavaMem":"-Xms300m -Xmx300m", "solrMem":"1G", "solrCpu":"1000m", "cloud_name":"demo", "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-curl" }'
 CLOUD_BIND_PARAMS='{}'
 
