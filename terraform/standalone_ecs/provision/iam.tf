@@ -22,9 +22,10 @@ resource "aws_iam_role" "solr-task-execution" {
 }
 
 resource "aws_iam_policy_attachment" "solr-efs-ecs" {
+  count      = var.disableEfs ? 0 : 1
   name       = "solr-${var.instance_name}-efs-ecs-attachment"
   roles      = [aws_iam_role.solr-task-execution.name]
-  policy_arn = aws_iam_policy.ecs-solr-efs.arn
+  policy_arn = aws_iam_policy.ecs-solr-efs[count.index].arn
 }
 
 resource "aws_iam_policy_attachment" "solr-ecs-execution-role" {
@@ -34,6 +35,7 @@ resource "aws_iam_policy_attachment" "solr-ecs-execution-role" {
 }
 
 resource "aws_iam_policy" "ecs-solr-efs" {
+  count       = var.disableEfs ? 0 : 1
   name        = "solr-${var.instance_name}-efs-policy"
   path        = "/"
   description = "Allow ECS to talk to EFS"
@@ -48,7 +50,7 @@ resource "aws_iam_policy" "ecs-solr-efs" {
           "elasticfilesystem:ClientRootAccess"
         ]
         Effect   = "Allow"
-        Resource = "arn:aws:elasticfilesystem:${var.region}:${data.aws_caller_identity.current.id}:file-system/${aws_efs_file_system.solr-data.id}"
+        Resource = "arn:aws:elasticfilesystem:${var.region}:${data.aws_caller_identity.current.id}:file-system/${aws_efs_file_system.solr-data[count.index].id}"
       },
     ]
   })

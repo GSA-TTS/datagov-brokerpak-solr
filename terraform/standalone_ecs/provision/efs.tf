@@ -1,5 +1,6 @@
 
 resource "aws_kms_key" "solr-data-key" {
+  count                   = var.disableEfs ? 0 : 1
   description             = "Solr Data Key (${var.instance_name}"
   deletion_window_in_days = 7
   policy = jsonencode({
@@ -19,6 +20,7 @@ resource "aws_kms_key" "solr-data-key" {
 }
 
 resource "aws_efs_file_system" "solr-data" {
+  count          = var.disableEfs ? 0 : 1
   creation_token = "solr-${local.id_64char}-data"
 
   performance_mode                = var.efsPerformanceMode
@@ -27,15 +29,15 @@ resource "aws_efs_file_system" "solr-data" {
 
   # encryption-at-rest
   encrypted  = true
-  kms_key_id = aws_kms_key.solr-data-key.arn
+  kms_key_id = aws_kms_key.solr-data-key[count.index].arn
   tags = {
     Name = "SolrData-${var.instance_name}"
   }
 }
 
 resource "aws_efs_mount_target" "all" {
-  count           = length(module.vpc.public_subnets)
-  file_system_id  = aws_efs_file_system.solr-data.id
+  count           = var.disableEfs ? 0 : length(module.vpc.public_subnets)
+  file_system_id  = aws_efs_file_system.solr-data[count.index].id
   subnet_id       = module.vpc.private_subnets[count.index]
   security_groups = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
 }
@@ -62,7 +64,8 @@ resource "aws_security_group" "solr-ecs-efs-ingress" {
 }
 
 resource "aws_efs_file_system_policy" "policy" {
-  file_system_id = aws_efs_file_system.solr-data.id
+  count          = var.disableEfs ? 0 : 1
+  file_system_id = aws_efs_file_system.solr-data[count.index].id
 
   # encryption-in-transit
   policy = <<-POLICY
@@ -87,7 +90,8 @@ resource "aws_efs_file_system_policy" "policy" {
 }
 
 resource "aws_efs_backup_policy" "solr-data-backup" {
-  file_system_id = aws_efs_file_system.solr-data.id
+  count          = var.disableEfs ? 0 : 1
+  file_system_id = aws_efs_file_system.solr-data[count.index].id
 
   backup_policy {
     status = "ENABLED"

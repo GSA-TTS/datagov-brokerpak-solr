@@ -61,3 +61,9 @@ variable "efsPerformanceMode" {
   description = "The file system performance mode. Can be either \"generalPurpose\" or \"maxIO\" (Default: \"generalPurpose\")"
   default     = "generalPurpose"
 }
+
+variable "disableEfs" {
+  type        = string
+  description = "Launch without EFS volume"
+  default     = false
+}
