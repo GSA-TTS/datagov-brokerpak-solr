@@ -37,7 +37,7 @@ resource "aws_efs_file_system" "solr-data" {
 
 resource "aws_efs_mount_target" "all" {
   count           = var.disableEfs ? 0 : length(module.vpc.public_subnets)
-  file_system_id  = aws_efs_file_system.solr-data[count.index].id
+  file_system_id  = aws_efs_file_system.solr-data[0].id
   subnet_id       = module.vpc.private_subnets[count.index]
   security_groups = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
 }
