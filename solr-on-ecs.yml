@@ -47,6 +47,10 @@ provision:
     required: false
     type: string
     details: "The file system performance mode. Can be either \"generalPurpose\" or \"maxIO\" (Default: \"generalPurpose\")"
+  - field_name: disableEfs
+    required: false
+    type: boolean
+    details: "Launch Solr with local storage"
   computed_inputs:
   - name: instance_name
     type: string
@@ -86,6 +90,10 @@ provision:
     default: "generalPurpose"
     overwrite: false
     type: string
+  - name: disableEfs
+    default: false
+    overwrite: false
+    type: boolean
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"
