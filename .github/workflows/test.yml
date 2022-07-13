@@ -122,8 +122,11 @@ jobs:
         fi
         echo "INSTANCE_NAME=${INSTANCE_NAME}" | tee -a $GITHUB_ENV
 
-    - name: Start the broker and run the tests
+    - name: Start the broker and run the tests (normal with EFS)
       run: make .env up ecs-demo-up ecs-demo-down
+
+    - name: Use the same broker and run the tests (local storage, no EFS)
+      run: make ecs-no-efs-demo-up ecs-demo-down
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
