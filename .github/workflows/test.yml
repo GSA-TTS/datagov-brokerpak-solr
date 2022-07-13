@@ -125,6 +125,9 @@ jobs:
     - name: Start the broker and run the tests
       run: make .env up ecs-demo-up ecs-demo-down
 
+    - name: Start the broker and run the tests
+      run: make .env up ecs-no-efs-demo-up ecs-demo-down
+
     - name: Clean up if there was a failure
       if: ${{ failure() }}
       run: make ecs-demo-down down
