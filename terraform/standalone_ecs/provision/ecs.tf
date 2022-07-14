@@ -47,9 +47,6 @@ resource "aws_ecs_task_definition" "solr" {
   memory                   = var.solrMem
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
-  ephemeral_storage {
-    size_in_gib = 50
-  }
   container_definitions = jsonencode([
     {
       name      = "solr"
@@ -106,7 +103,9 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
   memory                   = var.solrMem
   task_role_arn            = aws_iam_role.solr-task-execution.arn
   execution_role_arn       = aws_iam_role.solr-task-execution.arn
-
+  ephemeral_storage {
+    size_in_gib = 50
+  }
   container_definitions = jsonencode([
     {
       name      = "solr"
@@ -115,6 +114,7 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
       memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
+        "df -h;",
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
