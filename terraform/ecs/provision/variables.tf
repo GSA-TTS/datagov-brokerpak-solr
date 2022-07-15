@@ -1,4 +1,8 @@
 
+##############################
+# Solr Leader (and standalone) Configuration
+##############################
+
 variable "instance_name" {
   type        = string
   description = "Unique ID to separate solr instanceresources"
@@ -44,6 +48,16 @@ variable "solrCpu" {
   default     = 2048
 }
 
+variable "setupLink" {
+  type        = string
+  description = "The Solr setup file for initialization of cores/authentication/et cetera..."
+  default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
+}
+
+##############################
+# Solr Follower Configuration
+##############################
+
 variable "solrFollowerMem" {
   type        = number
   description = "How much memory to request for each follower replica (default is '12G')"
@@ -68,11 +82,9 @@ variable "solrFollowerDiskSize" {
   default     = 50
 }
 
-variable "setupLink" {
-  type        = string
-  description = "The Solr setup file for initialization of cores/authentication/et cetera..."
-  default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
-}
+########################
+# Solr EFS Configuration
+########################
 
 variable "efsProvisionedThroughput" {
   type        = number
