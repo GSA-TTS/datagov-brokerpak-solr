@@ -44,6 +44,30 @@ variable "solrCpu" {
   default     = 2048
 }
 
+variable "solrFollowerMem" {
+  type        = number
+  description = "How much memory to request for each follower replica (default is '12G')"
+  default     = 12288
+}
+
+variable "solrFollowerCpu" {
+  type        = number
+  description = "How much vCPU to request for each follower replica (default is '2048' aka '2 vCPUs')"
+  default     = 2048
+}
+
+variable "solrFollowerCount" {
+  type        = number
+  description = "How many Solr Followers should be created"
+  default     = 0
+}
+
+variable "solrFollowerDiskSize" {
+  type        = number
+  description = "How much ephemeral storage disk space Solr Followers will have"
+  default     = 50
+}
+
 variable "setupLink" {
   type        = string
   description = "The Solr setup file for initialization of cores/authentication/et cetera..."
