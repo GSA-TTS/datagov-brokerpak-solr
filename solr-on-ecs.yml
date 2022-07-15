@@ -123,7 +123,7 @@ provision:
     ecs: terraform/ecs/provision/leader.tf
     efs: terraform/ecs/provision/efs.tf
     iam: terraform/ecs/provision/iam.tf
-    lb: terraform/ecs/provision/lb.tf
+    lb: terraform/ecs/provision/lb-leader.tf
     logging: terraform/ecs/provision/logging.tf
     ssl: terraform/ecs/provision/ssl.tf
     vpc: terraform/ecs/provision/vpc.tf
