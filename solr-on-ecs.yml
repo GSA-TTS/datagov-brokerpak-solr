@@ -120,7 +120,7 @@ provision:
   template_refs:
     admin: terraform/ecs/provision/admin.tf
     dns: terraform/ecs/provision/dns.tf
-    ecs: terraform/ecs/provision/ecs.tf
+    ecs: terraform/ecs/provision/leader.tf
     efs: terraform/ecs/provision/efs.tf
     iam: terraform/ecs/provision/iam.tf
     lb: terraform/ecs/provision/lb.tf
