@@ -6,18 +6,21 @@ locals {
 # Create ACM certificate for the sub-domain
 resource "aws_acm_certificate" "cert" {
   domain_name       = local.domain
+  subject_alternative_names = [ "*.${local.domain}" ]
+
   validation_method = "DNS"
   tags = merge(var.labels, {
     environment = var.instance_name
   })
 }
 
-# Validate the certificate using DNS method
+# Validate the certificate using DNS method (Parent Domain and subdomains)
 resource "aws_route53_record" "cert_validation" {
-  name    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_name
-  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_type
+  count   = 2
+  name    = tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_name
+  type    = tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_type
   zone_id = aws_route53_zone.cluster.id
-  records = [tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_value]
+  records = [tolist(aws_acm_certificate.cert.domain_validation_options)[count.index].resource_record_value]
   ttl     = 60
 }
 

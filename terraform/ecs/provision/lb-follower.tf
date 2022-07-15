@@ -42,7 +42,6 @@ resource "aws_lb_listener" "https_response-follower" {
   load_balancer_arn = aws_lb.solr-follower[count.index].arn
   port              = "443"
   protocol          = "HTTPS"
-  # TODO: create wildcard certificate
   certificate_arn   = aws_acm_certificate.cert.arn
 
   default_action {
