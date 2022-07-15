@@ -51,6 +51,22 @@ provision:
     required: false
     type: boolean
     details: "Launch Solr with local storage"
+  - field_name: solrFollowerCount
+    required: false
+    type: number
+    details: "How many Solr Followers should be created"
+  - field_name: solrFollowerCpu
+    required: false
+    type: number
+    details: "How much vCPU to request for each follower replica (default is '2048' aka '2 vCPUs')"
+  - field_name: solrFollowerMem
+    required: false
+    type: number
+    details: "How much memory to request for each follower replica (default is '12G')"
+  - field_name: solrFollowerDiskSize
+    required: false
+    type: number
+    details: "How much ephemeral storage disk space Solr Followers will have"
   computed_inputs:
   - name: instance_name
     type: string
@@ -94,6 +110,22 @@ provision:
     default: false
     overwrite: false
     type: boolean
+  - name: solrFollowerMem
+    default: 14336
+    overwrite: false
+    type: number
+  - name: solrFollowerCpu
+    default: 4096
+    overwrite: false
+    type: number
+  - name: solrFollowerCount
+    default: 0
+    overwrite: false
+    type: number
+  - name: solrFollowerDiskSize
+    default: 50
+    overwrite: false
+    type: number
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"
@@ -130,6 +162,10 @@ provision:
     outputs: terraform/ecs/provision/outputs.tf
     variables: terraform/ecs/provision/variables.tf
     versions: terraform/ecs/provision/versions.tf
+
+    # Separate configuration for solr followers
+    follower: terraform/ecs/provision/follower.tf
+    lb-follower: terraform/ecs/provision/lb-follower.tf
 bind:
   plan_inputs: []
   user_inputs: []
