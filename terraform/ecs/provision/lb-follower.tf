@@ -1,6 +1,6 @@
 
 resource "aws_lb" "solr-follower" {
-  count   = var.solrFollowerCount == 0 ? 0 : 1
+  count              = var.solrFollowerCount == 0 ? 0 : 1
   name               = "${local.lb_name}-follower-lb"
   internal           = false
   load_balancer_type = "application"
@@ -21,7 +21,7 @@ resource "aws_lb" "solr-follower" {
 }
 
 resource "aws_lb_listener" "http_upgrade-follower" {
-  count   = var.solrFollowerCount == 0 ? 0 : 1
+  count             = var.solrFollowerCount == 0 ? 0 : 1
   load_balancer_arn = aws_lb.solr-follower[count.index].arn
   port              = "80"
   protocol          = "HTTP"
@@ -38,7 +38,7 @@ resource "aws_lb_listener" "http_upgrade-follower" {
 }
 
 resource "aws_lb_listener" "https_response-follower" {
-  count   = var.solrFollowerCount == 0 ? 0 : 1
+  count             = var.solrFollowerCount == 0 ? 0 : 1
   load_balancer_arn = aws_lb.solr-follower[count.index].arn
   port              = "443"
   protocol          = "HTTPS"
@@ -51,7 +51,7 @@ resource "aws_lb_listener" "https_response-follower" {
 }
 
 resource "aws_lb_target_group" "solr-follower-target" {
-  count   = var.solrFollowerCount == 0 ? 0 : 1
+  count       = var.solrFollowerCount == 0 ? 0 : 1
   name        = "${local.lb_name}-follower-tg"
   port        = 8983
   protocol    = "HTTP"
