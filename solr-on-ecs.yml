@@ -118,18 +118,18 @@ provision:
     type: string
     required: true
   template_refs:
-    admin: terraform/standalone_ecs/provision/admin.tf
-    dns: terraform/standalone_ecs/provision/dns.tf
-    ecs: terraform/standalone_ecs/provision/ecs.tf
-    efs: terraform/standalone_ecs/provision/efs.tf
-    iam: terraform/standalone_ecs/provision/iam.tf
-    lb: terraform/standalone_ecs/provision/lb.tf
-    logging: terraform/standalone_ecs/provision/logging.tf
-    ssl: terraform/standalone_ecs/provision/ssl.tf
-    vpc: terraform/standalone_ecs/provision/vpc.tf
-    outputs: terraform/standalone_ecs/provision/outputs.tf
-    variables: terraform/standalone_ecs/provision/variables.tf
-    versions: terraform/standalone_ecs/provision/versions.tf
+    admin: terraform/ecs/provision/admin.tf
+    dns: terraform/ecs/provision/dns.tf
+    ecs: terraform/ecs/provision/ecs.tf
+    efs: terraform/ecs/provision/efs.tf
+    iam: terraform/ecs/provision/iam.tf
+    lb: terraform/ecs/provision/lb.tf
+    logging: terraform/ecs/provision/logging.tf
+    ssl: terraform/ecs/provision/ssl.tf
+    vpc: terraform/ecs/provision/vpc.tf
+    outputs: terraform/ecs/provision/outputs.tf
+    variables: terraform/ecs/provision/variables.tf
+    versions: terraform/ecs/provision/versions.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -180,10 +180,10 @@ bind:
     type: string
     required: false
   template_refs:
-    main: terraform/standalone_ecs/bind/main.tf
-    outputs: terraform/standalone_ecs/bind/outputs.tf
-    variables: terraform/standalone_ecs/bind/variables.tf
-    versions: terraform/standalone_ecs/bind/versions.tf
+    main: terraform/ecs/bind/main.tf
+    outputs: terraform/ecs/bind/outputs.tf
+    variables: terraform/ecs/bind/variables.tf
+    versions: terraform/ecs/bind/versions.tf
 
 examples: []
 plan_updateable: false
