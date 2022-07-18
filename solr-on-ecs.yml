@@ -43,6 +43,10 @@ provision:
     required: false
     type: number
     details: "The throughput, measured in MiB/s, that you want to provision for the file system"
+  - field_name: efsProvisionedThroughputFollower
+    required: false
+    type: number
+    details: "The throughput, measured in MiB/s, that you want to provision for the file system of the followers"
   - field_name: efsPerformanceMode
     required: false
     type: string
@@ -51,6 +55,10 @@ provision:
     required: false
     type: boolean
     details: "Launch Solr with local storage"
+  - field_name: disableEfsFollower
+    required: false
+    type: boolean
+    details: "Launch Solr Followers with local storage"
   - field_name: solrFollowerCount
     required: false
     type: number
@@ -102,11 +110,19 @@ provision:
     default: 1
     overwrite: false
     type: number
+  - name: efsProvisionedThroughputFollower
+    default: 1
+    overwrite: false
+    type: number
   - name: efsPerformanceMode
     default: "generalPurpose"
     overwrite: false
     type: string
   - name: disableEfs
+    default: false
+    overwrite: false
+    type: boolean
+  - name: disableEfsFollower
     default: false
     overwrite: false
     type: boolean
@@ -137,8 +153,12 @@ provision:
     overwrite: true
     default: ${config("aws.zone")}
   outputs:
-  - field_name: solr_admin_url
-    details: "The Solr url for the created instance"
+  - field_name: solr_leader_url
+    details: "The Solr Leader url for the created instance"
+    type: string
+    required: true
+  - field_name: solr_follower_url
+    details: "The Solr Follower url for the created instance (routes to all follower instances randomly)"
     type: string
     required: true
   - field_name: solr_admin_user
