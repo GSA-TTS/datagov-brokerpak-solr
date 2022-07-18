@@ -105,13 +105,13 @@ variable "efsPerformanceMode" {
 }
 
 variable "disableEfs" {
-  type        = string
+  type        = bool
   description = "Launch without EFS volume"
   default     = false
 }
 
 variable "disableEfsFollower" {
-  type        = string
+  type        = bool
   description = "Launch followers without EFS volume"
   default     = false
 }
