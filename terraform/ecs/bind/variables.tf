@@ -1,5 +1,9 @@
 
-variable "solr_admin_url" {
+variable "solr_leader_url" {
+  type = string
+}
+
+variable "solr_follower_individual_urls" {
   type = string
 }
 
