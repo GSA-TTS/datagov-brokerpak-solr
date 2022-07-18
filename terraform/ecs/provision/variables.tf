@@ -82,6 +82,12 @@ variable "solrFollowerDiskSize" {
   default     = 50
 }
 
+variable "setupFollowerLink" {
+  type        = string
+  description = "The Solr setup file for Followers to initialize cores/authentication/et cetera..."
+  default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_follower_setup.sh"
+}
+
 ########################
 # Solr EFS Configuration
 ########################

@@ -75,6 +75,10 @@ provision:
     required: false
     type: number
     details: "How much ephemeral storage disk space Solr Followers will have"
+  - field_name: setupFollowerLink
+    required: false
+    type: string
+    details: "The Solr setup file for follower to initialize cores/authentication/et cetera..."
   computed_inputs:
   - name: instance_name
     type: string
@@ -142,6 +146,10 @@ provision:
     default: 50
     overwrite: false
     type: number
+  - name: setupFollowerLink
+    default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_follower_setup.sh"
+    overwrite: false
+    type: string
   - name: region
     type: string
     details: "The AWS region in which to create k8s instances"
