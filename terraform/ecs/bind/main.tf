@@ -85,7 +85,7 @@ resource "null_resource" "manage_solr_user" {
         '${self.triggers.domain}/solr/admin/authorization' \
         -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
 
-      solr_follower_urls=(${replace(self.triggers.domain_followers, ",", ""))})
+      solr_follower_urls=(${replace(self.triggers.domain_followers, ",", "")})
       for solr_follower_url in $${solr_follower_urls[@]}
       do
         curl \
@@ -93,14 +93,14 @@ resource "null_resource" "manage_solr_user" {
           -o /dev/null \
           -w "%%{http_code}\n" \
           --user $${ADMIN_USERNAME}:$${ADMIN_PASSWORD} \
-          '$solr_follower_url/solr/admin/authentication' \
+          "$${solr_follower_url}/solr/admin/authentication" \
           -H 'Content-type:application/json' --data "$CREATE_USER_JSON"
         curl \
           -s -f -L \
           -o /dev/null \
           -w "%%{http_code}\n" \
           --user $${ADMIN_USERNAME}:$${ADMIN_PASSWORD} \
-          '$solr_follower_url/solr/admin/authorization' \
+          "$${solr_follower_url}/solr/admin/authorization" \
           -H 'Content-type:application/json' --data "$SET_ROLE_JSON"
       done
     EOF
@@ -134,7 +134,7 @@ resource "null_resource" "manage_solr_user" {
         '${self.triggers.domain}/solr/admin/authentication' \
         -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
 
-      solr_follower_urls=(${replace(self.triggers.domain_followers, ",", ""))})
+      solr_follower_urls=(${replace(self.triggers.domain_followers, ",", "")})
       for solr_follower_url in $${solr_follower_urls[@]}
       do
         curl \
@@ -142,14 +142,14 @@ resource "null_resource" "manage_solr_user" {
           -o /dev/null \
           -w "%%{http_code}\n" \
           --user $${ADMIN_USERNAME}:$${ADMIN_PASSWORD} \
-          '$solr_follower_url/solr/admin/authentication' \
+          "$${solr_follower_url}/solr/admin/authentication" \
           -H 'Content-type:application/json' --data "$CLEAR_ROLE_JSON"
         curl \
           -s -f -L \
           -o /dev/null \
           -w "%%{http_code}\n" \
           --user $${ADMIN_USERNAME}:$${ADMIN_PASSWORD} \
-          '$solr_follower_url/solr/admin/authorization' \
+          "$${solr_follower_url}/solr/admin/authorization" \
           -H 'Content-type:application/json' --data "$DELETE_USER_JSON"
       done
     EOF
