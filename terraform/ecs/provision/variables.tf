@@ -92,6 +92,12 @@ variable "efsProvisionedThroughput" {
   default     = 1
 }
 
+variable "efsProvisionedThroughputFollower" {
+  type        = number
+  description = "The throughput, measured in MiB/s, that you want to provision for the file system (for follower)"
+  default     = 1
+}
+
 variable "efsPerformanceMode" {
   type        = string
   description = "The file system performance mode. Can be either \"generalPurpose\" or \"maxIO\" (Default: \"generalPurpose\")"
@@ -101,5 +107,11 @@ variable "efsPerformanceMode" {
 variable "disableEfs" {
   type        = string
   description = "Launch without EFS volume"
+  default     = false
+}
+
+variable "disableEfsFollower" {
+  type        = string
+  description = "Launch followers without EFS volume"
   default     = false
 }
