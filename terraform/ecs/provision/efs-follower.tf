@@ -15,7 +15,7 @@ resource "aws_efs_file_system" "solr-data-follower" {
   encrypted  = true
   kms_key_id = aws_kms_key.solr-data-key[0].arn
   tags = {
-    Name = "SolrData-${var.instance_name}"
+    Name = "SolrData-${var.instance_name}-follower-${count.index}"
   }
 }
 
