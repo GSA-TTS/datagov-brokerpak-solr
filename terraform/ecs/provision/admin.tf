@@ -66,7 +66,7 @@ resource "aws_ecs_task_definition" "solr-admin-init" {
 
         "solr_follower_urls=(${join(" ", local.solr_follower_urls)});",
         "for solr_follower_url in $${solr_follower_urls[@]}; do",
-        "solr_ip=$(nslookup solr_follower_url | awk '/^Address: / { print $2 }');",
+        "solr_ip=$(nslookup $solr_follower_url | awk '/^Address: / { print $2 }');",
         "echo $solr_ip;",
         "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.create_user_json}';",
         "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.set_role_json}';",
