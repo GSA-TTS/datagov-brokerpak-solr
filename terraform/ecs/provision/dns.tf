@@ -126,7 +126,7 @@ resource "aws_route53_record" "solr" {
 resource "aws_route53_record" "solr-follower" {
   count   = var.solrFollowerCount == 0 ? 0 : 1
   zone_id = aws_route53_zone.cluster.zone_id
-  name    = local.follower_domain
+  name    = replace(local.follower_domain, "-placeholder", "")
   type    = "CNAME"
   ttl     = "120"
   records = [aws_lb.solr-follower[count.index].dns_name]

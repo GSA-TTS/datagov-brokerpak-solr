@@ -13,5 +13,11 @@ output "solr_leader_url" {
 }
 
 output "solr_follower_url" {
-  value = "https://${local.follower_domain}"
+  value = "https://${replace(local.follower_domain, "-placeholder", "")}"
+}
+
+output "solr_follower_individual_urls" {
+  value = join(", ", [for i in range(0, var.solrFollowerCount) :
+    "https://${replace(local.follower_domain, "-placeholder", "")}:${tostring(9000 + i)}"
+  ])
 }

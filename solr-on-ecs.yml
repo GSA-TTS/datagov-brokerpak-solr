@@ -169,6 +169,10 @@ provision:
     details: "The Solr Follower url for the created instance (routes to all follower instances randomly)"
     type: string
     required: true
+  - field_name: solr_follower_individual_urls
+    details: "The Solr Follower urls for each follower instance"
+    type: string
+    required: true
   - field_name: solr_admin_user
     details: "The admin username for access to the Solr Instance"
     type: string
