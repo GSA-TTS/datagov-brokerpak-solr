@@ -90,6 +90,13 @@ resource "aws_security_group" "solr-lb-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   ingress {
+    description = "HTTPS to individual Followers"
+    from_port   = 9000
+    to_port     = 9000+var.solrFollowerCount
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
     description     = "solr cluster"
     from_port       = 0
     to_port         = 0
