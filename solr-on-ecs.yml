@@ -152,7 +152,7 @@ provision:
     type: string
   - name: region
     type: string
-    details: "The AWS region in which to create k8s instances"
+    details: "The AWS region in which to create all AWS resources"
     overwrite: true
     default: ${config("aws.default_region")}
   - name: zone
@@ -224,29 +224,41 @@ bind:
   - field_name: domain
     required: false
     type: string
-    details: The domain of the SolrCloud instance that was created
+    details: The domain of the Solr Leader instance that was created
+  - field_name: domain_replica
+    required: false
+    type: string
+    details: The domain of the Solr Follower instances that were created
   - field_name: username
     required: false
     type: string
-    details: The username of the SolrCloud instance that was created
+    details: The username of the Solr instances (leader + followers) that were created
   - field_name: password
     required: false
     type: string
-    details: The password of the SolrCloud instance that was created
+    details: The password of the Solr instances (leader + followers) that were created
   - field_name: uri
     required: true
     type: string
-    details: The URL to use for working with the SolrCloud instance
-  - field_name: solr_admin_url
-    details: "The Solr url for the created instance"
+    details: The URL to use for working with the Solr Leader instance
+  - field_name: solr_leader_url
+    details: "The Solr Leader url for the created instance"
     type: string
-    required: false
+    required: true
+  - field_name: solr_follower_url
+    details: "The Solr Follower url for the created instance (routes to all follower instances randomly)"
+    type: string
+    required: true
+  - field_name: solr_follower_individual_urls
+    details: "The Solr Follower urls for each follower instance"
+    type: string
+    required: true
   - field_name: solr_admin_user
-    details: "The admin username for access to the Solr Instance"
+    details: "The admin username for access to the Solr instances (leader + followers)"
     type: string
     required: false
   - field_name: solr_admin_pass
-    details: "The admin password for access to the Solr Instance"
+    details: "The admin password for access to the Solr instances (leader + followers)"
     type: string
     required: false
   template_refs:
