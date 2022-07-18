@@ -1,6 +1,8 @@
 
 locals {
   domain = "solr-${local.lb_name}.${var.zone}"
+  leader_domain = "leader.${local.domain}"
+  follower_domain = "follower.${local.domain}"
 }
 
 # Create ACM certificate for the sub-domain

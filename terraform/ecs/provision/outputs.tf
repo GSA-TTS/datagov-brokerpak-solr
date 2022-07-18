@@ -8,6 +8,10 @@ output "solr_admin_pass" {
   sensitive = true
 }
 
-output "solr_admin_url" {
-  value = "https://${local.domain}"
+output "solr_leader_url" {
+  value = "https://${local.leader_domain}"
+}
+
+output "solr_follower_url" {
+  value = "https://${local.follower_domain}"
 }

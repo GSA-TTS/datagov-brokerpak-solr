@@ -116,7 +116,7 @@ resource "aws_route53_record" "cluster-ds" {
 # CNAME to Solr Leader Load Balancer
 resource "aws_route53_record" "solr" {
   zone_id = aws_route53_zone.cluster.zone_id
-  name    = "leader.${local.domain}"
+  name    = local.leader_domain
   type    = "CNAME"
   ttl     = "120"
   records = [aws_lb.solr.dns_name]
@@ -126,7 +126,7 @@ resource "aws_route53_record" "solr" {
 resource "aws_route53_record" "solr-follower" {
   count   = var.solrFollowerCount == 0 ? 0 : 1
   zone_id = aws_route53_zone.cluster.zone_id
-  name    = "follower.${local.domain}"
+  name    = local.follower_domain
   type    = "CNAME"
   ttl     = "120"
   records = [aws_lb.solr-follower[count.index].dns_name]
