@@ -7,4 +7,6 @@ output "password" { value = nonsensitive(random_password.password.result) }
 
 output "solr_admin_user" { value = "(hidden)" }
 output "solr_admin_pass" { value = "(hidden)" }
-output "solr_admin_url" { value = "(hidden)" }
+output "solr_follower_url" { value = "(hidden)" }
+output "solr_leader_url" { value = "(hidden)" }
+output "solr_follower_individual_urls" {}
