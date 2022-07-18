@@ -216,8 +216,16 @@ bind:
     default: ${instance.details["solr_admin_user"]}
     overwrite: true
     type: string
-  - name: solr_admin_url
-    default: ${instance.details["solr_admin_url"]}
+  - name: solr_leader_url
+    default: ${instance.details["solr_leader_url"]}
+    overwrite: true
+    type: string
+  - name: solr_follower_url
+    default: ${instance.details["solr_follower_url"]}
+    overwrite: true
+    type: string
+  - name: solr_follower_individual_urls
+    default: ${instance.details["solr_follower_individual_urls"]}
     overwrite: true
     type: string
   outputs:
