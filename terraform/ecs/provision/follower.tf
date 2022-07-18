@@ -126,7 +126,7 @@ resource "aws_ecs_service" "solr-follower" {
     container_port   = 8983
   }
   service_registries {
-    registry_arn   = aws_service_discovery_service.solr.arn
+    registry_arn   = aws_service_discovery_service.solr-follower[count.index].arn
     container_name = "solr-follower-${count.index}"
     # container_port = 8983
   }
