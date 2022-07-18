@@ -180,8 +180,9 @@ provision:
   template_refs:
     admin: terraform/ecs/provision/admin.tf
     dns: terraform/ecs/provision/dns.tf
-    ecs: terraform/ecs/provision/leader.tf
-    efs: terraform/ecs/provision/efs.tf
+    private-dns: terraform/ecs/provision/private-dns.tf
+    leader: terraform/ecs/provision/leader.tf
+    efs: terraform/ecs/provision/efs-leader.tf
     iam: terraform/ecs/provision/iam.tf
     lb: terraform/ecs/provision/lb-leader.tf
     logging: terraform/ecs/provision/logging.tf
@@ -194,6 +195,7 @@ provision:
     # Separate configuration for solr followers
     follower: terraform/ecs/provision/follower.tf
     lb-follower: terraform/ecs/provision/lb-follower.tf
+    efs-follower: terraform/ecs/provision/efs-follower.tf
 bind:
   plan_inputs: []
   user_inputs: []
