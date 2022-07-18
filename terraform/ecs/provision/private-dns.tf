@@ -24,7 +24,7 @@ resource "aws_service_discovery_service" "solr" {
 
 resource "aws_service_discovery_service" "solr-follower" {
   count = var.solrFollowerCount
-  name = "${local.lb_name}-follower-${count.index}"
+  name  = "${local.lb_name}-follower-${count.index}"
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.solr.id

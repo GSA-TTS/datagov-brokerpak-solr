@@ -6,7 +6,7 @@ resource "random_password" "password" {
 }
 
 locals {
-  solr_url           = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  solr_url = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
   solr_follower_urls = [for follower in range(0, var.solrFollowerCount) :
     "${local.lb_name}-follower-${follower}.${aws_service_discovery_private_dns_namespace.solr.name}"
   ]

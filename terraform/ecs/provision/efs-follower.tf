@@ -22,14 +22,14 @@ resource "aws_efs_file_system" "solr-data-follower" {
 resource "aws_efs_mount_target" "follower-all" {
   # Complex double-for loop based on https://www.daveperrett.com/articles/2021/08/19/nested-for-each-with-terraform/
   # For each EFS file system, we need to make a mount target in all subnets.
-  for_each        = var.disableEfsFollower ? {} : { for i, entry in flatten([
-      for efs in aws_efs_file_system.solr-data-follower : [
-        for subnet in module.vpc.private_subnets : {
-          efs_id = efs.id
-          subnet_id = subnet
-        }
-      ]
-    ]) : "${local.efs_mount_target_keys[i]}" => entry }
+  for_each = var.disableEfsFollower ? {} : { for i, entry in flatten([
+    for efs in aws_efs_file_system.solr-data-follower : [
+      for subnet in module.vpc.private_subnets : {
+        efs_id    = efs.id
+        subnet_id = subnet
+      }
+    ]
+  ]) : "${local.efs_mount_target_keys[i]}" => entry }
 
   file_system_id  = each.value.efs_id
   subnet_id       = each.value.subnet_id
