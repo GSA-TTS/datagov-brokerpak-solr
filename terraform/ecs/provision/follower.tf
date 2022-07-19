@@ -26,12 +26,12 @@ resource "aws_ecs_task_definition" "solr-follower-no-efs" {
         "df -h;",
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupFollowerLink}; /bin/bash solr_setup.sh;",
         "mv /tmp/ckan_config/solrconfig_follower.xml /tmp/ckan_config/solrconfig.xml;",
-        "sed -i 's/SOLR_REPLICATION_LEADER_URL/https:\\/\\/${local.leader_domain}\\/solr\\/ckan\\/replication/g' /tmp/ckan_config/solrconfig.xml",
-        "sed -i 's/SOLR_REPLICATION_LEADER_USER/${random_uuid.username.result}/g' /tmp/ckan_config/solrconfig.xml",
-        "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml",
+        "sed -i 's/SOLR_REPLICATION_LEADER_URL/https:\\/\\/${local.leader_domain}:443\\/solr\\/ckan\\/replication/g' /tmp/ckan_config/solrconfig.xml;",
+        "sed -i 's/SOLR_REPLICATION_LEADER_USER/${random_uuid.username.result}/g' /tmp/ckan_config/solrconfig.xml;",
+        "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.disable.shardsWhitelist=true\" -m solr"
       ])]
 
       portMappings = [
@@ -71,12 +71,12 @@ resource "aws_ecs_task_definition" "solr-follower" {
       command = ["/bin/bash", "-c", join(" ", [
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupFollowerLink}; /bin/bash solr_setup.sh;",
         "mv /tmp/ckan_config/solrconfig_follower.xml /tmp/ckan_config/solrconfig.xml;",
-        "sed -i 's/SOLR_REPLICATION_LEADER_URL/https:\\/\\/${local.leader_domain}\\/solr\\/ckan\\/replication/g' /tmp/ckan_config/solrconfig.xml",
-        "sed -i 's/SOLR_REPLICATION_LEADER_USER/${random_uuid.username.result}/g' /tmp/ckan_config/solrconfig.xml",
-        "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml",
+        "sed -i 's/SOLR_REPLICATION_LEADER_URL/https:\\/\\/${local.leader_domain}:443\\/solr\\/ckan\\/replication/g' /tmp/ckan_config/solrconfig.xml;",
+        "sed -i 's/SOLR_REPLICATION_LEADER_USER/${random_uuid.username.result}/g' /tmp/ckan_config/solrconfig.xml;",
+        "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.disable.shardsWhitelist=true\" -m solr"
       ])]
 
       portMappings = [
