@@ -43,6 +43,10 @@ provision:
     required: false
     type: number
     details: "The throughput, measured in MiB/s, that you want to provision for the file system"
+  - field_name: efsProvisionedThroughputFollower
+    required: false
+    type: number
+    details: "The throughput, measured in MiB/s, that you want to provision for the file system of the followers"
   - field_name: efsPerformanceMode
     required: false
     type: string
@@ -51,6 +55,30 @@ provision:
     required: false
     type: boolean
     details: "Launch Solr with local storage"
+  - field_name: disableEfsFollower
+    required: false
+    type: boolean
+    details: "Launch Solr Followers with local storage"
+  - field_name: solrFollowerCount
+    required: false
+    type: number
+    details: "How many Solr Followers should be created"
+  - field_name: solrFollowerCpu
+    required: false
+    type: number
+    details: "How much vCPU to request for each follower replica (default is '2048' aka '2 vCPUs')"
+  - field_name: solrFollowerMem
+    required: false
+    type: number
+    details: "How much memory to request for each follower replica (default is '12G')"
+  - field_name: solrFollowerDiskSize
+    required: false
+    type: number
+    details: "How much ephemeral storage disk space Solr Followers will have"
+  - field_name: setupFollowerLink
+    required: false
+    type: string
+    details: "The Solr setup file for follower to initialize cores/authentication/et cetera..."
   computed_inputs:
   - name: instance_name
     type: string
@@ -86,6 +114,10 @@ provision:
     default: 1
     overwrite: false
     type: number
+  - name: efsProvisionedThroughputFollower
+    default: 1
+    overwrite: false
+    type: number
   - name: efsPerformanceMode
     default: "generalPurpose"
     overwrite: false
@@ -94,9 +126,33 @@ provision:
     default: false
     overwrite: false
     type: boolean
+  - name: disableEfsFollower
+    default: false
+    overwrite: false
+    type: boolean
+  - name: solrFollowerMem
+    default: 14336
+    overwrite: false
+    type: number
+  - name: solrFollowerCpu
+    default: 4096
+    overwrite: false
+    type: number
+  - name: solrFollowerCount
+    default: 0
+    overwrite: false
+    type: number
+  - name: solrFollowerDiskSize
+    default: 50
+    overwrite: false
+    type: number
+  - name: setupFollowerLink
+    default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_follower_setup.sh"
+    overwrite: false
+    type: string
   - name: region
     type: string
-    details: "The AWS region in which to create k8s instances"
+    details: "The AWS region in which to create all AWS resources"
     overwrite: true
     default: ${config("aws.default_region")}
   - name: zone
@@ -105,8 +161,16 @@ provision:
     overwrite: true
     default: ${config("aws.zone")}
   outputs:
-  - field_name: solr_admin_url
-    details: "The Solr url for the created instance"
+  - field_name: solr_leader_url
+    details: "The Solr Leader url for the created instance"
+    type: string
+    required: true
+  - field_name: solr_follower_url
+    details: "The Solr Follower url for the created instance (routes to all follower instances randomly)"
+    type: string
+    required: true
+  - field_name: solr_follower_individual_urls
+    details: "The Solr Follower urls for each follower instance"
     type: string
     required: true
   - field_name: solr_admin_user
@@ -118,18 +182,24 @@ provision:
     type: string
     required: true
   template_refs:
-    admin: terraform/standalone_ecs/provision/admin.tf
-    dns: terraform/standalone_ecs/provision/dns.tf
-    ecs: terraform/standalone_ecs/provision/ecs.tf
-    efs: terraform/standalone_ecs/provision/efs.tf
-    iam: terraform/standalone_ecs/provision/iam.tf
-    lb: terraform/standalone_ecs/provision/lb.tf
-    logging: terraform/standalone_ecs/provision/logging.tf
-    ssl: terraform/standalone_ecs/provision/ssl.tf
-    vpc: terraform/standalone_ecs/provision/vpc.tf
-    outputs: terraform/standalone_ecs/provision/outputs.tf
-    variables: terraform/standalone_ecs/provision/variables.tf
-    versions: terraform/standalone_ecs/provision/versions.tf
+    admin: terraform/ecs/provision/admin.tf
+    dns: terraform/ecs/provision/dns.tf
+    private-dns: terraform/ecs/provision/private-dns.tf
+    leader: terraform/ecs/provision/leader.tf
+    efs: terraform/ecs/provision/efs-leader.tf
+    iam: terraform/ecs/provision/iam.tf
+    lb: terraform/ecs/provision/lb-leader.tf
+    logging: terraform/ecs/provision/logging.tf
+    ssl: terraform/ecs/provision/ssl.tf
+    vpc: terraform/ecs/provision/vpc.tf
+    outputs: terraform/ecs/provision/outputs.tf
+    variables: terraform/ecs/provision/variables.tf
+    versions: terraform/ecs/provision/versions.tf
+
+    # Separate configuration for solr followers
+    follower: terraform/ecs/provision/follower.tf
+    lb-follower: terraform/ecs/provision/lb-follower.tf
+    efs-follower: terraform/ecs/provision/efs-follower.tf
 bind:
   plan_inputs: []
   user_inputs: []
@@ -146,44 +216,64 @@ bind:
     default: ${instance.details["solr_admin_user"]}
     overwrite: true
     type: string
-  - name: solr_admin_url
-    default: ${instance.details["solr_admin_url"]}
+  - name: solr_leader_url
+    default: ${instance.details["solr_leader_url"]}
+    overwrite: true
+    type: string
+  - name: solr_follower_url
+    default: ${instance.details["solr_follower_url"]}
+    overwrite: true
+    type: string
+  - name: solr_follower_individual_urls
+    default: ${instance.details["solr_follower_individual_urls"]}
     overwrite: true
     type: string
   outputs:
   - field_name: domain
     required: false
     type: string
-    details: The domain of the SolrCloud instance that was created
+    details: The domain of the Solr Leader instance that was created
+  - field_name: domain_replica
+    required: false
+    type: string
+    details: The domain of the Solr Follower instances that were created
   - field_name: username
     required: false
     type: string
-    details: The username of the SolrCloud instance that was created
+    details: The username of the Solr instances (leader + followers) that were created
   - field_name: password
     required: false
     type: string
-    details: The password of the SolrCloud instance that was created
+    details: The password of the Solr instances (leader + followers) that were created
   - field_name: uri
     required: true
     type: string
-    details: The URL to use for working with the SolrCloud instance
-  - field_name: solr_admin_url
-    details: "The Solr url for the created instance"
+    details: The URL to use for working with the Solr Leader instance
+  - field_name: solr_leader_url
+    details: "The Solr Leader url for the created instance"
     type: string
-    required: false
+    required: true
+  - field_name: solr_follower_url
+    details: "The Solr Follower url for the created instance (routes to all follower instances randomly)"
+    type: string
+    required: true
+  - field_name: solr_follower_individual_urls
+    details: "The Solr Follower urls for each follower instance"
+    type: string
+    required: true
   - field_name: solr_admin_user
-    details: "The admin username for access to the Solr Instance"
+    details: "The admin username for access to the Solr instances (leader + followers)"
     type: string
     required: false
   - field_name: solr_admin_pass
-    details: "The admin password for access to the Solr Instance"
+    details: "The admin password for access to the Solr instances (leader + followers)"
     type: string
     required: false
   template_refs:
-    main: terraform/standalone_ecs/bind/main.tf
-    outputs: terraform/standalone_ecs/bind/outputs.tf
-    variables: terraform/standalone_ecs/bind/variables.tf
-    versions: terraform/standalone_ecs/bind/versions.tf
+    main: terraform/ecs/bind/main.tf
+    outputs: terraform/ecs/bind/outputs.tf
+    variables: terraform/ecs/bind/variables.tf
+    versions: terraform/ecs/bind/versions.tf
 
 examples: []
 plan_updateable: false

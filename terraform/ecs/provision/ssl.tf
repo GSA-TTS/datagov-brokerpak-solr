@@ -1,18 +1,22 @@
 
 locals {
   domain = "solr-${local.lb_name}.${var.zone}"
+  leader_domain = "leader.${local.domain}"
+  follower_domain = "follower.${local.domain}"
 }
 
 # Create ACM certificate for the sub-domain
 resource "aws_acm_certificate" "cert" {
-  domain_name       = local.domain
+  domain_name               = local.domain
+  subject_alternative_names = ["*.${local.domain}"]
+
   validation_method = "DNS"
   tags = merge(var.labels, {
     environment = var.instance_name
   })
 }
 
-# Validate the certificate using DNS method
+# Validate the certificate using DNS method (Parent Domain and subdomains)
 resource "aws_route53_record" "cert_validation" {
   name    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.cert.domain_validation_options)[0].resource_record_type

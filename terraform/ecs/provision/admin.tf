@@ -6,7 +6,10 @@ resource "random_password" "password" {
 }
 
 locals {
-  solr_url         = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  solr_url = "${local.lb_name}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  solr_follower_urls = [for follower in range(0, var.solrFollowerCount) :
+    "${local.lb_name}-follower-${follower}.${aws_service_discovery_private_dns_namespace.solr.name}"
+  ]
   create_user_json = <<-EOF
     {
       "set-user": {
@@ -60,6 +63,16 @@ resource "aws_ecs_task_definition" "solr-admin-init" {
         "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.set_role_json}';",
         "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.clear_role_json}';",
         "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.delete_user_json}';",
+
+        "solr_follower_urls=(${join(" ", local.solr_follower_urls)});",
+        "for solr_follower_url in $${solr_follower_urls[@]}; do",
+        "solr_ip=$(nslookup $solr_follower_url | awk '/^Address: / { print $2 }');",
+        "echo $solr_ip;",
+        "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.create_user_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user 'catalog:Bleeding-Edge' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.set_role_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authorization' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.clear_role_json}';",
+        "curl -v -L -w \"%%{http_code}\n\" --user '${random_uuid.username.result}:${random_password.password.result}' 'http://solr.null/solr/admin/authentication' --connect-to solr.null:80:$solr_ip:8983 -H 'Content-type:application/json' --data '${local.delete_user_json}';",
+        "done;",
         "sleep infinity"
       ])]
 

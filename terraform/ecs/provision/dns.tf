@@ -113,14 +113,21 @@ resource "aws_route53_record" "cluster-ds" {
   records = [aws_route53_key_signing_key.cluster.ds_record]
 }
 
-# Alias to Solr Load Balancer
+# CNAME to Solr Leader Load Balancer
 resource "aws_route53_record" "solr" {
   zone_id = aws_route53_zone.cluster.zone_id
-  name    = local.domain
-  type    = "A"
-  alias {
-    name                   = aws_lb.solr.dns_name
-    zone_id                = aws_lb.solr.zone_id
-    evaluate_target_health = false
-  }
+  name    = local.leader_domain
+  type    = "CNAME"
+  ttl     = "120"
+  records = [aws_lb.solr.dns_name]
+}
+
+# CNAME to Solr Follower Load Balancer
+resource "aws_route53_record" "solr-follower" {
+  count   = var.solrFollowerCount == 0 ? 0 : 1
+  zone_id = aws_route53_zone.cluster.zone_id
+  name    = local.follower_domain
+  type    = "CNAME"
+  ttl     = "120"
+  records = [aws_lb.solr-follower[count.index].dns_name]
 }

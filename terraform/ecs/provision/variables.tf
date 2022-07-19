@@ -1,4 +1,8 @@
 
+##############################
+# Solr Leader (and standalone) Configuration
+##############################
+
 variable "instance_name" {
   type        = string
   description = "Unique ID to separate solr instanceresources"
@@ -50,9 +54,53 @@ variable "setupLink" {
   default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
 }
 
+##############################
+# Solr Follower Configuration
+##############################
+
+variable "solrFollowerMem" {
+  type        = number
+  description = "How much memory to request for each follower replica (default is '12G')"
+  default     = 12288
+}
+
+variable "solrFollowerCpu" {
+  type        = number
+  description = "How much vCPU to request for each follower replica (default is '2048' aka '2 vCPUs')"
+  default     = 2048
+}
+
+variable "solrFollowerCount" {
+  type        = number
+  description = "How many Solr Followers should be created"
+  default     = 0
+}
+
+variable "solrFollowerDiskSize" {
+  type        = number
+  description = "How much ephemeral storage disk space Solr Followers will have"
+  default     = 50
+}
+
+variable "setupFollowerLink" {
+  type        = string
+  description = "The Solr setup file for Followers to initialize cores/authentication/et cetera..."
+  default     = "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_follower_setup.sh"
+}
+
+########################
+# Solr EFS Configuration
+########################
+
 variable "efsProvisionedThroughput" {
   type        = number
   description = "The throughput, measured in MiB/s, that you want to provision for the file system"
+  default     = 1
+}
+
+variable "efsProvisionedThroughputFollower" {
+  type        = number
+  description = "The throughput, measured in MiB/s, that you want to provision for the file system (for follower)"
   default     = 1
 }
 
@@ -63,7 +111,13 @@ variable "efsPerformanceMode" {
 }
 
 variable "disableEfs" {
-  type        = string
+  type        = bool
   description = "Launch without EFS volume"
+  default     = false
+}
+
+variable "disableEfsFollower" {
+  type        = bool
+  description = "Launch followers without EFS volume"
   default     = false
 }
