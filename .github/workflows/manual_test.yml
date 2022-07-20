@@ -76,4 +76,4 @@ jobs:
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
-      run: make k8s-demo-down down
+      run: make demo-down down
