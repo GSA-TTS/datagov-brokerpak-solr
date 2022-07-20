@@ -27,6 +27,9 @@ function waitLast {
     if [[ $STATUS == "410" ]]; then
       echo "gone!"
       exit 0
+    elif [[ $STATUS == "500" ]]; then
+      echo "Something's wrong x-x"
+      exit 1
     elif [[ $STATE == "failed" ]]; then
       echo "$STATE!"
       echo "$ACTION"
