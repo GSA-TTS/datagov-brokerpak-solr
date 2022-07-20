@@ -46,7 +46,7 @@
     "service_id": "182612a5-e2b7-4afc-b2b2-9f9d066875d1",
     "plan_id": "4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d",
     "instance_name": "demo-ecs-leader-follower-ephemeral",
-    "provision_params": "{\"solrMem\":2048, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-leader-follower-ephemeral\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"disableEfs\": true, \"disableEfsFollower\": true}",
+    "provision_params": "{\"solrMem\":2048, \"solrCpu\":2048, \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"disableEfs\": true, \"disableEfsFollower\": true}",
     "bind_params": {}
   },
   {
