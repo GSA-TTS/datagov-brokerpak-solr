@@ -6,7 +6,7 @@
     "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
     "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
     "instance_name": "demo-k8s",
-    "provision_params": "'{\"solrMem\":6144, \"solrCpu\":2048, \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-curl\", \"solrJavaMem\":\"-Xms300m -Xmx300m\"}'",
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-curl\", \"solrJavaMem\":\"-Xms300m -Xmx300m\"}",
     "bind_params": {}
   },
   {
@@ -16,7 +16,7 @@
     "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
     "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
     "instance_name": "demo-ecs-standalone-efs",
-    "provision_params": "'{\"solrMem\":6144, \"solrCpu\":2048, \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\"}'",
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\"}",
     "bind_params": {}
   },
   {
