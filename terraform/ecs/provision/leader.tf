@@ -56,6 +56,7 @@ resource "aws_ecs_task_definition" "solr" {
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
+        "rm -rf /tmp/ckan_config/solrconfig_follower.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
         "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
@@ -116,6 +117,7 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
       command = ["/bin/bash", "-c", join(" ", [
         "df -h;",
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
+        "rm -rf /tmp/ckan_config/solrconfig_follower.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
         "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
