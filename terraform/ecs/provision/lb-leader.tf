@@ -4,7 +4,7 @@ locals {
 }
 
 resource "aws_lb" "solr" {
-  name               = "${local.lb_name}-leader-lb"
+  name               = "${local.lb_name}-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.solr-lb-sg.id]
