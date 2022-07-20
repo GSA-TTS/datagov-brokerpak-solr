@@ -1,10 +1,10 @@
 
 locals {
-  lb_name = substr(var.instance_name, 0, 29)
+  lb_name = substr(var.instance_name, 0, 13)
 }
 
 resource "aws_lb" "solr" {
-  name               = "${local.lb_name}-lb"
+  name               = "${local.lb_name}-leader-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.solr-lb-sg.id]
