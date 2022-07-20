@@ -7,14 +7,10 @@ SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
 BROKER_NAME=solr
-K8S_SERVICE_NAME=solr-cloud
-K8S_PLAN_NAME=base
-K8S_SERVICE_ID='b9013a91-9ce8-4c18-8035-a135a8cd6ff9'
-K8S_PLAN_ID='e35e9675-413f-4f42-83de-ad5003357e77'
-ECS_SERVICE_NAME=solr-on-ecs
-ECS_PLAN_NAME=base
-ECS_SERVICE_ID='182612a5-e2b7-4afc-b2b2-9f9d066875d1'
-ECS_PLAN_ID='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
+SERVICE_NAME ?= solr-cloud
+PLAN_NAME ?= base
+SERVICE_ID ?= 'b9013a91-9ce8-4c18-8035-a135a8cd6ff9'
+PLAN_ID ?= 'e35e9675-413f-4f42-83de-ad5003357e77'
 
 # Specify provsion/bind parameters to run a specific example
 INSTANCE_NAME ?= instance-$(USER)
@@ -25,12 +21,6 @@ K8S_CLOUD_BIND_PARAMS ?= '{}'
 
 # Execute the cloud-service-broker binary inside the running container
 CSB_EXEC=docker exec csb-service-$(BROKER_NAME) /bin/cloud-service-broker
-
-# Generate IDs for the serviceid and planid, formatted like so (suitable for eval):
-#   serviceid=SERVICEID
-#   planid=PLANID
-CSB_SET_ECS_IDS=$(CSB_EXEC) client catalog | jq -r '.response.services[]| select(.name=="$(ECS_SERVICE_NAME)") | {serviceid: .id, planid: .plans[0].id} | to_entries | .[] | "export " + .key + "=" + (.value | @sh)'
-CSB_SET_K8S_IDS=$(CSB_EXEC) client catalog | jq -r '.response.services[]| select(.name=="$(K8S_SERVICE_NAME)") | {serviceid: .id, planid: .plans[0].id} | to_entries | .[] | "export " + .key + "=" + (.value | @sh)'
 
 # Wait for an instance operation to complete; append with the instance id
 # Wait for an binding operation to complete; append with the instance id and binding id
@@ -48,12 +38,9 @@ K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string
 
 check:
 	@echo CSB_EXEC: $(CSB_EXEC)
-	@echo ECS_SERVICE_NAME: $(ECS_SERVICE_NAME)
-	@echo ECS_PLAN_NAME: $(ECS_PLAN_NAME)
-	@echo ECS_CLOUD_PROVISION_PARAMS: $(ECS_CLOUD_PROVISION_PARAMS)
-	@echo K8S_SERVICE_NAME: $(K8S_SERVICE_NAME)
-	@echo K8S_PLAN_NAME: $(K8S_PLAN_NAME)
-	@echo K8S_CLOUD_PROVISION_PARAMS: $(K8S_CLOUD_PROVISION_PARAMS)
+	@echo SERVICE_NAME: $(SERVICE_NAME)
+	@echo PLAN_NAME: $(PLAN_NAME)
+	@echo CLOUD_PROVISION_PARAMS: $(CLOUD_PROVISION_PARAMS)
 	@echo CLOUD_BIND_PARAMS: $(CLOUD_BIND_PARAMS)
 
 clean: down ## Bring down the broker service if it's up and clean out the database
@@ -93,48 +80,32 @@ down: ## Bring the cloud-service-broker service down
 ###############################################################################
 ## Solr on ECS Commands
 
-check-ecs-ids:
-	@( \
-	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
-	echo Service ID: $(ECS_SERVICE_ID) ;\
-	echo Plan ID: $(ECS_PLAN_ID) ;\
-	)
-
 .env.secrets:
 	@echo Copy .env.secrets-template to .env.secrets, then edit in your own values
 
-ecs-all: clean build up ecs-demo-up ecs-demo-down down ## Clean and rebuild, run the broker, provision/bind instance, unbind/deprovision instance, and tear the broker down
+ecs-all: clean build up demo-up demo-down down ## Clean and rebuild, run the broker, provision/bind instance, unbind/deprovision instance, and tear the broker down
 
-ecs-demo-up: ## Provision a Solr instance on ECS and output the bound credentials
+demo-up: ## Provision a Solr instance on ECS and output the bound credentials
 	@( \
 	set -e ;\
-	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
-	echo "Provisioning $(ECS_SERVICE_NAME):$(ECS_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(ECS_CLOUD_PROVISION_PARAMS)';\
+	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
+	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(ECS_CLOUD_PROVISION_PARAMS)';\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
-	echo "Binding $(ECS_SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid binding --params "$(CLOUD_BIND_PARAMS)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
+	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
+	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid binding --params "$(CLOUD_BIND_PARAMS)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
-ecs-demo-down: ## Clean up data left over from tests and demos
+demo-down: ## Clean up data left over from tests and demos
 	@( \
 	set -e ;\
-	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
-	echo "Unbinding and deprovisioning the ${ECS_SERVICE_NAME} instance";\
-	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) 2>/dev/null;\
-	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) 2>/dev/null;\
+	echo "Unbinding and deprovisioning the ${SERVICE_NAME} instance";\
+	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
+	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(SERVICE_ID) --planid $(PLAN_ID) 2>/dev/null;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	)
 
 ###############################################################################
 ## SolrCloud on EKS Commands
-
-check-k8s-ids:
-	@( \
-	eval "$$( $(CSB_SET_K8S_IDS) )" ;\
-	echo Service ID: $(K8S_SERVICE_ID) ;\
-	echo Plan ID: $(K8S_PLAN_ID) ;\
-	)
 
 .env: generate-env.sh
 	@echo Generating a .env file containing the k8s config needed by the broker
@@ -142,27 +113,6 @@ check-k8s-ids:
 
 examples.json: examples.json-template
 	@./generate-examples.sh > examples.json
-
-k8s-demo-up: ## Provision a SolrCloud instance and output the bound credentials
-	@( \
-	set -e ;\
-	eval "$$( $(CSB_SET_K8S_IDS) )" ;\
-	echo "Provisioning $(K8S_SERVICE_NAME):$(K8S_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params '$(K8S_CLOUD_PROVISION_PARAMS)';\
-	$(CSB_INSTANCE_WAIT) ${INSTANCE_NAME} ;\
-	echo "Binding $(K8S_SERVICE_NAME):$(K8S_PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params '$(CLOUD_BIND_PARAMS)' | jq -r .response > $(INSTANCE_NAME).binding.json ;\
-	)
-
-k8s-demo-down: ## Clean up data left over from tests and demos
-	@( \
-	set -e ;\
-	eval "$$( $(CSB_SET_K8S_IDS) )" ;\
-	echo "Unbinding and deprovisioning the $(SERVICE_NAME) instance";\
-	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) 2>/dev/null;\
-	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(K8S_SERVICE_ID) --planid $(K8S_PLAN_ID) 2>/dev/null;\
-	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
-	)
 
 kind-up: ## Set up a Kubernetes test environment using KinD
 	# Creating a temporary Kubernetes cluster to test against with KinD
@@ -187,8 +137,8 @@ kind-down: ## Tear down the Kubernetes test environment in KinD
 	kind delete cluster --name datagov-broker-test
 	@rm .env
 
-eks-all: clean build kind-up up k8s-demo-up k8s-demo-down down kind-down ## Clean and rebuild, start local test environment, run the broker, run the examples, and tear the broker and test env down
-.PHONY: all clean build up down test kind-up kind-down ecs-demo-up ecs-demo-down k8s-demo-up k8s-demo-down
+eks-all: clean build kind-up up demo-up demo-down down kind-down ## Clean and rebuild, start local test environment, run the broker, run the examples, and tear the broker and test env down
+.PHONY: all clean build up down test kind-up kind-down demo-up demo-down
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
