@@ -68,7 +68,7 @@ jobs:
 
     - name: Start the broker and run the specified example test
       run: |
-        make .env up
+        make .env up examples.json
         ./test.sh ${{ matrix.example_no }} $INSTANCE_NAME
 
     - name: Clean up if there was a failure
