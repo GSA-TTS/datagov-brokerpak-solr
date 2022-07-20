@@ -6,7 +6,7 @@ resource "aws_service_discovery_private_dns_namespace" "solr" {
 }
 
 resource "aws_service_discovery_service" "solr" {
-  name = local.lb_name
+  name = "${local.lb_name}-leader"
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.solr.id
