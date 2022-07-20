@@ -1,12 +1,56 @@
 [
   {
     "name": "Cloud in local k8s",
-    "description": "Provision a SolrCloud instance in a local k8s",
+    "description": "Provision a SolrCloud instance in a local k8s (K8S)",
     "service_name": "solr-cloud",
     "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
     "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
-    "provision_params": {"solrMem":12288, "solrCpu":2048, "instance_name":"demo", "solrImageRepo":"ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag":"8-stunnel-root"},
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"instance_name\":\"demo\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-curl\", \"solrJavaMem\":\"-Xms300m -Xmx300m\"}",
+    "bind_params": {}
+  },
+  {
+    "name": "Solr on ECS (standalone/EFS)",
+    "description": "Provision a single Solr instance on ECS with EFS storage (ECS)",
+    "service_name": "solr-cloud",
+    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-standalone-efs\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\"}",
+    "bind_params": {}
+  },
+  {
+    "name": "Solr on ECS (standalone/ephermeral)",
+    "description": "Provision a single Solr instance on ECS with ephemeral storage (ECS)",
+    "service_name": "solr-cloud",
+    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-standalone-ephemeral\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"disableEfs\": true}",
+    "bind_params": {}
+  },
+  {
+    "name": "Solr on ECS (leader-follower/EFS)",
+    "description": "Provision a single Solr Leader instance with 2 Solr Followers on ECS, all using EFS storage (ECS)",
+    "service_name": "solr-cloud",
+    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+    "provision_params": "{\"solrMem\":6144, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-leader-follower-efs\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"solrFollowerCount\":2, \"solrFollowerMem\":6144, \"solrFollowerCpu\":2048}",
+    "bind_params": {}
+  },
+  {
+    "name": "Solr on ECS (leader-follower/ephemeral)",
+    "description": "Provision a single Solr Leader instance with 2 Solr Followers on ECS, all using ephemeral storage (ECS)",
+    "service_name": "solr-cloud",
+    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+    "provision_params": "{\"solrMem\":12288, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-leader-follower-ephemeral\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"disableEfs\": true, \"disableEfsFollower\": true}",
+    "bind_params": {}
+  },
+  {
+    "name": "Solr on ECS (leader-follower/EFS-ephemeral)",
+    "description": "Provision a single Solr Leader instance using EFS storage with 2 Solr Followers using ephemeral storage (ECS)",
+    "service_name": "solr-cloud",
+    "service_id": "b9013a91-9ce8-4c18-8035-a135a8cd6ff9",
+    "plan_id": "e35e9675-413f-4f42-83de-ad5003357e77",
+    "provision_params": "{\"solrMem\":12288, \"solrCpu\":2048, \"instance_name\":\"demo-ecs-leader-follower-efs-ephemeral\", \"solrImageRepo\":\"ghcr.io/gsa/catalog.data.gov.solr\", \"solrImageTag\":\"8-stunnel-root\", \"disableEfsFollower\": true}",
     "bind_params": {}
   }
 ]
-

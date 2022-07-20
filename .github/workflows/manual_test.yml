@@ -1,20 +1,23 @@
 # On pull request events, this workflow will run `make build-and-test`.
 
-name: 'Test All (automatically)'
+name: 'Test with Manual Intervention'
 on:
-  push:
   workflow_dispatch:
     inputs:
       debug_enabled:
         description: 'Debug (primarily for brokerpak provisioning constraints)'
         required: false
         default: false
+      example_id:
+        description: 'The index of the the example in examples.json'
+        required: true
+        default: 0
 
 jobs:
   test-solr:
     strategy:
       matrix:
-        example_no: [0, 1, 2, 3, 4]
+        example_no: [github.event.inputs.example_id]
     name: 'Test Solr Broker'
     runs-on: ubuntu-latest
     env:
@@ -68,9 +71,9 @@ jobs:
 
     - name: Start the broker and run the specified example test
       run: |
-        make .env up
-        ./test.sh ${{ matrix.example_no }} $INSTANCE_NAME
+        make .env up 
+        ./test.sh ${{ matrix.example_no }}
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
-      run: make k8s-demo-down ecs-demo-down down
+      run: make k8s-demo-down down

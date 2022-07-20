@@ -15,7 +15,13 @@ ECS_SERVICE_NAME=solr-on-ecs
 ECS_PLAN_NAME=base
 ECS_SERVICE_ID='182612a5-e2b7-4afc-b2b2-9f9d066875d1'
 ECS_PLAN_ID='4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
+
+# Specify provsion/bind parameters to run a specific example
 INSTANCE_NAME ?= instance-$(USER)
+ECS_CLOUD_PROVISION_PARAMS ?= '{}'
+ECS_CLOUD_BIND_PARAMS ?= '{}'
+K8S_CLOUD_PROVISION_PARAMS ?= '{}'
+K8S_CLOUD_BIND_PARAMS ?= '{}'
 
 # Execute the cloud-service-broker binary inside the running container
 CSB_EXEC=docker exec csb-service-$(BROKER_NAME) /bin/cloud-service-broker
@@ -32,14 +38,6 @@ CSB_SET_K8S_IDS=$(CSB_EXEC) client catalog | jq -r '.response.services[]| select
 CSB_INSTANCE_WAIT=docker exec csb-service-$(BROKER_NAME) ./bin/instance-wait.sh
 CSB_BINDING_WAIT=docker exec csb-service-$(BROKER_NAME) ./bin/binding-wait.sh
 CSB_BINDING_FETCH=docker exec csb-service-$(BROKER_NAME) ./bin/binding-fetch.sh
-
-# This doesn't work, so simplify the provision/bind params
-# CLOUD_PROVISION_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .provision_params')
-# CLOUD_BIND_PARAMS=$(shell cat examples.json |jq -r '.[] | select(.service_name | contains("solr-cloud")) | .bind_params')
-ECS_CLOUD_PROVISION_PARAMS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root" }'
-ECS_CLOUD_PROVISION_PARAMS_NO_EFS='{ "solrMem": 12288, "solrCpu": 2048, "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-stunnel-root", "disableEfs": true }'
-K8S_CLOUD_PROVISION_PARAMS='{ "solrJavaMem":"-Xms300m -Xmx300m", "solrMem":"1G", "solrCpu":"1000m", "cloud_name":"demo", "solrImageRepo": "ghcr.io/gsa/catalog.data.gov.solr", "solrImageTag": "8-curl" }'
-CLOUD_BIND_PARAMS='{}'
 
 PREREQUISITES = docker jq kind kubectl helm
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
@@ -112,7 +110,7 @@ ecs-demo-up: ## Provision a Solr instance on ECS and output the bound credential
 	set -e ;\
 	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
 	echo "Provisioning $(ECS_SERVICE_NAME):$(ECS_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(ECS_CLOUD_PROVISION_PARAMS);\
+	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params "$(ECS_CLOUD_PROVISION_PARAMS)";\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
 	$(CSB_EXEC) client bind      --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
@@ -126,17 +124,6 @@ ecs-demo-down: ## Clean up data left over from tests and demos
 	$(CSB_EXEC) client unbind --bindingid binding --instanceid $(INSTANCE_NAME) --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) 2>/dev/null;\
 	$(CSB_EXEC) client deprovision --instanceid $(INSTANCE_NAME) --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) 2>/dev/null;\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
-	)
-
-ecs-no-efs-demo-up: ## Provision a Solr instance on ECS and output the bound credentials
-	@( \
-	set -e ;\
-	eval "$$( $(CSB_SET_ECS_IDS) )" ;\
-	echo "Provisioning $(ECS_SERVICE_NAME):$(ECS_PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME)                     --params $(ECS_CLOUD_PROVISION_PARAMS_NO_EFS);\
-	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
-	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
-	$(CSB_EXEC) client bind      --serviceid $(ECS_SERVICE_ID) --planid $(ECS_PLAN_ID) --instanceid $(INSTANCE_NAME) --bindingid binding --params $(CLOUD_BIND_PARAMS) | jq -r .response > $(INSTANCE_NAME).binding.json ;\
 	)
 
 ###############################################################################
