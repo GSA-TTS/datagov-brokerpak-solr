@@ -1,6 +1,6 @@
 
 locals {
-  id_64char = substr(var.instance_name, 0, 54)
+  id_64char = substr(var.instance_name, 0, 42)
 }
 
 resource "aws_iam_role" "solr-task-execution" {

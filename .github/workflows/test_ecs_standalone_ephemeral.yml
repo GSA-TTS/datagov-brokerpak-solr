@@ -1,0 +1,74 @@
+# On pull request events, this workflow will run `make build-and-test`.
+
+name: 'Test ECS Standalone Ephemeral'
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Debug (primarily for brokerpak provisioning constraints)'
+        required: false
+        default: false
+
+jobs:
+  test-solr:
+    name: 'Test Solr Broker'
+    runs-on: ubuntu-latest
+    env:
+      # For storing the Terraform state for the deployment
+      AWS_ACCESS_KEY_ID: "${{ secrets.AWS_ACCESS_KEY_ID }}"
+      AWS_SECRET_ACCESS_KEY: "${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+      AWS_DEFAULT_REGION: "${{ secrets.AWS_DEFAULT_REGION }}"
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - name: Create KinD cluster
+      uses: helm/kind-action@v1.2.0
+
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: '0'
+
+    - name: Supply an empty .env.secrets file
+      run: |
+        echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" > .env.secrets
+        echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> .env.secrets
+        echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> .env.secrets
+        echo "AWS_ZONE=ssb-dev.data.gov" >> .env.secrets
+
+    - name: Build the brokerpak and set up the test environment
+      run: make build kind-up
+
+    - name: Stop for debugging
+      if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
+      uses: mxschmitt/action-tmate@v3
+      with:
+        limit-access-to-actor: true
+
+    - name: Set the instance name for subsequent steps
+      # Use an instance name that corresponds to this particular branch+run.
+      # Docs for this method:
+      # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+      run: |
+        # INSTANCE_NAME="$(echo ci-${{ github.event.pull_request.number }}-${GITHUB_RUN_ID}-${{ matrix.example_no }}-${GITHUB_RUN_ATTEMPT})"
+        INSTANCE_NAME="$(uuidgen)"
+        if [[ "$(echo -n ${INSTANCE_NAME} | wc -c)" -lt  "64" ]]; then
+          INSTANCE_NAME="${INSTANCE_NAME}-a-long-suffix-to-ensure-we-are-generating-ids-that-are-short-enough-for-underlying-identifiers"
+          INSTANCE_NAME="${INSTANCE_NAME//-}"
+          INSTANCE_NAME=$(head -c 64 <<< "$INSTANCE_NAME")
+        fi
+        echo "INSTANCE_NAME=${INSTANCE_NAME}" | tee -a $GITHUB_ENV
+
+    - name: Start the broker and run the specified example test
+      run: |
+        make .env up examples.json
+        ./test.sh 2 $INSTANCE_NAME
+
+    - name: Clean up if there was a failure
+      if: ${{ failure() }}
+      run: make demo-down down
