@@ -20,6 +20,6 @@ service_id=$( jq -r ".[$i].service_id" examples.json)
 plan_id=$( jq -r ".[$i].plan_id" examples.json)
 
 SERVICE_ID=$service_id PLAN_ID=$plan_id SERVICE_NAME=$service_name \
-  INSTANCE_NAME=$INSTANCE_NAME ECS_CLOUD_PROVISION_PARAMS="$provision_params" ECS_CLOUD_BIND_PARAMS="$bind_params" make demo-up
+  INSTANCE_NAME=$INSTANCE_NAME CLOUD_PROVISION_PARAMS="$provision_params" CLOUD_BIND_PARAMS="$bind_params" make demo-up
 SERVICE_ID=$service_id PLAN_ID=$plan_id SERVICE_NAME=$service_name \
   INSTANCE_NAME=$INSTANCE_NAME make demo-down

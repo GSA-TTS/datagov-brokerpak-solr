@@ -14,10 +14,8 @@ PLAN_ID ?= 'e35e9675-413f-4f42-83de-ad5003357e77'
 
 # Specify provsion/bind parameters to run a specific example
 INSTANCE_NAME ?= instance-$(USER)
-ECS_CLOUD_PROVISION_PARAMS ?= '{}'
-ECS_CLOUD_BIND_PARAMS ?= '{}'
-K8S_CLOUD_PROVISION_PARAMS ?= '{}'
-K8S_CLOUD_BIND_PARAMS ?= '{}'
+CLOUD_PROVISION_PARAMS ?= '{}'
+CLOUD_BIND_PARAMS ?= '{}'
 
 # Execute the cloud-service-broker binary inside the running container
 CSB_EXEC=docker exec csb-service-$(BROKER_NAME) /bin/cloud-service-broker
@@ -89,7 +87,7 @@ demo-up: ## Provision a Solr instance on ECS and output the bound credentials
 	@( \
 	set -e ;\
 	echo "Provisioning $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME)" ;\
-	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(ECS_CLOUD_PROVISION_PARAMS)';\
+	$(CSB_EXEC) client provision --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)"                     --params '$(CLOUD_PROVISION_PARAMS)';\
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	echo "Binding $(SERVICE_NAME):$(PLAN_NAME):$(INSTANCE_NAME):binding" ;\
 	$(CSB_EXEC) client bind      --serviceid $(SERVICE_ID) --planid $(PLAN_ID) --instanceid "$(INSTANCE_NAME)" --bindingid binding --params "$(CLOUD_BIND_PARAMS)" | jq -r .response > $(INSTANCE_NAME).binding.json ;\
