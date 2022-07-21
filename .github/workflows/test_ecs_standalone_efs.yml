@@ -1,6 +1,6 @@
 # On pull request events, this workflow will run `make build-and-test`.
 
-name: 'Test All (automatically)'
+name: 'Test ECS Standalone EFS'
 on:
   push:
   workflow_dispatch:
@@ -12,9 +12,6 @@ on:
 
 jobs:
   test-solr:
-    strategy:
-      matrix:
-        example_no: [0, 1, 2, 3, 4]
     name: 'Test Solr Broker'
     runs-on: ubuntu-latest
     env:
@@ -59,7 +56,7 @@ jobs:
       # https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
       run: |
         # INSTANCE_NAME="$(echo ci-${{ github.event.pull_request.number }}-${GITHUB_RUN_ID}-${{ matrix.example_no }}-${GITHUB_RUN_ATTEMPT})"
-        INSTANCE_NAME="$(uuidgen)-${{ matrix.example_no }}"
+        INSTANCE_NAME="$(uuidgen)"
         if [[ "$(echo -n ${INSTANCE_NAME} | wc -c)" -lt  "64" ]]; then
           INSTANCE_NAME="${INSTANCE_NAME}-a-long-suffix-to-ensure-we-are-generating-ids-that-are-short-enough-for-underlying-identifiers"
           INSTANCE_NAME="${INSTANCE_NAME//-}"
@@ -70,7 +67,7 @@ jobs:
     - name: Start the broker and run the specified example test
       run: |
         make .env up examples.json
-        ./test.sh ${{ matrix.example_no }} $INSTANCE_NAME
+        ./test.sh 1 $INSTANCE_NAME
 
     - name: Clean up if there was a failure
       if: ${{ failure() }}
