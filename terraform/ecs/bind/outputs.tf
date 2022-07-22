@@ -9,4 +9,4 @@ output "solr_admin_user" { value = "(hidden)" }
 output "solr_admin_pass" { value = "(hidden)" }
 output "solr_follower_url" { value = "(hidden)" }
 output "solr_leader_url" { value = "(hidden)" }
-output "solr_follower_individual_urls" {}
+output "solr_follower_individual_urls" { value = var.solr_follower_individual_urls }
