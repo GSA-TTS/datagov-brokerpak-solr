@@ -120,7 +120,7 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
         "rm -rf /tmp/ckan_config/solrconfig_follower.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g -Dsolr.lock.type=none\" -m solr"
       ])]
 
       portMappings = [
