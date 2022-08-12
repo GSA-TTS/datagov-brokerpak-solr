@@ -153,7 +153,6 @@ resource "aws_ecs_service" "solr" {
   launch_type           = "FARGATE"
   platform_version      = "1.4.0"
   wait_for_steady_state = true
-  deregistration_delay  = 90
 
   network_configuration {
     security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]

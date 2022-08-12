@@ -61,6 +61,7 @@ resource "aws_lb_target_group" "solr-follower-target" {
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
+  deregistration_delay  = 90
 
   health_check {
     healthy_threshold   = 3
@@ -105,6 +106,7 @@ resource "aws_lb_target_group" "solr-follower-individual-target" {
   protocol    = "HTTP"
   target_type = "ip"
   vpc_id      = module.vpc.vpc_id
+  deregistration_delay  = 90
 
   health_check {
     healthy_threshold   = 3
