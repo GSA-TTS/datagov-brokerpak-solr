@@ -143,6 +143,9 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
 }
 
 resource "aws_ecs_service" "solr" {
+  timeouts {
+    create = "15m"
+  }
   name                  = "solr-${var.instance_name}"
   cluster               = aws_ecs_cluster.solr-cluster.id
   task_definition       = var.disableEfs ? aws_ecs_task_definition.solr-no-efs[0].arn : aws_ecs_task_definition.solr[0].arn
@@ -150,6 +153,7 @@ resource "aws_ecs_service" "solr" {
   launch_type           = "FARGATE"
   platform_version      = "1.4.0"
   wait_for_steady_state = true
+  deregistration_delay  = 90
 
   network_configuration {
     security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]

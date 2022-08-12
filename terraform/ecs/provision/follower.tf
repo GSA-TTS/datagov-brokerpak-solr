@@ -115,6 +115,9 @@ resource "aws_ecs_task_definition" "solr-follower" {
 
 
 resource "aws_ecs_service" "solr-follower" {
+  timeouts {
+    create = "15m"
+  }
   count                 = var.solrFollowerCount
   name                  = "solr-follower-${count.index}-${var.instance_name}"
   cluster               = aws_ecs_cluster.solr-cluster.id
@@ -123,6 +126,7 @@ resource "aws_ecs_service" "solr-follower" {
   launch_type           = "FARGATE"
   platform_version      = "1.4.0"
   wait_for_steady_state = true
+  deregistration_delay  = 90
 
   network_configuration {
     security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
