@@ -115,9 +115,6 @@ resource "aws_ecs_task_definition" "solr-follower" {
 
 
 resource "aws_ecs_service" "solr-follower" {
-  timeouts {
-    create = "15m"
-  }
   count                 = var.solrFollowerCount
   name                  = "solr-follower-${count.index}-${var.instance_name}"
   cluster               = aws_ecs_cluster.solr-cluster.id
