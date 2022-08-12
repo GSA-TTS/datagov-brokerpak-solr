@@ -55,11 +55,12 @@ resource "aws_ecs_task_definition" "solr" {
       memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
+        "set -e;",
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupLink}; /bin/bash solr_setup.sh;",
         "rm -rf /tmp/ckan_config/solrconfig_follower.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g -Dsolr.lock.type=simple\" -m solr"
       ])]
 
       portMappings = [
@@ -120,7 +121,7 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
         "rm -rf /tmp/ckan_config/solrconfig_follower.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g -Dsolr.lock.type=none\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrMemInG}g\" -m solr"
       ])]
 
       portMappings = [

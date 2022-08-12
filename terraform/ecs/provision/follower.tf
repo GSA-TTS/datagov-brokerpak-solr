@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "solr-follower-no-efs" {
         "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.lock.type=none -Dsolr.disable.shardsWhitelist=true\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.disable.shardsWhitelist=true\" -m solr"
       ])]
 
       portMappings = [
@@ -69,6 +69,7 @@ resource "aws_ecs_task_definition" "solr-follower" {
       memory    = var.solrMem
       essential = true
       command = ["/bin/bash", "-c", join(" ", [
+        "set -e;",
         "cd /tmp; /usr/bin/wget -O solr_setup.sh ${var.setupFollowerLink}; /bin/bash solr_setup.sh;",
         "mv /tmp/ckan_config/solrconfig_follower.xml /tmp/ckan_config/solrconfig.xml;",
         "sed -i 's/SOLR_REPLICATION_LEADER_URL/https:\\/\\/${local.leader_domain}:443\\/solr\\/ckan\\/replication/g' /tmp/ckan_config/solrconfig.xml;",
@@ -76,7 +77,7 @@ resource "aws_ecs_task_definition" "solr-follower" {
         "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.lock.type=none -Dsolr.disable.shardsWhitelist=true\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.lock.type=simple -Dsolr.disable.shardsWhitelist=true\" -m solr"
       ])]
 
       portMappings = [

@@ -147,7 +147,7 @@ provision:
     overwrite: false
     type: number
   - name: setupFollowerLink
-    default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_follower_setup.sh"
+    default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
     overwrite: false
     type: string
   - name: region
