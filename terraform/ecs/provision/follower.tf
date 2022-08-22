@@ -77,7 +77,9 @@ resource "aws_ecs_task_definition" "solr-follower" {
         "sed -i 's/SOLR_REPLICATION_LEADER_PASSWORD/${random_password.password.result}/g' /tmp/ckan_config/solrconfig.xml;",
         "chown -R 8983:8983 /var/solr/data;",
         "cd -; su -c \"",
-        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data; solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.lock.type=simple -Dsolr.disable.shardsWhitelist=true\" -m solr"
+        "init-var-solr; precreate-core ckan /tmp/ckan_config; chown -R 8983:8983 /var/solr/data;",
+        "[[ -f /var/solr/data/ckan/data/index/write.lock ]] && { ls -l /var/solr/data/ckan/data/index/write.lock; echo 'The lock file is back. exit to avoid conflict.'; exit 1;};",
+        "solr-fg -m ${local.solrFollowerMemInG}g -Dsolr.lock.type=simple -Dsolr.disable.shardsWhitelist=true\" -m solr"
       ])]
 
       portMappings = [
