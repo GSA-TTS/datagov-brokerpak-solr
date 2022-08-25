@@ -21,9 +21,8 @@ resource "aws_cloudwatch_metric_alarm" "solr-leader-oom" {
     ServiceName = aws_ecs_service.solr.name
   }
 
-  alarm_actions = [aws_sns_topic.solr_memory_updates.arn]
-  ok_actions    = [aws_sns_topic.solr_memory_updates.arn]
-
+  alarm_actions             = [aws_sns_topic.solr_memory_updates.arn]
+  ok_actions                = [aws_sns_topic.solr_memory_updates.arn]
   insufficient_data_actions = []
 }
 
@@ -45,8 +44,7 @@ resource "aws_cloudwatch_metric_alarm" "solr-follower-oom" {
     ServiceName = aws_ecs_service.solr-follower[count.index].name
   }
 
-  alarm_actions = [aws_sns_topic.solr_memory_updates.arn]
-  ok_actions    = [aws_sns_topic.solr_memory_updates.arn]
-
+  alarm_actions             = [aws_sns_topic.solr_memory_updates.arn]
+  ok_actions                = [aws_sns_topic.solr_memory_updates.arn]
   insufficient_data_actions = []
 }
