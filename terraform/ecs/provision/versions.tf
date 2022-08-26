@@ -7,7 +7,7 @@ terraform {
     template = {
       source = "hashicorp/template"
     }
-    template = {
+    archive = {
       source = "hashicorp/archive"
     }
   }

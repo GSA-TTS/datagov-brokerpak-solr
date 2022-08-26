@@ -10,6 +10,9 @@ terraform_binaries:
 - name: terraform
   version: 1.1.5
   source: https://github.com/hashicorp/terraform/archive/v1.1.5.zip
+- name: terraform-provider-archive
+  version: 2.2.0
+  source: https://releases.hashicorp.com/terraform-provider-archive/2.2.0/terraform-provider-archive_2.2.0_linux_amd64.zip
 - name: terraform-provider-aws
   version: 3.75.1
   source: https://releases.hashicorp.com/terraform-provider-aws/3.75.1/terraform-provider-aws_3.75.1_linux_amd64.zip
