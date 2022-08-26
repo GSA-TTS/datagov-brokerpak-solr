@@ -1,7 +1,6 @@
 
 resource "aws_sns_topic" "solr_memory_updates" {
   name              = "solr-memory-topic"
-  kms_master_key_id = "alias/aws/sns"
 }
 
 resource "aws_cloudwatch_metric_alarm" "solr-leader-oom" {
@@ -27,7 +26,7 @@ resource "aws_cloudwatch_metric_alarm" "solr-leader-oom" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "solr-follower-oom" {
-  count               = var.solrFollowerCount + 1
+  count               = var.solrFollowerCount
   alarm_name          = "Solr-Follower-${count.index}-MemoryThreshold"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
