@@ -9,26 +9,30 @@ def handler(event, context):
     print("From SNS: " + message)
     message_json = json.loads(message)
 
+    # Parse Alarm State
+    state = message_json['NewStateValue']
+
     # Parse/Restart ECS Service
+    if state == 'ALARM':
+        restartSolrECS(message_json)
+    elif state == 'OK':
+        pass
+
+    return message
+
+def restartSolrECS(message_json):
+    '''
+    Reference: https://github.com/s7anley/aws-ecs-service-stop-lambda/blob/master/main.py
+    '''
     service_dimensions = {}
     for dim in message_json['Trigger']['Dimensions']:
         service_dimensions[dim['name']] = dim['value']
     service_region = message_json['AlarmArn'].split(':')[3]
-    restartSolrECS(
-        service_dimensions['ClusterName'],
-        "%s-service" % (service_dimensions['ServiceName']),
-        service_region
-    )
 
-    return message
-
-def restartSolrECS(cluster, service, region):
-    '''
-    Reference: https://github.com/s7anley/aws-ecs-service-stop-lambda/blob/master/main.py
-    '''
-
-    client = boto3.client("ecs", region_name=region)
-    response = client.list_tasks(cluster=cluster, family=service)
+    client = boto3.client("ecs", region_name=service_region)
+    response = client.list_tasks(
+        cluster=service_dimensions['ClusterName'],
+        family="%s-service" % (service_dimensions['ServiceName']))
     tasks = response.get('taskArns', [])
     print("Service is running {0} underlying tasks".format(len(tasks)))
 
