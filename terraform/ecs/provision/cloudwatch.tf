@@ -1,6 +1,6 @@
 
 resource "aws_sns_topic" "solr_memory_updates" {
-  name              = "solr-memory-topic"
+  name = "solr-memory-topic"
 }
 
 resource "aws_cloudwatch_metric_alarm" "solr-leader-oom" {

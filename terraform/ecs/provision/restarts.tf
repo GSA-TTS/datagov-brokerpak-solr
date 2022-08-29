@@ -25,15 +25,15 @@ resource "aws_iam_role" "iam_for_lambda" {
   EOF
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_logs" {
+resource "aws_iam_role_policy_attachment" "lambda_operations" {
   role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.lambda_logging.arn
+  policy_arn = aws_iam_policy.lambda_operations.arn
 }
 
-resource "aws_iam_policy" "lambda_logging" {
-  name        = "lambda_logging"
+resource "aws_iam_policy" "lambda_operations" {
+  name        = "lambda_operations"
   path        = "/"
-  description = "IAM policy for logging from a lambda"
+  description = "IAM policy for logging/ecs-restarts from a lambda"
 
   policy = <<EOF
 {
@@ -47,6 +47,13 @@ resource "aws_iam_policy" "lambda_logging" {
       ],
       "Resource": "arn:aws:logs:*:*:*",
       "Effect": "Allow"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:*"
+      ],
+      "Resource": "*"
     }
   ]
 }
