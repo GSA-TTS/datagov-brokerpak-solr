@@ -5,14 +5,6 @@ resource "aws_sns_topic_subscription" "solr_memory_lambda_target" {
   endpoint  = aws_lambda_function.solr_restarts.arn
 }
 
-resource "aws_lambda_permission" "solr_restarts_with_sns" {
-  statement_id  = "AllowExecutionFromSNS"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.solr_restarts.arn
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.solr_memory_updates.arn
-}
-
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_solr_restarts"
 
@@ -39,7 +31,7 @@ resource "aws_iam_role_policy_attachment" "lambda_operations" {
 }
 
 resource "aws_iam_policy" "lambda_operations" {
-  name        = "lambda_operations"
+  name        = "solr-${local.lb_name}-lambda_operations"
   path        = "/"
   description = "IAM policy for logging/ecs-restarts from a lambda"
 
