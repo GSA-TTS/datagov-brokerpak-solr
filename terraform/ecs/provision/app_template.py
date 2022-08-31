@@ -52,11 +52,9 @@ def restartSolrECS(message_json, cluster_name, service_name):
 
 def notifySlack(event_info, cluster, service):
     from slack_sdk.webhook import WebhookClient
-    url = "https://hooks.slack.com/services/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"
-    webhook = WebhookClient(url)
+    webhook = WebhookClient("<slack-notification-url>")
 
     important_data = ["Alarm Name", "New State Value", "New State Reason", "State Change Time"]
-
     emoji = "😨" if event_info["NewStateValue"] == "ALARM" else "😐"
 
     response = webhook.send(blocks=[

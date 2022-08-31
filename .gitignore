@@ -55,3 +55,4 @@ terraform/*/provision/.cache
 .kube*
 *.binding.json
 .terraform.lock.hcl
+terraform/ecs/provision/app.py

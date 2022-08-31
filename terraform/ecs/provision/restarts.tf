@@ -73,10 +73,19 @@ resource "aws_cloudwatch_log_group" "lambda-restarts" {
   retention_in_days = 14
 }
 
+resource "local_file" "app" {
+    content  = replace(file("${path.module}/app_template.py"), "<slack-notification-url>", var.slackNotificationUrl)
+    filename = "${path.module}/app.py"
+}
+
 data "archive_file" "solr-restart-script" {
   type        = "zip"
   source_file = "${path.module}/app.py"
   output_path = "${path.module}/app.zip"
+
+  depends_on = [
+    local_file.app
+  ]
 }
 
 resource "aws_lambda_function" "solr_restarts" {
