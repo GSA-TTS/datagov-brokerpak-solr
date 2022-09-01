@@ -71,7 +71,7 @@ def notifySlack(event_info, cluster, service):
                 },
                 {
                     "type": "mrkdwn",
-                    "text": ":::ALERT::: *%s/%s* has experienced an event. " % (service['ClusterName'], service['ServiceName']) + emoji
+                    "text": ":::ALERT::: *%s/%s* has experienced an event. " % (cluster, service) + emoji
                 }
             ]
         },

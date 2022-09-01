@@ -87,10 +87,15 @@ resource "local_file" "app_no_slack" {
   filename = "${path.module}/app.py"
 }
 
-data "archive_file" "solr-restart-script" {
-  type        = "zip"
-  source_file = "${path.module}/app.py"
-  output_path = "${path.module}/app.zip"
+resource "null_resource" "package_slack_sdk" {
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<-EOF
+      pip install --target ./package slack-sdk
+      cd package && zip -r ../restart_app.zip ./* && cd -
+      zip -g restart_app.zip app.py
+    EOF
+  }
 
   depends_on = [
     local_file.app,
@@ -98,15 +103,16 @@ data "archive_file" "solr-restart-script" {
   ]
 }
 
+
 resource "aws_lambda_function" "solr_restarts" {
   function_name = "solr-${local.lb_name}-restarts"
   role          = aws_iam_role.iam_for_lambda.arn
   runtime       = "python3.9"
-  filename      = "app.zip"
+  filename      = "restart_app.zip"
   handler       = "app.handler"
 
   package_type = "Zip"
   depends_on = [
-    data.archive_file.solr-restart-script
+    null_resource.package_slack_sdk
   ]
 }

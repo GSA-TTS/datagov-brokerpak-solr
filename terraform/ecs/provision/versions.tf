@@ -7,9 +7,6 @@ terraform {
     template = {
       source = "hashicorp/template"
     }
-    archive = {
-      source = "hashicorp/archive"
-    }
   }
   required_version = "~> 1.1"
 }
