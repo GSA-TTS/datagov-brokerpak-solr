@@ -79,10 +79,10 @@ provision:
     required: false
     type: string
     details: "The Solr setup file for follower to initialize cores/authentication/et cetera..."
-  - field_name: slackNotificationUrl
+  - field_name: slackNotification
     required: false
-    type: string
-    details: "The webhook address to receive slack notifications for Solr Errors/restarts"
+    type: boolean
+    details: "Enable slack notifications for Solr Errors/restarts via webhook integration"
   computed_inputs:
   - name: instance_name
     type: string
@@ -154,8 +154,8 @@ provision:
     default: "https://raw.githubusercontent.com/GSA/catalog.data.gov/main/solr/solr_setup.sh"
     overwrite: false
     type: string
-  - name: slackNotificationUrl
-    default: "https://hooks.slack.com/services/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"
+  - name: slackNotification
+    default: false
     overwrite: false
     type: string
   - name: region
