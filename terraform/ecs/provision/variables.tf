@@ -126,8 +126,8 @@ variable "disableEfsFollower" {
 # Solr Alerts Configuration
 ########################
 
-variable "slackNotificationUrl" {
-  type        = string
+variable "slackNotification" {
+  type        = bool
   description = "The webhook address to receive slack notifications for Solr Errors/restarts"
-  default     = "https://hooks.slack.com/services/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"
+  default     = false
 }

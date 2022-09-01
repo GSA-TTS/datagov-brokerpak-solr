@@ -65,9 +65,26 @@ resource "aws_cloudwatch_log_group" "lambda-restarts" {
   retention_in_days = 14
 }
 
+data "aws_secretsmanager_secret" "slackNotificationUrl" {
+  count = var.slackNotification ? 1 : 0
+  name = "slackSolrEventNotificationUrl"
+}
+
+data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
+  count = var.slackNotification ? 1 : 0
+  secret_id = data.aws_secretsmanager_secret.slackNotificationUrl[0].id
+}
+
 resource "local_file" "app" {
-    content  = replace(file("${path.module}/app_template.py"), "<slack-notification-url>", var.slackNotificationUrl)
-    filename = "${path.module}/app.py"
+  count = var.slackNotification ? 1 : 0
+  content  = replace(file("${path.module}/app_template.py"), "<slack-notification-url>", jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"])
+  filename = "${path.module}/app.py"
+}
+
+resource "local_file" "app_no_slack" {
+  count = var.slackNotification == false ? 1 : 0
+  content  = replace(file("${path.module}/app_template.py"), "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "")
+  filename = "${path.module}/app.py"
 }
 
 data "archive_file" "solr-restart-script" {
@@ -76,7 +93,8 @@ data "archive_file" "solr-restart-script" {
   output_path = "${path.module}/app.zip"
 
   depends_on = [
-    local_file.app
+    local_file.app,
+    local_file.app_no_slack
   ]
 }
 
