@@ -1,7 +1,7 @@
 
 locals {
-  domain = "solr-${local.lb_name}.${var.zone}"
-  leader_domain = "leader.${local.domain}"
+  domain          = "solr-${local.lb_name}.${var.zone}"
+  leader_domain   = "leader.${local.domain}"
   follower_domain = "follower.${local.domain}"
 }
 

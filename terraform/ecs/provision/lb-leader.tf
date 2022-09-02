@@ -92,7 +92,7 @@ resource "aws_security_group" "solr-lb-sg" {
   ingress {
     description = "HTTPS to individual Followers"
     from_port   = 9000
-    to_port     = 9000+var.solrFollowerCount
+    to_port     = 9000 + var.solrFollowerCount
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }

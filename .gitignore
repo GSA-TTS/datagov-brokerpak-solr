@@ -55,3 +55,8 @@ terraform/*/provision/.cache
 .kube*
 *.binding.json
 .terraform.lock.hcl
+
+# Solr restart temp files
+terraform/ecs/provision/app.py
+terraform/ecs/provision/package/
+restart_app.zip

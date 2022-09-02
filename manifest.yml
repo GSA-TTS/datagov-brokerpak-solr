@@ -22,12 +22,15 @@ terraform_binaries:
 - name: terraform-provider-helm
   version: 2.4.1
   source: https://releases.hashicorp.com/terraform-provider-helm/2.4.1/terraform-provider-helm_2.4.1_linux_amd64.zip
+- name: terraform-provider-local
+  version: 2.2.3
+  source: https://releases.hashicorp.com/terraform-provider-local/2.2.3/terraform-provider-local_2.2.3_linux_amd64.zip
 - name: terraform-provider-null
   version: 3.1.1
   source: https://releases.hashicorp.com/terraform-provider-null/3.1.1/terraform-provider-null_3.1.1_linux_amd64.zip
 - name: terraform-provider-random
-  version: 3.2.0
-  source: https://releases.hashicorp.com/terraform-provider-random/3.2.0/terraform-provider-random_3.2.0_linux_amd64.zip
+  version: 3.4.1
+  source: https://releases.hashicorp.com/terraform-provider-random/3.4.1/terraform-provider-random_3.4.1_linux_amd64.zip
 - name: terraform-provider-template
   version: 2.2.0
   source: https://releases.hashicorp.com/terraform-provider-template/2.2.0/terraform-provider-template_2.2.0_linux_amd64.zip

@@ -121,3 +121,13 @@ variable "disableEfsFollower" {
   description = "Launch followers without EFS volume"
   default     = false
 }
+
+########################
+# Solr Alerts Configuration
+########################
+
+variable "slackNotification" {
+  type        = bool
+  description = "The webhook address to receive slack notifications for Solr Errors/restarts"
+  default     = false
+}

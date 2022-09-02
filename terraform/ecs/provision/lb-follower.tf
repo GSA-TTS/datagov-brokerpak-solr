@@ -87,7 +87,7 @@ resource "aws_lb_target_group" "solr-follower-target" {
 resource "aws_lb_listener" "https_response-follower-individual" {
   count             = var.solrFollowerCount
   load_balancer_arn = aws_lb.solr-follower[0].arn
-  port              = "${tostring(9000 + count.index)}"
+  port              = tostring(9000 + count.index)
   protocol          = "HTTPS"
   certificate_arn   = aws_acm_certificate.cert.arn
 
