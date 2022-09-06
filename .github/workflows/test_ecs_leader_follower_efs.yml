@@ -39,9 +39,7 @@ jobs:
         echo "AWS_ZONE=ssb-dev.data.gov" >> .env.secrets
 
     - name: Build the brokerpak and set up the test environment
-      run: |
-        sudo apt-get install zip
-        make build kind-up
+      run: make build kind-up
 
     - name: Stop for debugging
       if: github.event_name == 'workflow_dispatch' && github.event.inputs.debug_enabled
