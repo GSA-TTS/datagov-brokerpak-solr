@@ -40,7 +40,7 @@ jobs:
 
     - name: Build the brokerpak and set up the test environment
       run: |
-        apt-get install zip
+        sudo apt-get install zip
         make build kind-up
 
     - name: Stop for debugging
