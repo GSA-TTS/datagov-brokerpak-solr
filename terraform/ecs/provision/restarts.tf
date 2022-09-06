@@ -77,13 +77,13 @@ data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
 
 resource "local_file" "app" {
   count = var.slackNotification ? 1 : 0
-  content  = replace(file("${path.module}/app_template.py"), "<slack-notification-url>", jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"])
+  content  = replace(local.app_template, "<slack-notification-url>", jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"])
   filename = "${path.module}/app.py"
 }
 
 resource "local_file" "app_no_slack" {
   count = var.slackNotification == false ? 1 : 0
-  content  = replace(file("${path.module}/app_template.py"), "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "")
+  content  = replace(local.app_template, "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "")
   filename = "${path.module}/app.py"
 }
 

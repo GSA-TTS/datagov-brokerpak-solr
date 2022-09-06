@@ -191,6 +191,7 @@ provision:
     required: true
   template_refs:
     admin: terraform/ecs/provision/admin.tf
+    app-template: terraform/ecs/provision/app_template.tf
     cloudwatch: terraform/ecs/provision/cloudwatch.tf
     dns: terraform/ecs/provision/dns.tf
     private-dns: terraform/ecs/provision/private-dns.tf
@@ -210,9 +211,6 @@ provision:
     follower: terraform/ecs/provision/follower.tf
     lb-follower: terraform/ecs/provision/lb-follower.tf
     efs-follower: terraform/ecs/provision/efs-follower.tf
-
-    # Non-terraform files
-    app_template: terraform/ecs/provision/app_template.py
 bind:
   plan_inputs: []
   user_inputs: []
