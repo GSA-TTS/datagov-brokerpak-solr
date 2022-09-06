@@ -210,6 +210,9 @@ provision:
     follower: terraform/ecs/provision/follower.tf
     lb-follower: terraform/ecs/provision/lb-follower.tf
     efs-follower: terraform/ecs/provision/efs-follower.tf
+
+    # Non-terraform files
+    app_template: terraform/ecs/provision/app_template.py
 bind:
   plan_inputs: []
   user_inputs: []
