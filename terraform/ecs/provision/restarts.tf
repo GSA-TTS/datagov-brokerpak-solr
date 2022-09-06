@@ -6,7 +6,7 @@ resource "aws_sns_topic_subscription" "solr_memory_lambda_target" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name = "iam_for_solr_restarts"
+  name = "iam_for_solr_${local.lb_name}_restarts"
 
   assume_role_policy = <<-EOF
   {

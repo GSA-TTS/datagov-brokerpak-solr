@@ -24,7 +24,7 @@ var excludeRegions = []string{}
 // var resourceTypes = []string{"ec2", "vpc", "efs", "ecsserv", "ecscluster", "cloudwatch-loggroup", "eip", "nat-gateway", "elbv2"}
 // var resultTypes = []string{"elbv2", "nat-gateway", "ec2", "eip", "ecsserv", "ecscluster", "cloudwatch-loggroup", "vpc", "efs"}
 var resourceTypes = []string{"vpc"}
-var resultTypes = []string{"vpc"}
+var resultTypes = resourceTypes
 var excludeResourceTypes = []string{}
 // excludeAfter is parsed identically to the --older-than flag
 var excludeAfter = time.Now()
