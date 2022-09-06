@@ -191,6 +191,8 @@ provision:
     required: true
   template_refs:
     admin: terraform/ecs/provision/admin.tf
+    app-template: terraform/ecs/provision/app_template.tf
+    cloudwatch: terraform/ecs/provision/cloudwatch.tf
     dns: terraform/ecs/provision/dns.tf
     private-dns: terraform/ecs/provision/private-dns.tf
     leader: terraform/ecs/provision/leader.tf
@@ -198,6 +200,7 @@ provision:
     iam: terraform/ecs/provision/iam.tf
     lb: terraform/ecs/provision/lb-leader.tf
     logging: terraform/ecs/provision/logging.tf
+    restarts: terraform/ecs/provision/restarts.tf
     ssl: terraform/ecs/provision/ssl.tf
     vpc: terraform/ecs/provision/vpc.tf
     outputs: terraform/ecs/provision/outputs.tf
