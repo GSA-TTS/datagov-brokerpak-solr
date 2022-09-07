@@ -37,13 +37,13 @@ resource "aws_cloudwatch_metric_alarm" "solr-follower-oom" {
   count               = var.solrFollowerCount
   alarm_name          = "Solr-${local.lb_name}-Follower-${count.index}-MemoryThreshold"
   comparison_operator = "GreaterThanOrEqualToThreshold"
-  evaluation_periods  = "1"
+  evaluation_periods  = "10"
   namespace           = "ECS/ContainerInsights"
   metric_name         = "MemoryUtilized"
   statistic           = "Average"
   period              = "60"
   threshold           = "25000"
-  datapoints_to_alarm = "1"
+  datapoints_to_alarm = "10"
   alarm_description   = "This metric monitors solr memory consumption"
 
   dimensions = {

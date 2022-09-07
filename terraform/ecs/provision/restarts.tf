@@ -5,6 +5,13 @@ resource "aws_sns_topic_subscription" "solr_memory_lambda_target" {
   endpoint  = aws_lambda_function.solr_restarts.arn
 }
 
+resource "aws_sns_topic_subscription" "solr_memory_email_target" {
+  count = var.emailNotification == "" ? 0 : 1
+  topic_arn = aws_sns_topic.solr_memory_updates.arn
+  protocol  = "email"
+  endpoint  = var.emailNotification
+}
+
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_solr_${local.lb_name}_restarts"
 
@@ -82,7 +89,7 @@ resource "local_file" "app" {
 }
 
 resource "local_file" "app_no_slack" {
-  count = var.slackNotification == false ? 1 : 0
+  count = var.slackNotification ? 0 : 1
   content  = replace(local.app_template, "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "")
   filename = "${path.module}/app.py"
 }
