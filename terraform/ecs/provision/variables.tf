@@ -131,3 +131,9 @@ variable "slackNotification" {
   description = "The webhook address to receive slack notifications for Solr Errors/restarts"
   default     = false
 }
+
+variable "emailNotification" {
+  type        = string
+  description = "The email address to receive notifications for Solr Errors/restarts"
+  default     = ""
+}

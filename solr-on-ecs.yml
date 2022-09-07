@@ -83,6 +83,10 @@ provision:
     required: false
     type: boolean
     details: "Enable slack notifications for Solr Errors/restarts via webhook integration"
+  - field_name: emailNotification
+    required: false
+    type: string
+    details: "Enable email notifications for Solr Errors/restarts"
   computed_inputs:
   - name: instance_name
     type: string
@@ -156,6 +160,10 @@ provision:
     type: string
   - name: slackNotification
     default: false
+    overwrite: false
+    type: boolean
+  - name: emailNotification
+    default: ""
     overwrite: false
     type: string
   - name: region

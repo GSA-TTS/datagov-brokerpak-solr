@@ -8,3 +8,5 @@ solrFollowerCpu      = 2048
 solrFollowerMem      = 12288
 solrFollowerCount    = 2
 solrFollowerDiskSize = 50
+slackNotification    = false
+emailNotification    = "datagovhelp@gsa.gov"
