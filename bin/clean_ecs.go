@@ -38,14 +38,12 @@ func queryResources() {
 	}
   for region, all_resources := range accountResources.Resources {
     // fmt.Printf("Region: [%s]\n", region)
-    for class_name, list_resources := range all_resources.Resources {
+    for _, list_resources := range all_resources.Resources {
       // fmt.Printf("AWS Resource Class: [%s]\n", resourceTypes[class_name])
       for _, resource := range list_resources.ResourceIdentifiers() {
         fmt.Println("\n\n\n\n\n")
-        for group, command := range tag_commands {
-          checkTags(resource, class_name, group, command)
-        }
-        if interact(fmt.Sprintf("%s : %s : %s", region, resultTypes[class_name], resource)) {
+        checkTags(resource, getServiceType(resource), tag_commands[getServiceType(resource)])
+        if interact(fmt.Sprintf("%s : %s : %s", region, getServiceType(resource), resource)) {
           wg.Add(1)
           go deleteResource(&wg, list_resources, resource)
         }
