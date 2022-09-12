@@ -54,7 +54,7 @@ resource "aws_ecs_task_definition" "solr-follower-no-efs" {
 
 resource "aws_ecs_task_definition" "solr-follower" {
   count                    = var.disableEfsFollower ? 0 : var.solrFollowerCount
-  family                   = "solr-follower-${count.index}-${var.instance_name}-service"
+  family                   = "solr-follower-${var.instance_name}-${count.index}-service"
   requires_compatibilities = ["FARGATE"]
   network_mode             = "awsvpc"
   cpu                      = var.solrCpu
