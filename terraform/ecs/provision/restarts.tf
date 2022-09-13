@@ -96,7 +96,7 @@ resource "local_file" "app_no_slack" {
 
 resource "null_resource" "package_slack_sdk" {
   provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
+    interpreter = ["/bin/sh", "-c"]
     command = <<-EOF
       pip install --target ./package slack-sdk
       cd package && zip -r ../restart_app.zip ./* && cd -

@@ -1,10 +1,6 @@
-FROM hashicorp/terraform:0.13.7 as terraform
-
-FROM alpine/k8s:1.20.7
-
-COPY --from=terraform /bin/terraform /bin/terraform 
+FROM hashicorp/terraform:1.1.5
 
 RUN apk update
-RUN apk add --update git 
+RUN apk add --update git zip curl python3 py3-pip
 
 ENTRYPOINT ["/bin/sh"]
