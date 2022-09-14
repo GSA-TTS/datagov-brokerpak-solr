@@ -32,7 +32,7 @@ resource "aws_acm_certificate_validation" "cert" {
 
 resource "time_sleep" "cert_validate" {
   depends_on = [
-    aws_acm_certificate.cert
+    aws_acm_certificate.cert,
     aws_acm_certificate_validation.cert,
     aws_route53_record.cert_validation
   ]
