@@ -37,5 +37,5 @@ resource "time_sleep" "cert_validate" {
     aws_route53_record.cert_validation
   ]
 
-  create_duration = "30s"
+  create_duration = "15s"
 }
