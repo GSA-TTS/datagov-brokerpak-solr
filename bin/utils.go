@@ -34,6 +34,12 @@ var aws_session, session_err = session.NewSession(&aws.Config{Region: aws.String
 
 var reader = bufio.NewReader(os.Stdin)
 func interact(resource string) bool{
+  /* Check if this should be bypassed */
+  var HUMANS string
+  HUMANS = os.Getenv("HUMANS")
+  if strings.Compare("no", HUMANS) == 0 {
+    return true
+  }
   /* Decide if to delete selected resource */
   fmt.Printf("Delete [%s] -> ", resource)
   text, _ := reader.ReadString('\n')
