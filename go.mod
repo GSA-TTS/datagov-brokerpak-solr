@@ -3,7 +3,7 @@ module bin
 go 1.19
 
 require (
-	github.com/aws/aws-sdk-go v1.42.26
+	github.com/aws/aws-sdk-go v1.39.0
 	github.com/gruntwork-io/cloud-nuke v0.1.25
 )
 
@@ -22,8 +22,9 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/urfave/cli v1.22.4 // indirect
 	golang.org/x/crypto v0.0.0-20211202192323-5770296d904e // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/net v0.4.0 // indirect
+	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/text v0.5.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
