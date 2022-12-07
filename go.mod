@@ -1,10 +1,10 @@
 module bin
 
-go 1.17
+go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.85
-	github.com/gruntwork-io/cloud-nuke v0.19.0
+	github.com/gruntwork-io/cloud-nuke v0.21.0
 )
 
 require (
