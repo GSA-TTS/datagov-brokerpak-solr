@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/aws/aws-sdk-go v1.44.85
-	github.com/gruntwork-io/cloud-nuke v0.21.0
+	github.com/gruntwork-io/cloud-nuke v0.1.25
 )
 
 require (
@@ -22,9 +22,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.16.13 // indirect
 	github.com/aws/smithy-go v1.12.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/docker/docker v1.3.3 // indirect
 	github.com/go-errors/errors v1.0.2-0.20180813162953-d98b870cc4e0 // indirect
 	github.com/google/uuid v1.1.2 // indirect
-	github.com/gruntwork-io/go-commons v0.8.2 // indirect
+	github.com/gruntwork-io/go-commons v0.8.0 // indirect
 	github.com/gruntwork-io/gruntwork-cli v0.7.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.0 // indirect
