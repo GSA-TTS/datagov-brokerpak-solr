@@ -20,6 +20,7 @@ docs.
 Huge props go to @josephlewis42 of Google for publishing and publicizing the
 brokerpak concept, and to the Pivotal team running with the concept!
 
+
 ### Related Docs
 
 - [Solr Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr)
