@@ -121,7 +121,7 @@ kind-up: ## Set up a Kubernetes test environment using KinD
 	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
 	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
 	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.1/deploy/static/provider/kind/deploy.yaml
+	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.9.1/deploy/static/provider/kind/deploy.yaml
 	@kubectl wait --namespace ingress-nginx \
       --for=condition=ready pod \
       --selector=app.kubernetes.io/component=controller \
