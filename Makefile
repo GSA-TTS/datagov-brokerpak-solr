@@ -129,7 +129,7 @@ kind-up: ## Set up a Kubernetes test environment using KinD
 	@kubectl apply -f kind/persistent-storage.yml
 	# Install the ZooKeeper and Solr operators using Helm
 	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
+	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.7.1 solr solr-operator
 
 kind-down: ## Tear down the Kubernetes test environment in KinD
 	kind delete cluster --name datagov-broker-test
