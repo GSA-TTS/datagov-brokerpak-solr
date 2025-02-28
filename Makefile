@@ -2,15 +2,15 @@
 .DEFAULT_GOAL := help
 
 DOCKER_OPTS=--rm -v $(PWD):/brokerpak -w /brokerpak
-CSB=ghcr.io/gsa/cloud-service-broker:v0.10.0gsa-zip
+CSB=ghcr.io/gsa/cloud-service-broker:v2.0.3gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 
 BROKER_NAME=solr
-SERVICE_NAME ?= solr-cloud
+SERVICE_NAME ?= solr-on-ecs
 PLAN_NAME ?= base
-SERVICE_ID ?= 'b9013a91-9ce8-4c18-8035-a135a8cd6ff9'
-PLAN_ID ?= 'e35e9675-413f-4f42-83de-ad5003357e77'
+SERVICE_ID ?= '182612a5-e2b7-4afc-b2b2-9f9d066875d1'
+PLAN_ID ?= '4d7f0501-77d6-4d21-a37a-8b80a0ea9c0d'
 
 # Specify provsion/bind parameters to run a specific example
 INSTANCE_NAME ?= instance-$(USER)
@@ -52,7 +52,7 @@ build: manifest.yml solr-on-ecs.yml $(shell find terraform) ## Build the brokerp
 
 # Healthcheck solution from https://stackoverflow.com/a/47722899
 # (Alpine inclues wget, but not curl.)
-up: .env.secrets .env ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
+up: .env.secrets ## Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser.
 	docker run $(DOCKER_OPTS) \
 	-p 8080:8080 \
 	-e SECURITY_USER_NAME=$(SECURITY_USER_NAME) \
@@ -60,10 +60,9 @@ up: .env.secrets .env ## Run the broker service with the brokerpak configured. T
 	-e "DB_TYPE=sqlite3" \
 	-e "DB_PATH=/tmp/csb-db" \
 	-e "GSB_DEBUG=true" \
-	--env-file .env \
 	--env-file .env.secrets \
 	--name csb-service-$(BROKER_NAME) \
-	-d --network kind \
+  -d \
 	--health-cmd="wget --header=\"X-Broker-API-Version: 2.16\" --no-verbose --tries=1 --spider http://$(SECURITY_USER_NAME):$(SECURITY_USER_PASSWORD)@localhost:8080/v2/catalog || exit 1" \
 	--health-interval=2s \
 	--health-retries=15 \
@@ -102,41 +101,6 @@ demo-down: ## Clean up data left over from tests and demos
 	$(CSB_INSTANCE_WAIT) $(INSTANCE_NAME) ;\
 	)
 
-###############################################################################
-## SolrCloud on EKS Commands
-
-.env: generate-env.sh
-	@echo Generating a .env file containing the k8s config needed by the broker
-	@./generate-env.sh
-
-examples.json: examples.json-template
-	@./generate-examples.sh > examples.json
-
-kind-up: ## Set up a Kubernetes test environment using KinD
-	# Creating a temporary Kubernetes cluster to test against with KinD
-	@kind create cluster --config kind/kind-config.yaml --name datagov-broker-test
-	# Grant cluster-admin permissions to the `system:serviceaccount:default:default` Service.
-	# (This is necessary for the service account to be able to create the cluster-wide
-	# Solr CRD definitions.)
-	@kubectl create clusterrolebinding default-sa-cluster-admin --clusterrole=cluster-admin --serviceaccount=default:default --namespace=default
-	# Install a KinD-flavored ingress controller (to make the Solr instances visible to the host).
-	# See (https://kind.sigs.k8s.io/docs/user/ingress/#ingress-nginx for details.
-	@kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.1/deploy/static/provider/kind/deploy.yaml
-	@kubectl wait --namespace ingress-nginx \
-      --for=condition=ready pod \
-      --selector=app.kubernetes.io/component=controller \
-      --timeout=270s
-	@kubectl apply -f kind/persistent-storage.yml
-	# Install the ZooKeeper and Solr operators using Helm
-	kubectl create -f https://solr.apache.org/operator/downloads/crds/v0.5.0/all-with-dependencies.yaml
-	@helm install --namespace kube-system --repo https://solr.apache.org/charts --version 0.5.0 solr solr-operator
-
-kind-down: ## Tear down the Kubernetes test environment in KinD
-	kind delete cluster --name datagov-broker-test
-	@rm .env
-
-eks-all: clean build kind-up up demo-up demo-down down kind-down ## Clean and rebuild, start local test environment, run the broker, run the examples, and tear the broker and test env down
-.PHONY: all clean build up down test kind-up kind-down demo-up demo-down
 
 # Output documentation for top-level targets
 # Thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
