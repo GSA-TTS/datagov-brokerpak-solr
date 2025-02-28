@@ -75,52 +75,52 @@ resource "aws_security_group" "solr-lb-sg" {
   name        = "solr-${var.instance_name}-sg"
   description = "Allow TLS inbound traffic to Solr"
   vpc_id      = module.vpc.vpc_id
-
-  ingress {
-    description = "TLS from users/application"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description = "HTTP to upgrade"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description = "HTTPS to individual Followers"
-    from_port   = 9000
-    to_port     = 9000 + var.solrFollowerCount
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-  ingress {
-    description     = "solr cluster"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [module.vpc.default_security_group_id]
-  }
-  egress {
-    description     = "solr cluster"
-    from_port       = 0
-    to_port         = 0
-    protocol        = "-1"
-    security_groups = [module.vpc.default_security_group_id]
-  }
-  egress {
-    description = "GHCR Pull Images"
-    from_port   = 0
-    to_port     = 65535
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    # cidr_blocks = [for ip in data.dns_a_record_set.ghcr.addrs : "${ip}/32"]
-  }
 }
 
-data "dns_a_record_set" "ghcr" {
-  host = "ghcr.io"
+resource "aws_vpc_security_group_ingress_rule" "incoming_tls" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port   = 443
+  to_port     = 443
+  ip_protocol    = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "incoming_http" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port   = 80
+  to_port     = 80
+  ip_protocol    = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "incoming_follower_http" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  cidr_ipv4 = "0.0.0.0/0"
+  from_port   = 9000
+  to_port     = 9000 + var.solrFollowerCount
+  ip_protocol    = "tcp"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "cluster_ingress" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  from_port       = 0
+  to_port         = 0
+  ip_protocol        = "-1"
+  referenced_security_group_id = module.vpc.default_security_group_id
+}
+
+resource "aws_vpc_security_group_egress_rule" "cluster_egress" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  from_port       = 0
+  to_port         = 0
+  ip_protocol        = "-1"
+  referenced_security_group_id = module.vpc.default_security_group_id
+}
+
+resource "aws_vpc_security_group_egress_rule" "ghcr_egress" {
+  security_group_id = aws_security_group.solr-lb-sg.id
+  from_port   = 0
+  to_port     = 65535
+  ip_protocol    = "tcp"
+  cidr_ipv4 = "0.0.0.0/0"
 }
