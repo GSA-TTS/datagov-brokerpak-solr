@@ -142,6 +142,26 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
   ])
 }
 
+resource "aws_security_group" "ecs_container_egress" {
+
+	name        = "allow_ecs_to_get_container_image"
+  description = "Allow all outbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  tags = {
+    Name = "alllow_outbound"
+  }
+}
+
+resource "aws_vpc_security_group_egress_rule" "allow_https_egress" {
+  security_group_id = aws_security_group.ecs_container_egress.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 443
+  to_port           = 443
+  ip_protocol       = "tcp"
+}
+
+
 resource "aws_ecs_service" "solr" {
   name                  = "solr-${var.instance_name}"
   cluster               = aws_ecs_cluster.solr-cluster.id
@@ -152,7 +172,7 @@ resource "aws_ecs_service" "solr" {
   wait_for_steady_state = true
 
   network_configuration {
-    security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
+    security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id, aws_security_group.ecs_container_egress.id]
     subnets          = module.vpc.private_subnets
     assign_public_ip = false
   }

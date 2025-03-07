@@ -116,11 +116,3 @@ resource "aws_vpc_security_group_egress_rule" "cluster_egress" {
   ip_protocol        = "-1"
   referenced_security_group_id = module.vpc.default_security_group_id
 }
-
-resource "aws_vpc_security_group_egress_rule" "ghcr_egress" {
-  security_group_id = aws_security_group.solr-lb-sg.id
-  from_port   = 0
-  to_port     = 65535
-  ip_protocol    = "tcp"
-  cidr_ipv4 = "0.0.0.0/0"
-}
