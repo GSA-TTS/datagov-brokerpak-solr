@@ -144,7 +144,7 @@ resource "aws_ecs_task_definition" "solr-no-efs" {
 
 resource "aws_security_group" "ecs_container_egress" {
 
-	name        = "allow_ecs_to_get_container_image"
+  name        = "allow_ecs_to_get_container_image"
   description = "Allow all outbound traffic"
   vpc_id      = module.vpc.vpc_id
 

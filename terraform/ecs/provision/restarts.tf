@@ -6,7 +6,7 @@ resource "aws_sns_topic_subscription" "solr_memory_lambda_target" {
 }
 
 resource "aws_sns_topic_subscription" "solr_memory_email_target" {
-  count = var.emailNotification == "" ? 0 : 1
+  count     = var.emailNotification == "" ? 0 : 1
   topic_arn = aws_sns_topic.solr_memory_updates.arn
   protocol  = "email"
   endpoint  = var.emailNotification
@@ -74,22 +74,22 @@ resource "aws_cloudwatch_log_group" "lambda-restarts" {
 
 data "aws_secretsmanager_secret" "slackNotificationUrl" {
   count = var.slackNotification ? 1 : 0
-  name = "slackSolrEventNotificationUrl"
+  name  = "slackSolrEventNotificationUrl"
 }
 
 data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
-  count = var.slackNotification ? 1 : 0
+  count     = var.slackNotification ? 1 : 0
   secret_id = data.aws_secretsmanager_secret.slackNotificationUrl[0].id
 }
 
 resource "local_file" "app" {
-  count = var.slackNotification ? 1 : 0
+  count    = var.slackNotification ? 1 : 0
   content  = replace(local.app_template, "<slack-notification-url>", jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"])
   filename = "${path.module}/app.py"
 }
 
 resource "local_file" "app_no_slack" {
-  count = var.slackNotification ? 0 : 1
+  count    = var.slackNotification ? 0 : 1
   content  = replace(local.app_template, "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "pass")
   filename = "${path.module}/app.py"
 }
@@ -97,7 +97,7 @@ resource "local_file" "app_no_slack" {
 resource "null_resource" "package_slack_sdk" {
   provisioner "local-exec" {
     interpreter = ["/bin/sh", "-c"]
-    command = <<-EOF
+    command     = <<-EOF
       pip install --target ./package slack-sdk
       cd package && zip -r ../restart_app.zip ./* && cd -
       zip -g restart_app.zip app.py

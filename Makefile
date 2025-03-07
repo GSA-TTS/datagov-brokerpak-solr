@@ -27,7 +27,7 @@ CSB_INSTANCE_WAIT=docker exec csb-service-$(BROKER_NAME) ./bin/instance-wait.sh
 CSB_BINDING_WAIT=docker exec csb-service-$(BROKER_NAME) ./bin/binding-wait.sh
 CSB_BINDING_FETCH=docker exec csb-service-$(BROKER_NAME) ./bin/binding-fetch.sh
 
-PREREQUISITES = docker jq kind kubectl helm
+PREREQUISITES = docker jq
 K := $(foreach prereq,$(PREREQUISITES),$(if $(shell which $(prereq)),some string,$(error "Missing prerequisite commands $(prereq)")))
 
 
