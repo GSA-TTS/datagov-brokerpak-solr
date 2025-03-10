@@ -25,4 +25,3 @@ jobs:
       uses: actions/checkout@main
     - name: Check terraform fmt
       uses: actionshub/terraform-lint@main
-      working-directory: "terraform/ecs/provision/"
