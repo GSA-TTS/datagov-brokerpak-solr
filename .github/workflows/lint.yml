@@ -15,8 +15,7 @@ jobs:
         tflint_version: v0.55.1
     - name: Run TFLint
       run: tflint -f compact
-      with:
-        path: "terraform/ecs/provision/"
+      working-directory: "terraform/ecs/provision/"
 
   checkfmt:
     runs-on: ubuntu-latest
@@ -26,5 +25,4 @@ jobs:
       uses: actions/checkout@main
     - name: Check terraform fmt
       uses: actionshub/terraform-lint@main
-      with:
-        path: "terraform/ecs/provision/"
+      working-directory: "terraform/ecs/provision/"
