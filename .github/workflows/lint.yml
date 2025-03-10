@@ -1,0 +1,30 @@
+name: terraform-lint
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@main
+    - uses: terraform-linters/setup-tflint@v4
+      name: Setup TFLint
+      with:
+        tflint_version: v0.55.1
+    - name: Run TFLint
+      run: tflint -f compact
+      with:
+        path: "terraform/ecs/provision/"
+
+  checkfmt:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@main
+    - name: Check terraform fmt
+      uses: actionhub/terraform-lint
+      with:
+        path: "terraform/ecs/provision/"

@@ -7,6 +7,18 @@ terraform {
     template = {
       source = "hashicorp/template"
     }
+    random = {
+      source = "hashicorp/random"
+      version = "~> 3.6.3"
+    }
+    local = {
+      source = "hashicorp/local"
+      version = "~> 2.5.2"
+    }
+    null = {
+      source = "hashicorp/null"
+      version = "~> 2.2.0"
+    }
   }
   required_version = "~> 1.9"
 }

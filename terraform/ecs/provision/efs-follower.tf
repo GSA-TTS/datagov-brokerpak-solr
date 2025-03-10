@@ -29,7 +29,7 @@ resource "aws_efs_mount_target" "follower-all" {
         subnet_id = subnet
       }
     ]
-  ]) : "${local.efs_mount_target_keys[i]}" => entry }
+  ]) : local.efs_mount_target_keys[i] => entry }
 
   file_system_id  = each.value.efs_id
   subnet_id       = each.value.subnet_id
