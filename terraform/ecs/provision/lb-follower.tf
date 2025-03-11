@@ -55,13 +55,13 @@ resource "aws_lb_listener" "https_response-follower" {
 }
 
 resource "aws_lb_target_group" "solr-follower-target" {
-  count       = var.solrFollowerCount == 0 ? 0 : 1
-  name        = "${local.lb_name}-follower-tg"
-  port        = 8983
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = module.vpc.vpc_id
-  deregistration_delay  = 90
+  count                = var.solrFollowerCount == 0 ? 0 : 1
+  name                 = "${local.lb_name}-follower-tg"
+  port                 = 8983
+  protocol             = "HTTP"
+  target_type          = "ip"
+  vpc_id               = module.vpc.vpc_id
+  deregistration_delay = 90
 
   health_check {
     healthy_threshold   = 3
@@ -100,13 +100,13 @@ resource "aws_lb_listener" "https_response-follower-individual" {
 
 
 resource "aws_lb_target_group" "solr-follower-individual-target" {
-  count       = var.solrFollowerCount
-  name        = "${local.lb_name}-follower-${count.index}-tg"
-  port        = 8983
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = module.vpc.vpc_id
-  deregistration_delay  = 90
+  count                = var.solrFollowerCount
+  name                 = "${local.lb_name}-follower-${count.index}-tg"
+  port                 = 8983
+  protocol             = "HTTP"
+  target_type          = "ip"
+  vpc_id               = module.vpc.vpc_id
+  deregistration_delay = 90
 
   health_check {
     healthy_threshold   = 3

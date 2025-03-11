@@ -127,7 +127,7 @@ resource "aws_ecs_service" "solr-follower" {
   wait_for_steady_state = true
 
   network_configuration {
-    security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id]
+    security_groups  = [module.vpc.default_security_group_id, aws_security_group.solr-ecs-efs-ingress.id, aws_security_group.ecs_container_egress.id]
     subnets          = module.vpc.private_subnets
     assign_public_ip = false
   }

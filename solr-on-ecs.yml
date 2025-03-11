@@ -6,7 +6,7 @@ display_name: Solr on ECS
 image_url: https://lucene.apache.org/theme/images/solr/identity/Solr_Logo_on_white.png
 documentation_url: https://lucene.apache.org/solr/resources.html
 support_url: https://github.com/GSA/datagov-brokerpak-solr
-tags: [apache, search, index, k8s]
+tags: [apache, search, index]
 
 plans:
 - name: base
