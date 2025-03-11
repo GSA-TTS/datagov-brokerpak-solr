@@ -15,19 +15,11 @@ jobs:
       run:
         shell: bash
 
-    steps:  
-    - name: Install testing tools
-      run: |
-        wget -q -O - https://raw.githubusercontent.com/starkandwayne/homebrew-cf/master/public.key | sudo apt-key add -
-        echo "deb http://apt.starkandwayne.com stable main" | sudo tee /etc/apt/sources.list.d/starkandwayne.list
-        sudo apt-get update
-        sudo apt-get install eden
-        sudo apt-get install bats
-
+    steps:
 
     - name: Check out repository
-      uses: actions/checkout@v3
-      with: 
+      uses: actions/checkout@v4
+      with:
         fetch-depth: '0'
 
     - name: Build the brokerpak
@@ -41,4 +33,4 @@ jobs:
       with:
         artifacts: "*.brokerpak"
         artifactErrorsFailBuild: true
-        token: ${{ secrets.GITHUB_TOKEN }}      
+        token: ${{ secrets.GITHUB_TOKEN }}
