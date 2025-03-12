@@ -6,9 +6,8 @@ This is a [cloud-service-broker](https://github.com/pivotal/cloud-service-broker
 needed by the data.gov team brokerable via the [Open Service Broker
 API](https://www.openservicebrokerapi.org/) (compatible with Cloud Foundry and
 Kubernetes), using Terraform. In particular, this brokerpak is used by
-[`datagov-ssb`](https://github.com/GSA/datagov-ssb) to broker instances of either of the following on cloud.gov,
-- [SolrCloud](https://solr.apache.org/guide/8_11/solrcloud.html)
-- [Solr Standalone](https://solr.apache.org/guide/8_11/a-quick-overview.html)
+[`datagov-ssb`](https://github.com/GSA/datagov-ssb) to broker instances of 
+[Solr Standalone](https://solr.apache.org/guide/8_11/a-quick-overview.html) on cloud.gov.
 
 For more information about the brokerpak concept, here's a [5-minute lightning
 talk](https://www.youtube.com/watch?v=BXIvzEfHil0) from the 2019 Cloud Foundry Summit. You may also want to check out the brokerpak
@@ -21,32 +20,14 @@ Huge props go to @josephlewis42 of Google for publishing and publicizing the
 brokerpak concept, and to the Pivotal team running with the concept!
 
 
-### Related Docs
-
-- [Solr Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr)
-- [Solr Operator Helm Chart](https://artifacthub.io/packages/helm/apache-solr/solr-operator)
-- [Solr Official Docs](https://solr.apache.org/guide/8_11/)
-- [Solr Operator SolrCloud CRD](https://github.com/apache/solr-operator/blob/main/docs/solr-cloud/solr-cloud-crd.md)
-
-## Prerequisites (solr-cloud)
+## Prerequisites
 
 1. `make` is used for executing docker commands in a meaningful build cycle.
 1. `jq` is used for running certain tests
 1. [Docker Desktop (for Mac or
    Windows)](https://www.docker.com/products/docker-desktop) or [Docker Engine
    (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
-1. [KinD (Kubernetes-in-Docker)](https://kind.sigs.k8s.io/) is used to provide
-   a local k8s for the broker to populate during tests and demos
-1. [`terraform` 1.1.5](https://releases.hashicorp.com/terraform/1.1.5/) is used for local development.
-
-## Prerequisites (solr-on-ecs)
-
-1. `make` is used for executing docker commands in a meaningful build cycle.
-1. `jq` is used for running certain tests
-1. [Docker Desktop (for Mac or
-   Windows)](https://www.docker.com/products/docker-desktop) or [Docker Engine
-   (for Linux)](https://www.docker.com/products/container-runtime) is used for  building, serving, and testing the brokerpak.
-1. [`terraform` 1.1.5](https://releases.hashicorp.com/terraform/1.1.5/) is used for local development.
+1. [OpenTofu 1.9.0](https://github.com/opentofu/opentofu/releases/tag/v1.9.0) is used for local development.
 1. AWS account credentials (as environment variables) are used for actual service provisioning. The corresponding user must have at least the permissions described in permission-policies.tf. Set at least these variables:
     - AWS_ACCESS_KEY_ID
     - AWS_SECRET_ACCESS_KEY
@@ -60,58 +41,51 @@ clean      Bring down the broker service if it is up and clean out the database
 build      Build the brokerpak(s)
 up         Run the broker service with the brokerpak configured. The broker listens on `0.0.0.0:8080`. curl http://127.0.0.1:8080 or visit it in your browser. 
 down       Bring the cloud-service-broker service down
-test       Execute the brokerpak examples against the running broker (TODO)
-k8s-demo-up    Provision a SolrCloud instance and output the bound credentials
-k8s-demo-down  Clean up data left over from tests and demos
-ecs-demo-up    Provision a Solr standalone instance (configured for ckan) and output the bound credentials
-ecs-demo-down  Clean up data left over from tests and demos
-kind-up    Set up a local Kubernetes test environment using KinD
-kind-down  Tear down the Kubernetes test environment in KinD
-all        Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
+ecs-all    Clean and rebuild, start test environment, run the broker, run the examples, and tear the broker and test env down
+demo-up    Provision a Solr standalone instance (configured for ckan) and output the bound credentials
+demo-down  Clean up data left over from tests and demos
 help       This help
 ```
 
 Notable targets are described below.
 
-## Providing a test/demo Kubernetes environment (solr-cloud)
-
-To use an existing Kubernetes cluster for testing:
-
-- Ensure that the [solr-operator Helm chart](https://artifacthub.io/packages/helm/apache-solr/solr-operator) is installed (at least 0.5.0)
-- Ensure that the [ingress-nginx Helm chart](https://artifacthub.io/packages/helm/ingress-nginx/ingress-nginx) is installed
-- Set the `SOLR_DOMAIN_NAME` environment variable to the subdomain where `ingress-nginx` resources will be mapped
-- Set the `KUBECONFIG` environment variable to point to the kubeconfig file for the cluster
-- If your kubeconfig describes multiple clusters, make sure the current cluster is set to the right one
-
-If you don't have an existing Kubernetes cluster, you can create a local test environment in Docker using the Makefile.
-
-### Creating a local k8s environment for testing
-
-Create a temporary Kubernetes cluster to test against with KinD:
-
-```bash
-make kind-up
-```
-
-### Tearing down the local k8s environment
-
-Run
-
-```bash
-make kind-down
-```
-
 ## Iterating on the Terraform code
 
-To work with the Terraform and target cluster directly (eg not through the CSB or brokerpak), you can generate an appropriate .tfvars file by running:
+To work with the Terraform and target cluster directly (eg not through the CSB
+or brokerpak), you can generate an appropriate .tfvars file by running:
 
 ```bash
 make .env
 ```
 
-From that point on, you can `cd terraform/provision` and iterate with `terraform init/plan/apply/etc`. The same configuration is also available in `terraform/bind`.
+From that point on, you can `cd terraform/ecs/provision` and iterate with
+`tofu init/plan/apply/etc` in the Docker environment in that directory. The
+same situation pertains in `terraform/ecs/bind`.
 
 (Note if you've been working with the broker the configuration will probably already exist.)
+
+## Releasing a version of the brokerpak
+
+After working on the brokerpak, in order to use it in the datagov-SSB, you
+need to make a release. The release is built by a Github Action that is
+triggered when a new tag is made. Do not make the tag in the Github web UI as
+part of making a new Github "release". Instead, tag the head of the `main`
+branch:
+
+```bash
+git checkout main
+git tag -a -m "Release version vX.Y.Z" vX.Y.Z
+```
+
+and push that tag up to Github to trigger the release process
+
+```bash
+git push origin tag vX.Y.Z
+```
+
+The resulting built `.brokerpak` file is used by the [`datagov-ssb` build
+process](https://github.com/GSA/datagov-ssb/blob/main/app-setup-solrcloud.sh#L46)
+according to the matching `vX.Y.Z` tag.
 
 ## Building and starting the brokerpak (while the test environment is available)
 
@@ -140,39 +114,6 @@ You can also inspect auto-generated documentation for the brokerpak's offerings
 by visiting [`http://127.0.0.1:8080/docs`](http://127.0.0.1:8080/docs) in your browser.
 
 ## Demonstrating operation
-
-### Spinning up a demo instance
-
-Run
-
-```bash
-make k8s-demo-up
-```
-
-The examples and values in the `examples.json` file will be used to provision and bind a solr-cloud instance.
-
-It takes a while for the SolrCloud instance to be ready for
-client connections (up to 12 minutes on Bret's workstation). You can monitor the
-progress by running:
-
-```bash
-watch kubectl get all -n default
-```
-
-The service will be available once there is at least one `pod/example-solrcloud-<n>` with status showing `Running` and Ready showing `1/1`. The output of `make` will display a URL with credentials for accessing it. Open the provided URL in your browser to see the SolrCloud dashboard.
-
-### Spinning down the demo instance
-
-Run
-
-```bash
-make k8s-demo-down
-```
-
-The examples and values in the `examples.json` file will be used to unbind and deprovision the solr-cloud instance.
-
-Any stray resources left over from a failed demo will also be removed, so you
-can use this command to reset the environment.
 
 ### Testing manually
 
