@@ -207,6 +207,7 @@ provision:
     iam: terraform/ecs/provision/iam.tf
     lb: terraform/ecs/provision/lb-leader.tf
     logging: terraform/ecs/provision/logging.tf
+    restarts_py: terraform/ecs/provision/restarts_py.tf
     restarts: terraform/ecs/provision/restarts.tf
     ssl: terraform/ecs/provision/ssl.tf
     vpc: terraform/ecs/provision/vpc.tf

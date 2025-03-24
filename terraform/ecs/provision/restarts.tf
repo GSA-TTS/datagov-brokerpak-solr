@@ -83,7 +83,7 @@ data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
 }
 
 resource "local_file" "app" {
-  content = templatefile("restarts.py.tftpl",
+  content = templatestring(local.restarts_app_template,
     { slack_notification_url = "%{if var.slackNotification}${jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"]}%{endif}",
       slack_notification     = "%{if var.slackNotification}true%{else}false%{endif}"
     }

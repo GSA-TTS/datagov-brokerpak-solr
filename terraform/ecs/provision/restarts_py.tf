@@ -1,3 +1,8 @@
+locals {
+  # Can't use a Terraform .tftpl template file because the cloud-service-broker only includes
+  # .tf files, so we have to do this as a heredoc. This heredoc contains Terraform template 
+  # strings so they are escaped here, "%%{" and "$${"
+  restarts_app_template = <<PYTHON
 import boto3
 import json
 print('Loading function')
@@ -16,9 +21,9 @@ def handler(event, context):
     service_dimensions = identifyCluster(message_json)
     if state == 'ALARM':
         restartSolrECS(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])
-        %{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%{ else }pass%{ endif }
+        %%{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%%{ else }pass%%{ endif }
     elif state == 'OK':
-        %{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%{ else }pass%{ endif }
+        %%{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%%{ else }pass%%{ endif }
 
     return message
 
@@ -52,7 +57,7 @@ def restartSolrECS(message_json, cluster_name, service_name):
 
 def notifySlack(event_info, cluster, service):
     from slack_sdk.webhook import WebhookClient
-    webhook = WebhookClient("${slack_notification_url}")
+    webhook = WebhookClient("$${slack_notification_url}")
 
     important_data = ["Alarm Name", "New State Value", "New State Reason", "State Change Time"]
     emoji = "😨" if event_info["NewStateValue"] == "ALARM" else "😐"
@@ -97,3 +102,5 @@ def notifySlack(event_info, cluster, service):
 
     assert response.status_code == 200
     assert response.body == "ok"
+PYTHON
+}
