@@ -2,7 +2,7 @@
 .DEFAULT_GOAL := help
 
 DOCKER_OPTS=--rm -v $(PWD):/brokerpak -w /brokerpak
-CSB=ghcr.io/gsa/cloud-service-broker:v2.0.3gsa
+CSB=ghcr.io/gsa/cloud-service-broker:v2.5.6gsa
 SECURITY_USER_NAME := $(or $(SECURITY_USER_NAME), user)
 SECURITY_USER_PASSWORD := $(or $(SECURITY_USER_PASSWORD), pass)
 

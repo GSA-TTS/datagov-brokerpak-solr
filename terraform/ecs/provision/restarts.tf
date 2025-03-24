@@ -83,43 +83,42 @@ data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
 }
 
 resource "local_file" "app" {
-  count    = var.slackNotification ? 1 : 0
-  content  = replace(local.app_template, "<slack-notification-url>", jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"])
-  filename = "${path.module}/app.py"
+  content = templatefile("restarts.py.tftpl",
+    { slack_notification_url = "%{if var.slackNotification}${jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"]}%{endif}",
+      slack_notification     = "%{if var.slackNotification}true%{else}false%{endif}"
+    }
+  )
+  filename = "${path.module}/package/app.py"
 }
 
-resource "local_file" "app_no_slack" {
-  count    = var.slackNotification ? 0 : 1
-  content  = replace(local.app_template, "notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])", "pass")
-  filename = "${path.module}/app.py"
-}
-
-resource "null_resource" "package_slack_sdk" {
+resource "null_resource" "download_slack_sdk" {
   provisioner "local-exec" {
     interpreter = ["/bin/sh", "-c"]
-    command     = <<-EOF
-      pip install --target ./package slack-sdk
-      cd package && zip -r ../restart_app.zip ./* && cd -
-      zip -g restart_app.zip app.py
-    EOF
+    command     = "pip install --target ./package slack-sdk"
   }
+}
+
+data "archive_file" "package_app" {
+
+  source_dir  = "${path.module}/package"
+  output_path = "${path.module}/restart_app.zip"
+  type        = "zip"
 
   depends_on = [
     local_file.app,
-    local_file.app_no_slack
+    null_resource.download_slack_sdk
   ]
 }
 
 
 resource "aws_lambda_function" "solr_restarts" {
-  function_name = "solr-${local.lb_name}-restarts"
-  role          = aws_iam_role.iam_for_lambda.arn
-  runtime       = "python3.9"
-  filename      = "restart_app.zip"
-  handler       = "app.handler"
+  function_name    = "solr-${local.lb_name}-restarts"
+  role             = aws_iam_role.iam_for_lambda.arn
+  runtime          = "python3.9"
+  filename         = data.archive_file.package_app.output_path
+  source_code_hash = data.archive_file.package_app.output_sha256
+  handler          = "app.handler"
 
   package_type = "Zip"
-  depends_on = [
-    null_resource.package_slack_sdk
-  ]
+
 }

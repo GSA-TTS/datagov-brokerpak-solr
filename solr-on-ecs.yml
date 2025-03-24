@@ -199,7 +199,6 @@ provision:
     required: true
   template_refs:
     admin: terraform/ecs/provision/admin.tf
-    app-template: terraform/ecs/provision/app_template.tf
     cloudwatch: terraform/ecs/provision/cloudwatch.tf
     dns: terraform/ecs/provision/dns.tf
     private-dns: terraform/ecs/provision/private-dns.tf
