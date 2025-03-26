@@ -103,16 +103,12 @@ resource "aws_vpc_security_group_ingress_rule" "incoming_follower_http" {
 
 resource "aws_vpc_security_group_ingress_rule" "cluster_ingress" {
   security_group_id            = aws_security_group.solr-lb-sg.id
-  from_port                    = 0
-  to_port                      = 0
   ip_protocol                  = "-1"
   referenced_security_group_id = module.vpc.default_security_group_id
 }
 
 resource "aws_vpc_security_group_egress_rule" "cluster_egress" {
   security_group_id            = aws_security_group.solr-lb-sg.id
-  from_port                    = 0
-  to_port                      = 0
   ip_protocol                  = "-1"
   referenced_security_group_id = module.vpc.default_security_group_id
 }

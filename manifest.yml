@@ -12,13 +12,17 @@ terraform_binaries:
   version: 1.9.0
   source: https://github.com/opentofu/opentofu/archive/v1.9.0.zip
 - name: terraform-provider-aws
-  version: 5.88.0
-  source: https://releases.hashicorp.com/terraform-provider-aws/5.88.0/terraform-provider-aws_5.88.0_linux_amd64.zip
+  version: 5.92.0
+  source: https://releases.hashicorp.com/terraform-provider-aws/5.88.0/terraform-provider-aws_5.92.0_linux_amd64.zip
   provider: registry.opentofu.org/hashicorp/aws
 - name: terraform-provider-random
   version: 3.6.3
   source: https://releases.hashicorp.com/terraform-provider-random/3.6.3/terraform-provider-random_3.6.3_linux_amd64.zip
   provider: registry.opentofu.org/hashicorp/random
+- name: terraform-provider-archive
+  version: 2.7.0
+  source: https://releases.hashicorp.com/terraform-provider-archive/2.7.0/terraform-provider-archive_2.7.0_linux_arm64.zip
+  provider: registry.opentofu.org/hashicorp/archive
 - name: terraform-provider-local
   version: 2.5.2
   source: https://releases.hashicorp.com/terraform-provider-local/2.5.2/terraform-provider-local_2.5.2_linux_amd64.zip
@@ -31,10 +35,6 @@ terraform_binaries:
   version: 3.2.3
   source: https://releases.hashicorp.com/terraform-provider-null/3.2.3/terraform-provider-null_3.2.3_linux_amd64.zip
   provider: registry.opentofu.org/hashicorp/null
-- name: terraform-provider-template
-  version: 2.2.0
-  source: https://releases.hashicorp.com/terraform-provider-template/2.2.0/terraform-provider-template_2.2.0_linux_amd64.zip
-  provider: registry.opentofu.org/hashicorp/template
 
 service_definitions:
 - solr-on-ecs.yml
