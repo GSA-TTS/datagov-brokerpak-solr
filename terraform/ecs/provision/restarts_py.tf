@@ -21,9 +21,6 @@ def handler(event, context):
     service_dimensions = identifyCluster(message_json)
     if state == 'ALARM':
         restartSolrECS(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])
-        %%{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%%{ else }pass%%{ endif }
-    elif state == 'OK':
-        %%{if slack_notification }notifySlack(message_json, service_dimensions['ClusterName'], service_dimensions['ServiceName'])%%{ else }pass%%{ endif }
 
     return message
 
@@ -53,54 +50,5 @@ def restartSolrECS(message_json, cluster_name, service_name):
         client.stop_task(cluster=cluster_name, task=task)
 
     print("Completed service restart")
-
-
-def notifySlack(event_info, cluster, service):
-    from slack_sdk.webhook import WebhookClient
-    webhook = WebhookClient("$${slack_notification_url}")
-
-    important_data = ["Alarm Name", "New State Value", "New State Reason", "State Change Time"]
-    emoji = "😨" if event_info["NewStateValue"] == "ALARM" else "😐"
-
-    response = webhook.send(blocks=[
-        {
-            "type": "divider"
-        },
-        {
-            "type": "context",
-            "elements": [
-                {
-                    "type": "image",
-                    "image_url": "https://s3-us-gov-west-1.amazonaws.com/cg-0817d6e3-93c4-4de8-8b32-da6919464e61/solr.png",
-                    "alt_text": "Solr Icon"
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": ":::ALERT::: *%s/%s* has experienced an event. " % (cluster, service) + emoji
-                }
-            ]
-        },
-        {
-            "type": "divider"
-        },
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "".join(["*%s*:\n%s\n\n" % (key, event_info[key.replace(" ", "")]) for key in important_data])
-            },
-            "accessory": {
-                "type": "image",
-		"image_url": "https://s3-us-gov-west-1.amazonaws.com/cg-0817d6e3-93c4-4de8-8b32-da6919464e61/solr.png",
-                "alt_text": "Solr Alert"
-            }
-        },
-        {
-            "type": "divider"
-        }
-    ])
-
-    assert response.status_code == 200
-    assert response.body == "ok"
 PYTHON
 }
