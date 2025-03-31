@@ -82,11 +82,11 @@ provision:
   - field_name: slackNotification
     required: false
     type: boolean
-    details: "Enable slack notifications for Solr Errors/restarts via webhook integration"
+    details: "INOPERATIVE: Retained for backwards compatibility"
   - field_name: emailNotification
     required: false
     type: string
-    details: "Enable email notifications for Solr Errors/restarts"
+    details: "Email address to use for email notifications for Solr Errors/restarts"
   computed_inputs:
   - name: instance_name
     type: string
@@ -173,7 +173,7 @@ provision:
     default: ${config("aws.default_region")}
   - name: zone
     type: string
-    details: "The Route53 zone in which to create k8s instances"
+    details: "The Route53 zone in which to create ECS instances"
     overwrite: true
     default: ${config("aws.zone")}
   outputs:

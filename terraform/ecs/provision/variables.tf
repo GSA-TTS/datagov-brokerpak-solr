@@ -126,9 +126,10 @@ variable "disableEfsFollower" {
 # Solr Alerts Configuration
 ########################
 
+# tflint-ignore: terraform_unused_declarations
 variable "slackNotification" {
   type        = bool
-  description = "The webhook address to receive slack notifications for Solr Errors/restarts"
+  description = "INOPERATIVE: retained for backwards compatibility"
   default     = false
 }
 

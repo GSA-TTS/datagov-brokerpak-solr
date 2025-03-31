@@ -72,30 +72,9 @@ resource "aws_cloudwatch_log_group" "lambda-restarts" {
   retention_in_days = 14
 }
 
-data "aws_secretsmanager_secret" "slackNotificationUrl" {
-  count = var.slackNotification ? 1 : 0
-  name  = "slackSolrEventNotificationUrl"
-}
-
-data "aws_secretsmanager_secret_version" "slackNotificationUrl" {
-  count     = var.slackNotification ? 1 : 0
-  secret_id = data.aws_secretsmanager_secret.slackNotificationUrl[0].id
-}
-
 resource "local_file" "app" {
-  content = templatestring(local.restarts_app_template,
-    { slack_notification_url = "%{if var.slackNotification}${jsondecode(data.aws_secretsmanager_secret_version.slackNotificationUrl[0].secret_string)["slackNotificationUrl"]}%{endif}",
-      slack_notification     = "%{if var.slackNotification}true%{else}false%{endif}"
-    }
-  )
+  content  = local.restarts_app_template
   filename = "${path.module}/package/app.py"
-}
-
-resource "null_resource" "download_slack_sdk" {
-  provisioner "local-exec" {
-    interpreter = ["/bin/sh", "-c"]
-    command     = "pip install --target ./package slack-sdk"
-  }
 }
 
 data "archive_file" "package_app" {
@@ -106,7 +85,6 @@ data "archive_file" "package_app" {
 
   depends_on = [
     local_file.app,
-    null_resource.download_slack_sdk
   ]
 }
 
@@ -114,11 +92,10 @@ data "archive_file" "package_app" {
 resource "aws_lambda_function" "solr_restarts" {
   function_name    = "solr-${local.lb_name}-restarts"
   role             = aws_iam_role.iam_for_lambda.arn
-  runtime          = "python3.9"
+  runtime          = "python3.13"
   filename         = data.archive_file.package_app.output_path
   source_code_hash = data.archive_file.package_app.output_sha256
   handler          = "app.handler"
 
   package_type = "Zip"
-
 }
