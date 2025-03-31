@@ -126,6 +126,7 @@ variable "disableEfsFollower" {
 # Solr Alerts Configuration
 ########################
 
+# tflint-ignore: terraform_unused_declarations
 variable "slackNotification" {
   type        = bool
   description = "INOPERATIVE: retained for backwards compatibility"

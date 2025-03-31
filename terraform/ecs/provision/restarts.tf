@@ -73,7 +73,7 @@ resource "aws_cloudwatch_log_group" "lambda-restarts" {
 }
 
 resource "local_file" "app" {
-  content = local.restarts_app_template
+  content  = local.restarts_app_template
   filename = "${path.module}/package/app.py"
 }
 
