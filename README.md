@@ -132,11 +132,11 @@ For example to see the catalog:
 docker-compose exec -T broker /bin/cloud-service-broker client catalog"
 ```
 
-To provision a service, copy `k8s-creds.yml-template` and edit it to
-include the correct credentials for an accessible kubernetes service. Then run:
+To provision a service, copy `.env.secrets-template` to `.env.secrets` and edit it to
+include the correct AWS credentials. Then run:
 
 ```bash
-docker-compose exec -T broker /bin/cloud-service-broker client provision --instanceid <instancename> --serviceid f145c5aa-4cee-4570-8a95-9a65f0d8d9da  --planid 1779d7d5-874a-4352-b9c4-877be1f0745b --params "$(cat k8s-creds.yml)"
+make up demo-up
 ```
 
 ...and so on.
@@ -146,9 +146,9 @@ docker-compose exec -T broker /bin/cloud-service-broker client provision --insta
 To rebuild the brokerpak and launch it, then provision a test instance:
 
 ```bash
-make down build up eks-demo-up
+make down build up demo-up
 # Poke and prod 
-make eks-demo-down down
+make demo-down down
 ```
 
 ## Tearing down the brokerpak
