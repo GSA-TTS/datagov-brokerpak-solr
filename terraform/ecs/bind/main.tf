@@ -88,6 +88,7 @@ resource "null_resource" "manage_solr_user" {
       solr_follower_urls=(${replace(self.triggers.domain_followers, ",", "")})
       for solr_follower_url in $${solr_follower_urls[@]}
       do
+      echo "$${solr_follower_url}: "
         curl \
           -s -f -L \
           -o /dev/null \

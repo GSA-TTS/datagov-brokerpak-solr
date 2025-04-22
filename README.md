@@ -19,6 +19,22 @@ docs.
 Huge props go to @josephlewis42 of Google for publishing and publicizing the
 brokerpak concept, and to the Pivotal team running with the concept!
 
+## IMPORTANT: Cluster resizing can be *very* challenging
+
+Solr clusters can be created using different numbers of followers with the
+`solrFollowerCount` parameter, and that parameter can be changed with an
+update operation. Because of how we configure followers with a
+common admin user (see `terraform/ecs/provision/admin.tf`) if we _increase_
+the `solrFollowerCount`, then newly created followers will not have the
+admin user and password set. When this happens, those clusters will fail
+`bind` and `unbind` operations because the new follower(s) will not respond
+as expected.
+
+The simplest thing to do is to never increase the number of followers in a
+Solr cluster. If it isn't possible to use a new Solr cluster with more
+followers, increasing the number of followers can be done, but the new
+followers will need to be manually configured with the admin user and password
+using the API calls from the ECS task in `admin.tf`.
 
 ## Prerequisites
 
