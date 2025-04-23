@@ -34,7 +34,12 @@ The simplest thing to do is to never increase the number of followers in a
 Solr cluster. If it isn't possible to use a new Solr cluster with more
 followers, increasing the number of followers can be done, but the new
 followers will need to be manually configured with the admin user and password
-using the API calls from the ECS task in `admin.tf`.
+using the API calls from the ECS task in `admin.tf`. There is a [shell
+script](https://github.com/GSA/catalog.data.gov/tree/main/solr/fix-follower.sh)
+in the <https://github.com/GSA/catalog.data.gov> repository to help do that.
+To use the shell script, you need the admin user and password which can only
+be found in the AWS Console for that ECS cluster inside the definition of its
+`solr-init` task.
 
 ## Prerequisites
 
